@@ -1,0 +1,27 @@
+BRONTOSOUND
+
+- Home
+- Members
+- Repertorio
+    - Brano
+        - Link yt/spoti/mp3/...
+        - Chords
+- Live
+    - Evento
+        - Scaletta
+        - Auto publish (e.g. Spotify events)
+        - Social Share
+- Audience
+    - Spotify for artists / Apple Music / Website analytics / ...
+- Press
+    - Contacts (journals, influencers, ...)
+    - Song release campaign
+- Bank
+    - Record expense/earning
+    - Bank account integration
+    - Splitwise integration
+- Site
+    - Home
+    - Songs
+    - Events
+    - Merch
