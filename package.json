@@ -14,13 +14,16 @@
     "test:unit": "vitest"
   },
   "devDependencies": {
+    "@magidoc/plugin-svelte-marked": "^4.0.0",
     "@playwright/test": "^1.28.1",
     "@sveltejs/adapter-auto": "^2.0.0",
     "@sveltejs/kit": "^1.20.4",
+    "@types/marked": "^5.0.1",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.28.0",
     "eslint-plugin-svelte": "^2.30.0",
     "flowbite-svelte-icons": "^0.2.6",
+    "marked": "^6.0.0",
     "postcss": "^8.4.24",
     "postcss-load-config": "^4.0.1",
     "svelte": "^4.0.5",
@@ -36,8 +39,10 @@
     "@fortawesome/free-brands-svg-icons": "^6.4.0",
     "@fortawesome/free-regular-svg-icons": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
+    "chordsheetjs": "^7.17.2",
     "flowbite": "^1.7.0",
     "flowbite-svelte": "^0.40.2",
+    "slugify": "^1.6.6",
     "svelte-fa": "^3.0.4",
     "tailwind-merge": "^1.14.0"
   }

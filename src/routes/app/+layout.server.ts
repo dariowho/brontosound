@@ -14,11 +14,10 @@ export function load({ cookies }: ServerLoadEvent) {
     }
 
     if (! brontoSession|| ! isValidSession(brontoSession)) {
+        // TODO! Move to hook
         throw redirect(307, '/');
     }
-
-    console.log(brontoSession);
-
+    
     return {
         brontoSession
     };

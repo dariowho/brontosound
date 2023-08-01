@@ -1,5 +1,5 @@
 <script>
-    import { Footer, FooterCopyright, FooterLinkGroup, FooterLink, Heading } from 'flowbite-svelte'
+    import { Footer, FooterCopyright, FooterLinkGroup, FooterLink, Heading, Breadcrumb, BreadcrumbItem } from 'flowbite-svelte'
     import Sidebar from "./Sidebar.svelte";
     import { page } from '$app/stores';
 </script>
@@ -7,6 +7,18 @@
 <Sidebar />
 
 <section id="content">
+    {#if $page.data.breadcrumb && $page.data.breadcrumb.length > 0 }
+        <div id="breadcrumb">
+            <Breadcrumb aria-label="Default breadcrumb example">
+                <BreadcrumbItem href="/app" home>Home</BreadcrumbItem>
+                {#each $page.data.breadcrumb.slice(0, $page.data.breadcrumb.length-1) as item}
+                    <BreadcrumbItem href={item.href || null}>{item.title}</BreadcrumbItem>
+                {/each}
+                <BreadcrumbItem>{$page.data.breadcrumb[$page.data.breadcrumb.length-1].title}</BreadcrumbItem>
+            </Breadcrumb>
+        </div>
+    {/if}
+    
     <div class="header">
         <Heading tag="h1">{$page.data.pageTitle}</Heading>
     </div>
@@ -30,9 +42,14 @@
         margin-bottom: 2em;
     }
 
+
     #content {
         padding: 1em;
         margin-left: 16rem;
+    }
+
+    #breadcrumb {
+        margin-bottom: 1em;
     }
 
     #footerContainer {

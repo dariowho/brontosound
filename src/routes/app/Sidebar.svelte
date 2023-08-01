@@ -3,7 +3,7 @@
     import { Sidebar, SidebarWrapper, SidebarBrand, SidebarItem, SidebarGroup } from 'flowbite-svelte'
     import Fa from 'svelte-fa/src/fa.svelte'
   
-    import { faMusic, faUsers, faHeartPulse, faChartLine, faGears, faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons'
+    import { faMusic, faUsers, faHeartPulse, faChartLine, faGears, faArrowRightFromBracket, faDrum } from '@fortawesome/free-solid-svg-icons'
     import { faNewspaper, faFileLines } from '@fortawesome/free-regular-svg-icons'
     
     let spanClass = 'flex-1 ml-3 whitespace-nowrap';
@@ -42,9 +42,9 @@
                 <span class="sidebarIcon"><Fa icon={faMusic} /></span>
             </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Press" {spanClass} active={activeUrl === '/app/press'}>
+            <SidebarItem label="Rehearsal" active={activeUrl === '/app/rehearsal'}>
                 <svelte:fragment slot="icon">
-                    <span class="sidebarIcon"><Fa icon={faNewspaper} /></span>
+                    <span class="sidebarIcon"><Fa icon={faDrum} /></span>
                 </svelte:fragment>
                 <svelte:fragment slot="subtext">
                 <span class="inline-flex justify-center items-center px-2 ml-3 text-sm font-medium text-gray-800 bg-gray-200 rounded-full dark:bg-gray-700 dark:text-gray-300">
@@ -52,9 +52,9 @@
                 </span>
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Members" active={activeUrl === '/app/members'}>
+            <SidebarItem label="Press" {spanClass} active={activeUrl === '/app/press'}>
                 <svelte:fragment slot="icon">
-                    <span class="sidebarIcon"><Fa icon={faUsers} /></span>
+                    <span class="sidebarIcon"><Fa icon={faNewspaper} /></span>
                 </svelte:fragment>
                 <svelte:fragment slot="subtext">
                 <span class="inline-flex justify-center items-center px-2 ml-3 text-sm font-medium text-gray-800 bg-gray-200 rounded-full dark:bg-gray-700 dark:text-gray-300">
