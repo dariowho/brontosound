@@ -4,6 +4,7 @@
     import Markdown from '@magidoc/plugin-svelte-marked'
     import { Button } from 'flowbite-svelte';
     import Fa from 'svelte-fa/src/fa.svelte';
+    import PlaceholderBox from '../../../PlaceholderBox.svelte';
 
     export let data;
 </script>
@@ -13,9 +14,16 @@
     <Button href="{$page.url.href}/edit">Edit</Button>
 </div>
 <div class="readme">
-    <Markdown
-        source={data.readme}
-    />
+    {#if data.readme}
+        <Markdown
+            source={data.readme}
+        />
+    {:else}
+        <PlaceholderBox>
+            <p>Your README.md appears to be empty. Press "Edit" to add your content!</p>
+        </PlaceholderBox>
+    {/if}
+    
 </div>
 
 <style>

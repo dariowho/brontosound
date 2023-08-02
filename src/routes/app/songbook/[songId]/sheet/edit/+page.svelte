@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Breadcrumb, Button, Toast } from "flowbite-svelte";
+    import { A, Breadcrumb, Button, P, Span, Toast } from "flowbite-svelte";
     import type { ActionData } from "./$types.js";
     import { goto } from "$app/navigation";
     import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
@@ -9,10 +9,10 @@
     export let data;
     export let form: ActionData;
 
-    let content: string = data.readme;
+    let content: string = data.chords;
 
     if (! content && !form ) {
-        content = `This is your song's Readme, use it to write any note or comment for others to see! (tip: you can use [Markdown](https://www.markdownguide.org/cheat-sheet/) here)\n\nYouTube links such as https://www.youtube.com/watch?v=dQw4w9WgXcQ will be extracted and shown on your song page!`;
+        content = `What [Em]child is [G]this, who, [D]laid to rest\nOn [Em]Mary's [Am]lap, is [B]sleeping?`;
     }
 
     if (browser) {
@@ -21,6 +21,7 @@
 </script>
 
 <form action="?/save" method="post">
+    <P style="margin-bottom:1em"><Span class="uppercase">Tip:</Span> Use <A href="https://ultimate.ftes.de/" target="_blank">https://ultimate.ftes.de/</A> to convert from Ultimate Guitar format.</P>
     <textarea name="editor" id="editor" bind:value={content}></textarea>
 
     <Button href="{data.breadcrumb[data.breadcrumb.length-2].href}" color="alternative"><Fa icon={faArrowLeft} size="sm" /> &nbsp; Back</Button>

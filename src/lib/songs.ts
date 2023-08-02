@@ -60,12 +60,16 @@ export class Song {
         }        
     }
 
-    chords(): string | null {
+    chords(): string {
         try {
             return this.storage.readTextFile(this.songFolder.folderPath, "chords.chordpro");
         } catch (err) {
             if (err instanceof FileNotFoundError) return "";
             throw err;
         } 
+    }
+
+    writeChords(content: string) {
+        this.storage.writeTextFile(content, path.join(this.songFolder.folderPath, "chords.chordpro"));
     }
 }

@@ -46,6 +46,7 @@
     #content {
         padding: 1em;
         margin-left: 16rem;
+        min-height: calc( 100vh - 69px ); /* more or less the footer... */
     }
 
     #breadcrumb {
@@ -53,8 +54,8 @@
     }
 
     #footerContainer {
-        position: absolute;
-        bottom: 0;
+        /* position: absolute; */
+        /* bottom: 0; */
         width: 100%;
     }
 </style>

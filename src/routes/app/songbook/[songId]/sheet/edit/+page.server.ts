@@ -20,7 +20,7 @@ export const actions = {
         const storage = new FilesystemStorage('data/');
         let songFolder: IndexedSongFolder = storage.songById(params.songId); // TODO: sanitize?
         let song = new Song(storage, songFolder);
-        song.writeReadme(newContent);
+        song.writeChords(newContent);
         return {
             success: true
         }
