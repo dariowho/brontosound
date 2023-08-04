@@ -89,13 +89,17 @@ export class FilesystemStorage {
         fs.writeFileSync(filePath, content, 'utf-8');
     }
 
+    writeJSONFile(content: any, filePath: string) {
+        this.writeTextFile(JSON.stringify(content), filePath);
+    }
+
     readJSON(...pathSegments: string[]) {
         return JSON.parse(this.readTextFile(...pathSegments));
     }
 
     // Song stuff below, should be moved in Song class
 
-    listSongs(): SongFolder[] {
+    listSongs(): (SongFolder|IndexedSongFolder)[] {
         let result: SongFolder[] = [];
             this._songFolders().forEach(dirent => {                
                 result.push(this._songFromDir(dirent.name, dirent.path));
@@ -116,6 +120,11 @@ export class FilesystemStorage {
         }
 
         return result;
+    }
+
+    writeSongMetadata(songFolderPath: string, newMetadata: SongMetadata) {
+        const metadataPath = path.join(songFolderPath, '.bronto', 'metadata.json');
+        this.writeJSONFile(newMetadata, metadataPath);
     }
 
     songById(songId: string): IndexedSongFolder {
@@ -201,3 +210,4 @@ export class FilesystemStorage {
 
 export class FileNotFoundError extends Error {};
 export class SongNotFoundError extends Error {};
+export class SongNotInitializedError extends Error {};

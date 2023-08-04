@@ -44,6 +44,7 @@
     "flowbite-svelte": "^0.40.2",
     "slugify": "^1.6.6",
     "svelte-fa": "^3.0.4",
+    "svelte-tags-input": "^5.0.0",
     "tailwind-merge": "^1.14.0"
   }
 }

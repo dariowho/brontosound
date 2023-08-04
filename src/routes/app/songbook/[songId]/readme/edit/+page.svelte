@@ -21,7 +21,7 @@
 </script>
 
 <form action="?/save" method="post">
-    <textarea name="editor" id="editor" bind:value={content}></textarea>
+    <textarea name="editor" id="editor" rows="20" bind:value={content}></textarea>
 
     <Button href="{data.breadcrumb[data.breadcrumb.length-2].href}" color="alternative"><Fa icon={faArrowLeft} size="sm" /> &nbsp; Back</Button>
     <Button type="submit">Save</Button>
@@ -45,7 +45,7 @@
 <style>
     textarea {
         width: 100%;
-        min-height: 300px;
+        min-height: calc(100vh - 400px);
         margin-bottom: 1em;
     }
 

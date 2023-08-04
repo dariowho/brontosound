@@ -1,7 +1,7 @@
 import { error, type ServerLoadEvent } from "@sveltejs/kit";
 
 import { FilesystemStorage, SongNotFoundError } from "$lib/storage"
-import { isValidId } from "$lib/session";
+import { isValidId } from "$lib/server/session";
 import { Song, type IndexedSongFolder } from "$lib/songs";
 
 export function load({ params, url }: ServerLoadEvent) {
@@ -28,6 +28,14 @@ export function load({ params, url }: ServerLoadEvent) {
 
   let song = new Song(storage, songFolder);
 
+  const songFolders = storage.listSongs();
+  let allTags: Set<string> = new Set();
+  songFolders.forEach(songFolder => {
+    if ("metadata" in songFolder) {
+      songFolder.metadata.tags.forEach(tag => allTags.add(tag));
+    }
+  });
+
   const pageTitle = [songFolder.metadata.author, songFolder.metadata.title].filter(str => str).join(' - ');
   return {
     pageTitle: pageTitle,
@@ -38,6 +46,7 @@ export function load({ params, url }: ServerLoadEvent) {
     songFolder: songFolder,
     ytUrl: song.ytLink(),
     readme: song.readme(),
-    chords: song.chords()
+    chords: song.chords(),
+    allTags: Array(...allTags)
   }
 }

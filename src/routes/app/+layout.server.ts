@@ -1,5 +1,5 @@
-import { isValidSession, type BrontoSession } from "$lib/session";
-import { redirect, type ServerLoadEvent } from "@sveltejs/kit";
+import type { BrontoSession } from "$lib/server/session";
+import type { ServerLoadEvent } from "@sveltejs/kit";
 
 export function load({ cookies }: ServerLoadEvent) {
     const brontoSessionString = cookies.get('brontoSession');
@@ -13,11 +13,6 @@ export function load({ cookies }: ServerLoadEvent) {
         }
     }
 
-    if (! brontoSession|| ! isValidSession(brontoSession)) {
-        // TODO! Move to hook
-        throw redirect(307, '/');
-    }
-    
     return {
         brontoSession
     };

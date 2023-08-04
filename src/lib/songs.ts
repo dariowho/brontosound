@@ -1,6 +1,6 @@
 import path from 'path'
 
-import { FileNotFoundError, type FilesystemStorage } from "./storage"
+import { FileNotFoundError, SongNotInitializedError, type FilesystemStorage } from "./storage"
 import { extractYTVideoUrl, type YTVideoUrl } from './yt'
 
 export interface SongFolder {
@@ -71,5 +71,21 @@ export class Song {
 
     writeChords(content: string) {
         this.storage.writeTextFile(content, path.join(this.songFolder.folderPath, "chords.chordpro"));
+    }
+
+    /**
+     * Replace tags in song metadada with the given list
+     * 
+     * TODO: this is not thread safe: the whole metadata file is replaced with
+     * content from the Song status
+     * @param newTags New tag list that will replace the old one
+     */
+    writeTags(newTags: string[]) {
+        let metadata = this.storage.readSongMetadata(this.songFolder.folderPath);
+        if (! metadata) {
+            throw new SongNotInitializedError();
+        }
+        metadata.tags = newTags;
+        this.storage.writeSongMetadata(this.songFolder.folderPath, metadata);
     }
 }
