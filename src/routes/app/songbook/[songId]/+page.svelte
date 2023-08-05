@@ -111,7 +111,7 @@
         </div>
     {:else}
     <PlaceholderBox>
-        <Button>Add Lyrics/Chords</Button>
+        <Button href="{$page.url.href}/sheet/edit">Add Lyrics/Chords</Button>
     </PlaceholderBox>
     {/if}
 </section>

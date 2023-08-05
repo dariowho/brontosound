@@ -1,6 +1,6 @@
 import { isValidId } from '$lib/server/session';
-import { Song, type IndexedSongFolder } from '$lib/songs';
-import { FilesystemStorage, SongNotFoundError } from '$lib/storage';
+import { Song, type IndexedSongFolderData, SongIndex, SongNotFoundError } from '$lib/songs';
+import { FilesystemStorage } from '$lib/storage';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 
@@ -21,10 +21,11 @@ export const POST = (async ({ request, params }) => {
     }
 
     const storage = new FilesystemStorage('data/');
-    let songFolder: IndexedSongFolder;
+    let songFolder: IndexedSongFolderData;
+    let songIndex = new SongIndex(storage);
 
     try {
-        songFolder = storage.songById(params.songId);
+        songFolder = songIndex.songById(params.songId);
     } catch (err) {
     if (err instanceof SongNotFoundError) {
         throw error(404, "Song not found: " + params.songId);

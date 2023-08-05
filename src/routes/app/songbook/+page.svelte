@@ -3,27 +3,28 @@
 
   import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Badge} from 'flowbite-svelte';
   
-  import type { IndexedSongFolder, SongFolder } from '$lib/songs.js';
+  import type { IndexedSongFolderData } from '$lib/songs.js';
+    import type { DirectoryData } from '$lib/storage.js';
   
   export let data;
 
-  function buildSongURL(songFolder: SongFolder | IndexedSongFolder) {
+  function buildSongURL(songFolder: DirectoryData | IndexedSongFolderData) {
     if ('metadata' in songFolder) {
       return '/app/songbook/' + songFolder.metadata.id
     }
 
-    const songSlug = slugify(songFolder.folderName)
-    const query = new URLSearchParams({folderName: songFolder.folderName})
+    const songSlug = slugify(songFolder.name)
+    const query = new URLSearchParams({folderName: songFolder.name})
     return '/app/songbook/' + songSlug + '?' + query;
   }
 
-  function songMetadata(songFolder: SongFolder | IndexedSongFolder) {
+  function songMetadata(songFolder: DirectoryData | IndexedSongFolderData) {
     if ('metadata' in songFolder) return songFolder.metadata;
 
     return {
       id: null,
       author: '',
-      title: songFolder.folderName,
+      title: songFolder.name,
       tags: []
     }
   }

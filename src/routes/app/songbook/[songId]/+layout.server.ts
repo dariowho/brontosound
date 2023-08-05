@@ -1,8 +1,8 @@
 import { error, type ServerLoadEvent } from "@sveltejs/kit";
 
-import { FilesystemStorage, SongNotFoundError } from "$lib/storage"
+import { FilesystemStorage } from "$lib/storage"
 import { isValidId } from "$lib/server/session";
-import { Song, type IndexedSongFolder } from "$lib/songs";
+import { Song, type IndexedSongFolderData, SongIndex, SongNotFoundError } from "$lib/songs";
 
 export function load({ params, url }: ServerLoadEvent) {
   if (! params.songId || ! isValidId(params.songId)) {
@@ -10,15 +10,16 @@ export function load({ params, url }: ServerLoadEvent) {
   }
 
   const storage = new FilesystemStorage('data/');
-  let songFolder: IndexedSongFolder;
+  const songIndex = new SongIndex(storage);
+  let songFolder: IndexedSongFolderData;
 
   try {
-   songFolder = storage.songById(params.songId);
+   songFolder = songIndex.songById(params.songId);
   } catch (err) {
     if (err instanceof SongNotFoundError) {
         let folderName;
         if (folderName = url.searchParams.get('folderName')) {
-           songFolder = storage.initializeSongMetadata(params.songId, folderName);
+           songFolder = songIndex.initializeSongMetadata(params.songId, folderName);
         } else {
             throw error(404, "Song not found: " + params.songId);
         }
@@ -28,7 +29,7 @@ export function load({ params, url }: ServerLoadEvent) {
 
   let song = new Song(storage, songFolder);
 
-  const songFolders = storage.listSongs();
+  const songFolders = songIndex.listSongs();
   let allTags: Set<string> = new Set();
   songFolders.forEach(songFolder => {
     if ("metadata" in songFolder) {

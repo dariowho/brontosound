@@ -6,7 +6,7 @@ import type { ServerLoadEvent } from "@sveltejs/kit";
 
 import type { Actions } from './$types';
 import { FilesystemStorage } from "$lib/storage";
-import { Song, type IndexedSongFolder } from "$lib/songs";
+import { Song, type IndexedSongFolderData, SongIndex } from "$lib/songs";
 
 export const actions = {
     save: async ({request, params}) => {
@@ -18,7 +18,8 @@ export const actions = {
         }
 
         const storage = new FilesystemStorage('data/');
-        let songFolder: IndexedSongFolder = storage.songById(params.songId); // TODO: sanitize?
+        const songIndex = new SongIndex(storage)
+        let songFolder: IndexedSongFolderData = songIndex.songById(params.songId); // TODO: sanitize?
         let song = new Song(storage, songFolder);
         song.writeReadme(newContent);
         return {

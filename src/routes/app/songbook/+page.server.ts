@@ -1,11 +1,13 @@
 import type { ServerLoadEvent } from "@sveltejs/kit";
 
 import { FilesystemStorage } from "$lib/storage"
+import { SongIndex } from "$lib/songs";
 
 export function load({ }: ServerLoadEvent) {
   // TODO: check auth
   const storage = new FilesystemStorage('data/');
-  const songFolders = storage.listSongs();
+  const songIndex = new SongIndex(storage);
+  const songFolders = songIndex.listSongs();
   let allTags: Set<string> = new Set();
   songFolders.forEach(songFolder => {
     if ("metadata" in songFolder) {
