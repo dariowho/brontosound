@@ -17,7 +17,7 @@ export interface PostTagsRequest {
  */
 export const POST = (async ({ request, params }) => {
     if (! params.songId || ! isValidId(params.songId)) {
-        throw error(400, "Invalid songId")
+        error(400, "Invalid songId");
     }
 
     const storage = new FilesystemStorage('data/');
@@ -28,7 +28,7 @@ export const POST = (async ({ request, params }) => {
         songFolder = songIndex.songById(params.songId);
     } catch (err) {
     if (err instanceof SongNotFoundError) {
-        throw error(404, "Song not found: " + params.songId);
+        error(404, "Song not found: " + params.songId);
     }
         throw(err);
     }

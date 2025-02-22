@@ -3,7 +3,7 @@
     import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
     import Markdown from '@magidoc/plugin-svelte-marked'
     import { Button } from 'flowbite-svelte';
-    import Fa from 'svelte-fa/src/fa.svelte';
+    import { Fa } from "svelte-fa";
     import PlaceholderBox from '../../../PlaceholderBox.svelte';
 
     export let data;

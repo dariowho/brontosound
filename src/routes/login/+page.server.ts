@@ -10,6 +10,7 @@ export const actions = {
     signIn: async ({cookies, request}) => {
         // console.log("Received form: ", request)
         cookies.set('brontoSession', JSON.stringify({
+            path: '/',
             username: "mimmo",
             accessToken: "fake-access-token"
         }), { path: '/' });
@@ -19,7 +20,7 @@ export const actions = {
     },
 
     signOut: async ({cookies, request}) => {
-        cookies.delete('brontoSession');
+        /* @migration task: add path argument */ cookies.delete('brontoSession', {path: '/'});
         return {
             signedOut: true
         }

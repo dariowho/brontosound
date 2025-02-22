@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from '$app/stores';
-    import { Sidebar, SidebarWrapper, SidebarBrand, SidebarItem, SidebarGroup } from 'flowbite-svelte'
-    import Fa from 'svelte-fa/src/fa.svelte'
+    import { Sidebar, SidebarWrapper, SidebarBrand, SidebarItem, SidebarGroup } from 'flowbite-svelte';
+    import { Fa } from "svelte-fa";
   
     import { faMusic, faUsers, faHeartPulse, faChartLine, faGears, faArrowRightFromBracket, faDrum } from '@fortawesome/free-solid-svg-icons'
     import { faNewspaper, faFileLines } from '@fortawesome/free-regular-svg-icons'

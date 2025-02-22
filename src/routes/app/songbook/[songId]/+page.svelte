@@ -4,7 +4,7 @@
     import { page } from "$app/stores";
     import PlaceholderBox from "../../PlaceholderBox.svelte";
     import RenderedChords from "./RenderedChords.svelte";
-    import Fa from "svelte-fa/src/fa.svelte";
+    import { Fa } from "svelte-fa";
     import Tags from "svelte-tags-input";
     import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
     export let data;

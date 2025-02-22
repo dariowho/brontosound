@@ -1,7 +1,5 @@
 <script>
-    import { faArrowAltCircleDown } from '@fortawesome/free-solid-svg-icons';
 import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Button } from 'flowbite-svelte'
-    import Fa from 'svelte-fa/src/fa.svelte';
 </script>
 
 <Navbar let:hidden let:toggle>
@@ -28,5 +26,4 @@ import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Button } from 'flowbite-s
     </NavUl>
   </Navbar>
     
-  <Fa icon={faArrowAltCircleDown}></Fa>
 <p style="text-align:center; padding:2em">This is the band's public website</p>

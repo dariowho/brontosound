@@ -6,21 +6,21 @@
 <Accordion>
     <AccordionItem>
         <span slot="header">Band</span>
-        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text" label="Band Name" />
+        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text" >Band Name</FloatingLabelInput>
     </AccordionItem>
 
     <AccordionItem>
         <span slot="header">Nextcloud Integration</span>
-        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text" label="Host" />
-        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text" label="Username" />
-        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text" label="Password" />
+        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text">Host</FloatingLabelInput>
+        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text">Username</FloatingLabelInput>
+        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text">Password</FloatingLabelInput>
     </AccordionItem>
 
     <AccordionItem>
         <span slot="header">YouTube Integration</span>
         <form action="?/yt" method="post" class="mt-8 space-y-6">
             <Toggle checked={true}>Use Invidious</Toggle>
-            <FloatingLabelInput id="ytInvidiousServer" name="ytInvidiousServer" type="text" label="Invidious Server" />
+            <FloatingLabelInput id="ytInvidiousServer" name="ytInvidiousServer" type="text">Invidious Server</FloatingLabelInput>
             <Button>Save</Button>
         </form>
     </AccordionItem>

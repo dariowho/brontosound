@@ -3,7 +3,7 @@
     import type { ActionData } from "./$types.js";
     import { goto } from "$app/navigation";
     import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-    import Fa from "svelte-fa/src/fa.svelte";
+    import { Fa } from "svelte-fa";
     import { browser } from "$app/environment";
 
     export let data;

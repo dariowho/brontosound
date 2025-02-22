@@ -16,22 +16,21 @@
   "devDependencies": {
     "@magidoc/plugin-svelte-marked": "^4.0.0",
     "@playwright/test": "^1.28.1",
-    "@sveltejs/adapter-auto": "^2.0.0",
-    "@sveltejs/kit": "^1.20.4",
+    "@sveltejs/adapter-auto": "^4.0.0",
+    "@sveltejs/kit": "^2.17.2",
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@types/marked": "^5.0.1",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.28.0",
-    "eslint-plugin-svelte": "^2.30.0",
-    "flowbite-svelte-icons": "^0.2.6",
+    "flowbite-svelte-icons": "^2.0.2",
     "marked": "^6.0.0",
     "postcss": "^8.4.24",
     "postcss-load-config": "^4.0.1",
-    "svelte": "^4.0.5",
-    "svelte-check": "^3.4.3",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.1.4",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.0.0",
-    "vite": "^4.4.2",
-    "vitest": "^0.32.2"
+    "vitest": "^3.0.6"
   },
   "type": "module",
   "dependencies": {
@@ -41,10 +40,10 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "chordsheetjs": "^7.17.2",
     "flowbite": "^1.7.0",
-    "flowbite-svelte": "^0.40.2",
+    "flowbite-svelte": "^0.48.3",
     "slugify": "^1.6.6",
-    "svelte-fa": "^3.0.4",
-    "svelte-tags-input": "^5.0.0",
+    "svelte-fa": "^4.0.3",
+    "svelte-tags-input": "^6.0.2",
     "tailwind-merge": "^1.14.0"
   }
 }

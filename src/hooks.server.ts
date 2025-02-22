@@ -17,7 +17,7 @@ export const handle: Handle = async({event, resolve}) => {
     if (event.url.pathname.startsWith('/app') || event.url.pathname.startsWith('/api')) {
         if (! brontoSession || ! isValidSession(brontoSession)) {
             console.log("hook: invalid auth")
-            throw redirect(303, '/');
+            redirect(303, '/');
         }
     }
     

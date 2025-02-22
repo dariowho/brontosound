@@ -6,7 +6,7 @@ import { Song, type IndexedSongFolderData, SongIndex, SongNotFoundError } from "
 
 export function load({ params, url }: ServerLoadEvent) {
   if (! params.songId || ! isValidId(params.songId)) {
-    throw error(400, "Invalid songId")
+    error(400, "Invalid songId");
   }
 
   const storage = new FilesystemStorage('data/');
@@ -21,7 +21,7 @@ export function load({ params, url }: ServerLoadEvent) {
         if (folderName = url.searchParams.get('folderName')) {
            songFolder = songIndex.initializeSongMetadata(params.songId, folderName);
         } else {
-            throw error(404, "Song not found: " + params.songId);
+            error(404, "Song not found: " + params.songId);
         }
     }
     throw(err);
