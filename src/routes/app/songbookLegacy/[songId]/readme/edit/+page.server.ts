@@ -17,7 +17,7 @@ export const actions = {
             message: "No content to write"
         }
 
-        const storage = new FilesystemStorage('data/');
+        const storage = new FilesystemStorage('data/persistedFilesystem');
         const songIndex = new SongIndex(storage)
         let songFolder: IndexedSongFolderData = songIndex.songById(params.songId); // TODO: sanitize?
         let song = new Song(storage, songFolder);

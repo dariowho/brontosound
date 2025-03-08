@@ -1,13 +1,13 @@
 import path from 'path'
 
-import { FileNotFoundError, type DirectoryData, type FilesystemStorage } from "./storage"
+import { FileNotFoundError, type StoredDirectory, type FilesystemStorage } from "./storage"
 import { extractYTVideoUrl, type YTVideoUrl } from './yt'
 
 interface SongIndexData {
     folderNameById: Record<string, string>
 }
 
-export interface IndexedSongFolderData extends DirectoryData {
+export interface IndexedSongFolderData extends StoredDirectory {
     metadata: SongMetadata
 }
 
@@ -28,7 +28,7 @@ export class SongIndex {
         this.songsBasePath = songsBasePath;
     }
 
-    _songFolders(): DirectoryData[] {
+    _songFolders(): StoredDirectory[] {
         return this.storage.listSubfolders(this.songsBasePath);
     }
 
@@ -72,7 +72,7 @@ export class SongIndex {
      * @param dirData Song Directory Data
      * @returns The same input dirData, enriched with Song metadata if present 
      */
-    _songFromDir(dirData: DirectoryData): DirectoryData | IndexedSongFolderData {
+    _songFromDir(dirData: StoredDirectory): StoredDirectory | IndexedSongFolderData {
         let metadata = this.readSongMetadata(dirData.name);
         if (metadata) {
             let result = (dirData as IndexedSongFolderData);
@@ -82,8 +82,8 @@ export class SongIndex {
         return dirData;
     }
 
-    listSongs(): (DirectoryData|IndexedSongFolderData)[] {
-        let result: (DirectoryData|IndexedSongFolderData)[] = [];
+    listSongs(): (StoredDirectory|IndexedSongFolderData)[] {
+        let result: (StoredDirectory|IndexedSongFolderData)[] = [];
             this._songFolders().forEach(dirData => {                
                 result.push(this._songFromDir(dirData));
             })
@@ -123,8 +123,8 @@ export class SongIndex {
         try {
             // Song in index with valid folder name
             const dirPath = path.join(this.songsBasePath, index.folderNameById[songId]);
-            let directoryData = this.storage.directoryData(dirPath);
-            let result = this._songFromDir(directoryData);
+            let storedDirectory = this.storage.storedDirectory(dirPath);
+            let result = this._songFromDir(storedDirectory);
             if ('metadata' in result && result.metadata.id == songId)
                 return result;
             // Folder does not contain metadata, or contains metadata for different ID

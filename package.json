@@ -20,6 +20,7 @@
     "@sveltejs/kit": "^2.17.2",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@types/marked": "^5.0.1",
+    "@types/node": "^22.13.5",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.28.0",
     "flowbite-svelte-icons": "^2.0.2",
@@ -39,11 +40,16 @@
     "@fortawesome/free-regular-svg-icons": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "chordsheetjs": "^7.17.2",
+    "class-transformer": "^0.5.1",
     "flowbite": "^1.7.0",
     "flowbite-svelte": "^0.48.3",
+    "reflect-metadata": "^0.2.2",
     "slugify": "^1.6.6",
+    "sqlite3": "^5.1.7",
     "svelte-fa": "^4.0.3",
     "svelte-tags-input": "^6.0.2",
-    "tailwind-merge": "^1.14.0"
+    "tailwind-merge": "^1.14.0",
+    "typeorm": "^0.3.20",
+    "webdav": "^5.8.0"
   }
 }

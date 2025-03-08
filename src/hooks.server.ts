@@ -20,8 +20,6 @@ export const handle: Handle = async({event, resolve}) => {
             redirect(303, '/');
         }
     }
-    
-
 
     const response = await resolve(event);
 

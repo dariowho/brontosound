@@ -42,7 +42,7 @@
                 <span class="sidebarIcon"><Fa icon={faMusic} /></span>
             </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Rehearsal" active={activeUrl === '/app/rehearsal'}>
+            <SidebarItem label="Rehearsal" {spanClass} active={activeUrl === '/app/rehearsal'}>
                 <svelte:fragment slot="icon">
                     <span class="sidebarIcon"><Fa icon={faDrum} /></span>
                 </svelte:fragment>
@@ -62,7 +62,7 @@
                 </span>
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Live" active={activeUrl === '/app/live'}>
+            <SidebarItem label="Live" {spanClass} active={activeUrl === '/app/live'}>
                 <svelte:fragment slot="icon">
                     <span class="sidebarIcon"><Fa icon={faHeartPulse} /></span>
                 </svelte:fragment>
@@ -72,7 +72,7 @@
                     </span>
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Public site" active={activeUrl === '/app/site'}>
+            <SidebarItem label="Public site" {spanClass} active={activeUrl === '/app/site'}>
                 <svelte:fragment slot="icon">
                     <span class="sidebarIcon"><Fa icon={faFileLines} /></span>
                 </svelte:fragment>

@@ -9,7 +9,7 @@ export function load({ params, url }: ServerLoadEvent) {
     error(400, "Invalid songId");
   }
 
-  const storage = new FilesystemStorage('data/');
+  const storage = new FilesystemStorage('data/persistedFilesystem');
   const songIndex = new SongIndex(storage);
   let songFolder: IndexedSongFolderData;
 

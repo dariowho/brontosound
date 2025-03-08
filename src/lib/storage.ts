@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-export interface DirectoryData {
+export interface StoredDirectory {
     name: string;
     path: string;
     creationDate: Date;
@@ -43,7 +43,7 @@ export class FilesystemStorage {
         return JSON.parse(this.readTextFile(...pathSegments));
     }
 
-    directoryData(dirPath: string): DirectoryData {
+    storedDirectory(dirPath: string): StoredDirectory {
         return {
             name: path.basename(dirPath),
             path: dirPath,
@@ -52,8 +52,8 @@ export class FilesystemStorage {
         }
     }
 
-    listSubfolders(...pathSegments: string[]): DirectoryData[] {
-        let result: DirectoryData[] = [];
+    listSubfolders(...pathSegments: string[]): StoredDirectory[] {
+        let result: StoredDirectory[] = [];
         const fullPath = path.join(this.basePath, ...pathSegments);
         let dirents = fs.readdirSync(fullPath, { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())

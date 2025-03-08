@@ -20,7 +20,7 @@ export const POST = (async ({ request, params }) => {
         error(400, "Invalid songId");
     }
 
-    const storage = new FilesystemStorage('data/');
+    const storage = new FilesystemStorage('data/persistedFilesystem');
     let songFolder: IndexedSongFolderData;
     let songIndex = new SongIndex(storage);
 
