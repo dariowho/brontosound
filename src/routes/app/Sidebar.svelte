@@ -28,8 +28,8 @@
 
 <div id="sidebar">
     
-    <Sidebar>
-        <SidebarWrapper>
+    <Sidebar asideClass="min-h-screen w-80">
+        <SidebarWrapper class="min-h-screen">
         <SidebarGroup>
             <SidebarBrand {site} />
             <SidebarItem label="Dashboard" href="/app" active={activeUrl === '/app'}>
@@ -62,14 +62,9 @@
                 </span>
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Live" {spanClass} active={activeUrl === '/app/live'}>
+            <SidebarItem label="Live" href="/app/live" {spanClass} active={activeUrl === '/app/live'}>
                 <svelte:fragment slot="icon">
                     <span class="sidebarIcon"><Fa icon={faHeartPulse} /></span>
-                </svelte:fragment>
-                <svelte:fragment slot="subtext">
-                    <span class="inline-flex justify-center items-center px-2 ml-3 text-sm font-medium text-gray-800 bg-gray-200 rounded-full dark:bg-gray-700 dark:text-gray-300">
-                        soon!
-                    </span>
                 </svelte:fragment>
             </SidebarItem>
             <SidebarItem label="Public site" {spanClass} active={activeUrl === '/app/site'}>
@@ -109,5 +104,6 @@
     #sidebar {
         min-height: 100%;
         float: left;
+        margin-right: 1em;
     }
 </style>
