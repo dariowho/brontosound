@@ -1,5 +1,19 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
+export enum UserRole {
+    VIEWER = 'viewer',
+    EDITOR = 'editor',
+    ADMIN = 'admin',
+}
+
+// TODO: implement in API endpoints
+export const permissionsFromRole = {
+    [UserRole.VIEWER]: ['songbook.read', 'live.read', 'contacts.read', 'bandSettings.read'],
+    [UserRole.EDITOR]: ['songbook.read', 'live.read', 'contacts.read', 'songbook.write', 'live.write', 'contacts.write', 'bandSettings.read'],
+    [UserRole.ADMIN]: ['songbook.read', 'live.read', 'contacts.read', 'songbook.write', 'live.write', 'contacts.write', 'bandSettings.read', 'bandSettings.write'],
+}
+
+
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
@@ -7,4 +21,13 @@ export class User {
 
     @Column({ type: 'varchar', unique: true })
     username: string;
+
+    @Column({ type: 'varchar' })
+    name: string;
+
+    @Column({ type: 'varchar', unique: true })
+    email: string;
+
+    @Column({ type: 'simple-enum', enum: UserRole })
+    role: UserRole;
 }

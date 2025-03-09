@@ -1,12 +1,11 @@
+import type { User } from '$lib/dbEntities/user'
+import type { Session } from '@auth/sveltekit'
 import slugify from 'slugify'
 
 export interface BrontoSession {
-    username: string,
-    accessToken: string
-}
-
-export function isValidSession(brontoSession: BrontoSession) {
-    return brontoSession.username && brontoSession.accessToken
+    user: User,
+    auth: Session,
+    permissions: string[],
 }
 
 export function isValidId(slug: string): boolean {

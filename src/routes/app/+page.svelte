@@ -2,4 +2,4 @@
     export let data;
 </script>
 
-<p>Welcome back, <strong>{data.brontoSession.username}</strong>!</p>
+<p>Welcome back, <strong>{data.brontoSession.user.name}</strong>!</p>

@@ -31,7 +31,7 @@
     <Sidebar asideClass="min-h-screen w-80">
         <SidebarWrapper class="min-h-screen">
         <SidebarGroup>
-            <SidebarBrand {site} />
+            <!-- <SidebarBrand {site} /> -->
             <SidebarItem label="Dashboard" href="/app" active={activeUrl === '/app'}>
                 <svelte:fragment slot="icon">
                     <span class="sidebarIcon"><Fa icon={faChartLine} /></span>
