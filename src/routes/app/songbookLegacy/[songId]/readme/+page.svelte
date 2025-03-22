@@ -1,10 +1,10 @@
 <script lang="ts">
     import { page } from '$app/stores';
+    import PlaceholderBox from '$lib/components/PlaceholderBox.svelte';
     import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
     import Markdown from '@magidoc/plugin-svelte-marked'
     import { Button } from 'flowbite-svelte';
     import { Fa } from "svelte-fa";
-    import PlaceholderBox from '../../../PlaceholderBox.svelte';
 
     export let data;
 </script>

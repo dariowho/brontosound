@@ -18,7 +18,7 @@ export function load({ }: ServerLoadEvent) {
 
   return {
     pageTitle: "Songbook",
-    breadcrumb: [{title: "Songbook", href: "/app/songbook"}],
+    breadcrumb: [{title: "Songbook", href: "/app/songbookLegacy"}],
     songs: songFolders,
     allTags: allTags
   }

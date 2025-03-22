@@ -2,11 +2,12 @@
     import { Button, Heading } from "flowbite-svelte";
     import LoadingIframe from "./LoadingIframe.svelte";
     import { page } from "$app/stores";
-    import PlaceholderBox from "../../PlaceholderBox.svelte";
     import RenderedChords from "./RenderedChords.svelte";
     import { Fa } from "svelte-fa";
+    // @ts-ignore
     import Tags from "svelte-tags-input";
     import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
+    import PlaceholderBox from "$lib/components/PlaceholderBox.svelte";
     export let data;
 
     let currentTags = [...data.songFolder.metadata.tags];
@@ -52,11 +53,11 @@
 
     // TODO: fix typings
     // @ts-ignore
-    let TagsAndHideTypeWarning: ConstructorOfATypedSvelteComponent = Tags;
+    // let TagsAndHideTypeWarning: ConstructorOfATypedSvelteComponent = Tags;
 </script>
 
 <section>
-    <TagsAndHideTypeWarning
+    <Tags
         bind:tags={newTags}
         addKeys={savingTags ? [] : null}
         removeKeys={[]}
@@ -92,7 +93,7 @@
         <div class="flex flex-wrap items-center gap-2 sectionButtons">
             <Button class="!p-2" href="{$page.url.href}/readme/edit"><Fa icon={faPenToSquare} size="lg" /></Button>
         </div>
-        <LoadingIframe width='100%' height='200px' src='https://yt.artemislena.eu/embed/{data.ytUrl.id}?listen=1&autoplay=0&thin_mode=true&player_style=youtube' />    
+        <LoadingIframe width='100%' height='200px' src='https://inv.nadeko.net/embed/{data.ytUrl.id}?listen=1&autoplay=0&thin_mode=true&player_style=youtube' />    
     {:else}
         <PlaceholderBox>
             <Button href="{$page.url.href}/readme/edit">Add YouTube link</Button>

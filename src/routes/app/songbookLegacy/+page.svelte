@@ -10,12 +10,12 @@
 
   function buildSongURL(songFolder: StoredDirectory | IndexedSongFolderData) {
     if ('metadata' in songFolder) {
-      return '/app/songbook/' + songFolder.metadata.id
+      return '/app/songbookLegacy/' + songFolder.metadata.id
     }
 
     const songSlug = slugify(songFolder.name)
     const query = new URLSearchParams({folderName: songFolder.name})
-    return '/app/songbook/' + songSlug + '?' + query;
+    return '/app/songbookLegacy/' + songSlug + '?' + query;
   }
 
   function songMetadata(songFolder: StoredDirectory | IndexedSongFolderData) {

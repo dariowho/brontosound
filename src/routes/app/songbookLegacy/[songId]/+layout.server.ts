@@ -41,8 +41,8 @@ export function load({ params, url }: ServerLoadEvent) {
   return {
     pageTitle: pageTitle,
     breadcrumb: [
-        {title: "Songbook", href: "/app/songbook"},
-        {title: pageTitle, href: "/app/songbook/"+params.songId},
+        {title: "Songbook", href: "/app/songbookLegacy"},
+        {title: pageTitle, href: "/app/songbookLegacy/"+params.songId},
     ],
     songFolder: songFolder,
     ytUrl: song.ytLink(),

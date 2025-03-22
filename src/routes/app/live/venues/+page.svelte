@@ -30,6 +30,12 @@
       newVenueName = '';
       busy = false;
     }
+
+    const famousVenues = ["The Cavern Club", "Wembley", "Madison Square Garden", "Sydney Opera House", "Red Rocks Amphitheatre", "San Siro", "Forum di Assago", "Alcatraz", "The Fillmore", "The Troubadour", "The Royal Albert Hall", "The Hollywood Bowl", "The O2 Arena"];
+      
+    function getRandomVenue() {
+      return famousVenues[Math.floor(Math.random() * famousVenues.length)];
+    }
   </script>
   
 <div class="busyContainer">
@@ -78,7 +84,7 @@
 
 <div>
   <form on:submit={addNewVenue} class="newVenueForm">
-    <Input class="mt-2" placeholder="The Cave Liverpool" bind:value={newVenueName} />
+    <Input class="mt-2" placeholder={getRandomVenue()} bind:value={newVenueName} />
     <span class="newVenueButton" title="Add new venue"><Button class="mt-2" color="primary" disabled={newVenueName.length == 0} on:click={addNewVenue}><CirclePlusOutline /></Button></span>
   </form>
 </div>

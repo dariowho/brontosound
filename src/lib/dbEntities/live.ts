@@ -47,13 +47,31 @@ export class LiveVenueAddress {
     country: string
 }
 
+export enum LiveGigStatus {
+    NEW = 'NEW',
+    WAITING_VENUE = 'WAITING_VENUE',
+    WAITING_BAND = 'WAITING_BAND',
+    CONFIRMED = 'CONFIRMED',
+    CANCELED = 'CANCELED',
+    WAITING_PAYMENT = 'WAITING_PAYMENT',
+    COMPLETE = 'COMPLETE',
+}
+
+export interface MoneyAmount {
+    amount: number,
+    currency: string,
+}
+
 @Entity()
 export class LiveGig {
     @PrimaryGeneratedColumn()
-    id: number
+    id: number = null
 
     @Column({ type: 'varchar'})
     name: string
+
+    @Column({ type: 'simple-enum', enum: LiveGigStatus})
+    status: LiveGigStatus
 
     @Column({ type: 'datetime'})
     date: Date
@@ -65,7 +83,19 @@ export class LiveGig {
     venue: LiveVenue
 
     @OneToMany(() => LiveGigInteraction, interaction => interaction.gig)
-    interactions: LiveGigInteraction[]
+    interactions: LiveGigInteraction[] = null
+
+    @Column({type: 'datetime', default: () => 'CURRENT_TIMESTAMP'})
+    creationDate?: Date
+
+    @Column({ type: 'json', nullable: true})
+    proposedCachet?: MoneyAmount
+
+    @Column({ type: 'json', nullable: true})
+    agreedCachet?: MoneyAmount
+
+    @Column({ type: 'json', nullable: true})
+    ReceivedCachet?: MoneyAmount
 }
 
 export enum InteractionSender {
@@ -80,6 +110,9 @@ export class LiveGigInteraction {
 
     @Column({ type: 'datetime'})
     date: Date
+
+    @ManyToOne(() => User)
+    createdBy: User
 
     @Column({ type: 'varchar', nullable: true})
     note: string

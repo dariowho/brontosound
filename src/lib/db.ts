@@ -51,11 +51,19 @@ class TypeOrm {
       return db.getRepository(target);
   }
 
-  public static async saveEntity<Type>(entityCls: ClassConstructor<Type>, entityObjectPromise: Promise<object>): Promise<Type> {
+  public static async saveEntity<Type>(entityCls: ClassConstructor<Type>, entity: Promise<object> | object | string, overrideProperties: Record<string, any>=null): Promise<Type> {
+      if (typeof entity === 'string') {
+          entity = JSON.parse(entity);
+      }
       const [entityObject, db] = await Promise.all([
-          await entityObjectPromise,
+          await entity,
           await TypeOrm.getDb(),
       ]);
+      if (overrideProperties) {
+        Object.entries(overrideProperties).forEach(([key, value]) => {
+          entityObject[key] = value;
+        });
+      }
       const newEntity = plainToClass(entityCls, entityObject);
       return db.manager.save(newEntity);
   }

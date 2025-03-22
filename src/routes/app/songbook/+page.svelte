@@ -180,7 +180,7 @@
 <div class="title">
   <Heading tag="h2">New Songs</Heading>
 </div>
-<P size="sm">These songs were found in your storage, but are not yet in your Songbook: add them!</P>
+<P size="sm" class="mb-3">These songs were found in your storage, but are not yet in your Songbook: add them!</P>
 <Table hoverable={true} class="songTable">
   <TableHead>
     <TableHeadCell class="!p-4">

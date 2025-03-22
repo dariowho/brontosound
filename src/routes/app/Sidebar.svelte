@@ -28,7 +28,7 @@
 
 <div id="sidebar">
     
-    <Sidebar asideClass="min-h-screen w-80">
+    <Sidebar asideClass="min-h-screen w-64">
         <SidebarWrapper class="min-h-screen">
         <SidebarGroup>
             <!-- <SidebarBrand {site} /> -->
