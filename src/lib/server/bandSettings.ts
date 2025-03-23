@@ -5,6 +5,7 @@ import { WebdavStorage, FilesystemStorage, type PersistedStorage } from './stora
 
 export interface SettingsData {
     bandName: string;
+    bandLogo?: string;
     webdavEnabled: boolean;
     webdavServer: string;
     webdavUsername: string;

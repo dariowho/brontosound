@@ -3,21 +3,20 @@
 
   import "../app.postcss";
   import { page } from '$app/state';
-
   // console.log(page.data)
 </script>
 
 
-<div class="header">
+<div class="header {(page.route.id != '/') ? 'headerApp' : ''}">
   <div class="siteName">
     <a href="/">
       <img
-        src="/bronto.png"
+        src={page.data.bandLogo}
         class="mr-3 h-6 sm:h-9"
         alt="Brontosound"
       />
       <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-        Brontosound
+        {page.data.bandName}
       </span>
     </a>
   </div>
@@ -66,7 +65,11 @@
     display: flex;
     justify-content: space-between;
     padding: 1rem;
-    background-color: #dedede;
+    /* background-color: #dedede; */
+  }
+
+  .headerApp {
+    background-color: #00000020;
   }
 
   .siteName {

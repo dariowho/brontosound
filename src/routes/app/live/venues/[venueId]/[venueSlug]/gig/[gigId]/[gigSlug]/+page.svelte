@@ -32,10 +32,10 @@
   {/if}
 </div>
 
-<div class="gigData mb-5">
+<div class="gigData mb-10 w-full">
   <!-- <Heading tag="h2" class="mb-3">Gig</Heading> -->
 
-<Card padding="xl" class="text-black">
+<Card padding="xl" class="text-black w-full">
   <!-- <h5 class="mb-4 text-xl font-medium">Info</h5> -->
   <!-- List -->
   <ul class="my-7 space-y-4">
@@ -56,7 +56,7 @@
   <!-- <Heading tag="h2" class="mb-3">Interactions</Heading> -->
 
   <form action="?/saveNewInteraction" method="POST">
-    <Textarea class="mb-4" placeholder="Post an update" bind:value={newInteraction.note}>
+    <Textarea class="mb-8" placeholder="Post an update" bind:value={newInteraction.note}>
       <div slot="footer" class="flex items-center justify-between">
         <Toolbar embedded>
           <Toggle bind:checked={newInteractionFromToggle}>
