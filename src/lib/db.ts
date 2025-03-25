@@ -18,7 +18,7 @@ class TypeOrm {
     if (!TypeOrm.instance) {
       TypeOrm.instance = new DataSource({
           type: "sqlite",
-          database: "database.sqlite", // TODO: use a config file
+          database: "data/database/database.sqlite", // TODO: use a config file
           entities: [
             User,
             Song,

@@ -6,6 +6,7 @@ import { WebdavStorage, FilesystemStorage, type PersistedStorage } from './stora
 export interface SettingsData {
     bandName: string;
     bandLogo?: string;
+    authorizedGoogleSSOUsers: string[];
     webdavEnabled: boolean;
     webdavServer: string;
     webdavUsername: string;
@@ -17,6 +18,7 @@ export interface SettingsData {
 
 export const defaultSettings: SettingsData = {
     bandName: "My Band",
+    authorizedGoogleSSOUsers: [],
     webdavEnabled: false,
     webdavServer: "",
     webdavUsername: "",

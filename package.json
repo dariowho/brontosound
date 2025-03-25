@@ -17,6 +17,7 @@
     "@magidoc/plugin-svelte-marked": "^4.0.0",
     "@playwright/test": "^1.28.1",
     "@sveltejs/adapter-auto": "^4.0.0",
+    "@sveltejs/adapter-node": "^5.2.12",
     "@sveltejs/kit": "^2.17.2",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@types/marked": "^5.0.1",
