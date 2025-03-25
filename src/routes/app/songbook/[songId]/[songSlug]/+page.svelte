@@ -2,7 +2,7 @@
     import { Button, Heading } from "flowbite-svelte";
     import LoadingIframe from "./LoadingIframe.svelte";
     import { page } from "$app/stores";
-    import PlaceholderBox from "../../../PlaceholderBox.svelte";
+    import PlaceholderBox from "$lib/components/PlaceholderBox.svelte";
     import RenderedChords from "./RenderedChords.svelte";
     import { Fa } from "svelte-fa";
     // @ts-ignore() - svelte-tags-input does not export types"

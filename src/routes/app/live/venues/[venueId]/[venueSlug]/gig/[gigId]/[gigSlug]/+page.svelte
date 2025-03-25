@@ -57,9 +57,9 @@
 
   <form action="?/saveNewInteraction" method="POST">
     <Textarea class="mb-8" placeholder="Post an update" bind:value={newInteraction.note}>
-      <div slot="footer" class="flex items-center justify-between">
-        <Toolbar embedded>
-          <Toggle bind:checked={newInteractionFromToggle}>
+      <div slot="footer" class="flex items-center justify-between gap-3 flex-wrap">
+        <Toolbar embedded class="gap-3">
+          <Toggle bind:checked={newInteractionFromToggle} class="leading-9">
             <svelte:fragment slot="offLabel"><span class="{(newInteraction.from != InteractionSender.BAND) ? 'text-gray-500' : ''}">band</span></svelte:fragment>
             <span class="{(newInteraction.from != InteractionSender.VENUE) ? 'text-gray-500' : ''}">venue</span>
           </Toggle>

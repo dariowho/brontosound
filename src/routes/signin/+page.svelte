@@ -1,12 +1,15 @@
 <script>
-    import { Card, Avatar, Button } from 'flowbite-svelte';
-    import { page } from "$app/state"
-    import SignIn from './SignIn.svelte';
-    import SignOut from './SignOut.svelte';
-  </script>
-   
-  <div class='text-center items-center mt-3'>
-    {#if page.data.brontoSession}
+  import { Card, Avatar, Button } from 'flowbite-svelte';
+  import { page } from "$app/state"
+  import SignIn from './SignIn.svelte';
+  import SignOut from './SignOut.svelte';
+  import BrontoHeader from '../BrontoHeader.svelte';
+</script>
+  
+<BrontoHeader />
+
+<div class='text-center items-center mt-3'>
+  {#if page.data.brontoSession}
     <div style="display:inline-block">
         <Card padding="md">
             <div class="flex flex-col items-center pb-4">
@@ -23,8 +26,8 @@
             </div>
           </Card>
     </div>
-    {:else}
-      <!-- <span class="notSignedInText">You are not signed in</span> -->
-      <SignIn provider="google"><span slot="submitButton">Sign in with Google</span></SignIn>
-    {/if}
+  {:else}
+    <!-- <span class="notSignedInText">You are not signed in</span> -->
+    <SignIn provider="google"><span slot="submitButton">Sign in with Google</span></SignIn>
+  {/if}
   </div>

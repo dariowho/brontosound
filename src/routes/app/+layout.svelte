@@ -1,12 +1,21 @@
-<script>
+<script lang="ts">
     import { Footer, FooterCopyright, FooterLinkGroup, FooterLink, Heading, Breadcrumb, BreadcrumbItem } from 'flowbite-svelte'
     import Sidebar from "./Sidebar.svelte";
     import { page } from '$app/stores';
+    import ResponsiveSidebar from './ResponsiveSidebar.svelte';
+    import BrontoHeader from '../BrontoHeader.svelte';
+
+    let isMobile: boolean;
+    let sidebarComponent;
 </script>
 
-<Sidebar />
+<!-- <Sidebar /> -->
+
+<BrontoHeader bind:isMobile bind:sidebarComponent />
 
 <section id="content">
+    <ResponsiveSidebar bind:isMobile bind:this={sidebarComponent} />
+
     {#if $page.data.breadcrumb && $page.data.breadcrumb.length > 0 }
         <div id="breadcrumb">
             <Breadcrumb aria-label="Default breadcrumb example">
@@ -20,9 +29,12 @@
     {/if}
     
     <div class="header">
-        <Heading tag="h1">{$page.data.pageTitle}</Heading>
+        <Heading tag="h1" class="break-words">{$page.data.pageTitle}</Heading>
     </div>
-    <slot />
+
+    <div class="pageContent">
+        <slot />
+    </div>
 </section>
 
 <div id="footerContainer">
@@ -45,12 +57,17 @@
 
     #content {
         padding: 1em;
-        margin-left: 16rem;
+        /* margin-left: 16rem; */
         min-height: calc( 100vh - 69px ); /* more or less the footer... */
     }
 
     #breadcrumb {
         margin-bottom: 1em;
+        overflow: scroll;
+    }
+
+    .pageContent {
+        display: flow-root;
     }
 
     #footerContainer {
