@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryColumn } from "typeorm"
+import { Entity, Column, PrimaryColumn, TableInheritance, ChildEntity } from "typeorm"
 
 @Entity()
-export class StoredDirectory {
+@TableInheritance({ column: { type: "varchar", name: "type" } })
+export class StoredObject {
     @Column({ type: 'varchar'})
     parentPath: string;
 
@@ -11,8 +12,8 @@ export class StoredDirectory {
     @PrimaryColumn({ type: 'varchar'})
     path: string;
 
-    @Column({ type: 'datetime'})
-    creationDate: Date;
+    @Column({ type: 'datetime', nullable: true})
+    creationDate?: Date;
 
     @Column({ type: 'datetime'})
     modificationDate: Date;
@@ -22,4 +23,16 @@ export class StoredDirectory {
 
     @Column({ type: 'datetime', nullable: true})
     lastVisited?: Date;
+}
+
+@ChildEntity()
+export class StoredDirectory extends StoredObject {
+    @Column({ type: 'varchar', nullable: true})
+    foo?: Date;
+}
+
+@ChildEntity()
+export class StoredFile extends StoredObject {
+    @Column({ type: 'varchar'})
+    content: string;
 }

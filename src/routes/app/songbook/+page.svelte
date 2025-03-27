@@ -12,7 +12,7 @@
   export let data;
   let songs = data.songs as Song[];
   let cachedStoredDirs = data.cachedStoredDirs as StoredDirectory[];
-  console.log(data);
+  // console.log(data);
 
   // Sync with remote storage
   let syncing = false;
@@ -24,6 +24,8 @@
       console.log("skipping sync");
     }
   });
+
+  // TODO: dir list not updating after new song insert
   async function syncStoredDirs() {
     if (syncing) return;
     syncing = true;
@@ -78,7 +80,7 @@
     newSongs = newNewSongs;
     deletedSongIds = newDeletedSongIds;
 
-    console.log('newSongs', newSongs);
+    // console.log('newSongs', newSongs);
     // console.log('deletedSongs', deletedSongIds);
   }
 
@@ -162,8 +164,8 @@
         <TableBodyCell>{song.artist}</TableBodyCell>
         <TableBodyCell>{song.creationDate.toLocaleDateString('it-IT')}</TableBodyCell>
         <TableBodyCell>
-          {#each song.tags as songTag}
-            <Badge>{songTag}</Badge> 
+          {#each song.tags.map((v) => v.name) as songTag}
+            <Badge class="mr-2">{songTag}</Badge> 
           {/each}
         </TableBodyCell>
         <!-- <TableBodyCell>

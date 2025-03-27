@@ -9,7 +9,11 @@ export async function load({ params }: ServerLoadEvent) {
   const [gig] = await Promise.all([
     db.getRepository(LiveGig).findOne({where: {id: parseInt(params.gigId)}, relations: ["venue", "interactions"]}),
   ]);
-  console.log("gig:", gig);
+  // console.log("gig:", gig);
+
+  if (!gig) {
+    error(404, "Gig not found!");
+  }
 
   return {
     pageTitle: "Gig: " + gig.name,
@@ -24,6 +28,7 @@ export async function load({ params }: ServerLoadEvent) {
 }
 
 import type { Actions } from './$types';
+import { error } from "console";
 
 export const actions = {
     saveNewInteraction: async ({request, locals}) => {

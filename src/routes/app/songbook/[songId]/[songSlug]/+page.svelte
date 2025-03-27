@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Button, Heading } from "flowbite-svelte";
+    import { Button, Heading, Spinner } from "flowbite-svelte";
     import LoadingIframe from "./LoadingIframe.svelte";
     import { page } from "$app/stores";
     import PlaceholderBox from "$lib/components/PlaceholderBox.svelte";
@@ -8,47 +8,99 @@
     // @ts-ignore() - svelte-tags-input does not export types"
     import Tags from "svelte-tags-input";
     import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
+    import type { SongTag } from "$lib/dbEntities/song";
+    import { extractYTVideoUrl, type YTVideoUrl } from "$lib/yt";
+    import type { StoredFile } from "$lib/dbEntities/storage";
+    import { arrayEquals } from "$lib/misc";
+    import { SongFilenames, StoredSong } from "$lib/songbook";
+    import { onMount } from "svelte";
+    import { plainToInstance } from "class-transformer";
+    import { RefreshOutline } from "flowbite-svelte-icons";
     export let data;
 
-    let currentTags = ['mock-current-tag1', 'mock-current-tag2'];
-    let newTags = ['mock-current-tag1', 'mock-current-tag2'];
+    // console.log(data);
+
+    let song: StoredSong = plainToInstance(StoredSong, data.song);
+    let readmeFile: StoredFile = data.readmeFile as StoredFile;
+    let chordsFile: StoredFile = data.chordsFile as StoredFile;
+    
+    let readme: string, chords: string, ytUrl: YTVideoUrl = null;
+    $: if (readmeFile) readme = readmeFile.content;
+    $: if (chordsFile) chords = chordsFile.content;
+    $: if (readme) { ytUrl = extractYTVideoUrl(readme)}
+
+    let currentTags: SongTag[]
+    $: song, currentTags = [...data.song.tags].map((v) => v.name);
+    let newTags: SongTag[] = [...data.song.tags].map((v) => v.name);
     let savingTags = false;
+    $: if (newTags != null) handleTagsChange();
+
     let error = "";
-    $: newTags, handleTagsChange();
+    let syncing = false;
 
+    onMount(() => {
+        if (needsSync(readmeFile) || needsSync(chordsFile))  {
+            sync();
+        } else {
+            console.log("skipping onMount sync");
+        }
+    });
 
-    function arrayEquals(a: Array<string>, b: Array<string>) {
-        return Array.isArray(a) &&
-            Array.isArray(b) &&
-            a.length === b.length &&
-            a.every((val, index) => val === b[index]);
+    const syncAfterSeconds = 120;
+    function needsSync(file: StoredFile): boolean {
+        return (!syncing && (new Date().getTime() - new Date(file.lastVisited).getTime()) / 1000 > syncAfterSeconds)
     }
 
+    async function fetchSongFile(filename:string): Promise<string> {
+        const response = await fetch('/api/storage/file?' + new URLSearchParams({
+            path: song.buildPath(filename)
+        }).toString());
+        // console.log(response);
+        if (response.ok) {
+            let data = (await response.json()) as StoredFile;
+            return data.content;
+        }
+
+        if (response.status != 404) {
+            console.error(`Fetch failed for ${filename}. Response:`, response)
+            throw Error();
+        }
+
+        return null;
+    }
+    async function sync() {
+        if (syncing) {
+            return;
+        }
+        syncing = true;
+        [readme, chords] = await Promise.all([
+            fetchSongFile(SongFilenames.README),
+            fetchSongFile(SongFilenames.CHORDS)
+        ]);
+        syncing = false;
+    }
+    
     async function handleTagsChange() {
+        // console.log("MOCK saving out", currentTags, newTags);
         if (savingTags) return;
-        // if (currentTags != newTags) {
+
         if (! arrayEquals(currentTags, newTags)) {
             savingTags = true;
-            console.log("MOCK saving", currentTags, newTags);
-
-            // error = "";
-            // const res = await fetch(`/api/song/${data.songFolder.metadata.id}/tags`, {
-            //         method: 'POST',
-            //         body: JSON.stringify({tags: newTags})
-            //     })
-            // .then(async function(response) {
-            //     if (!response.ok){
-            //         console.error("Failed updating song tags: ", response);
-            //         let responseText = await response.text();
-            //         error = response.status + " " + response.statusText + ": " + responseText;
-            //     } else {
-            //         console.log(`Updated song tags: ${newTags}`);
-            //         // let responseJson = await response.json();
-            //         currentTags = [...newTags];
-            //         savingTags = false;
-            //     }
-            // });
-
+            const response = await fetch(`/api/song/${song.id}/tags`, {
+                method: 'POST',
+                body: JSON.stringify({tags: newTags})
+            })
+            if (response.ok) {
+                let responseJson = await response.json();
+                console.log(`Updated song:`, responseJson);
+                song = plainToInstance(StoredSong, responseJson);
+                // currentTags = [...responseJson];
+                savingTags = false;
+            } else {
+                console.error("Failed updating song tags: ", response);
+                let responseText = await response.text();
+                error = response.status + " " + response.statusText + ": " + responseText;
+            }
             savingTags = false;
         }
     }
@@ -57,6 +109,14 @@
     // @ts-ignore
     let TagsAndHideTypeWarning: ConstructorOfATypedSvelteComponent = Tags;
 </script>
+
+<div id="syncStatus">
+    {#if syncing}
+      <span title="Sync with remote storage in progress..."><Button color="alternative" disabled><Spinner size="5" /></Button></span>
+    {:else}
+      <span><Button on:click={sync}><RefreshOutline /></Button></span>
+    {/if}  
+</div>
 
 <section>
     <!-- <TagsAndHideTypeWarning -->
@@ -91,12 +151,12 @@
 </section>
 
 <section>
-    {#if data.ytUrl}
+    {#if ytUrl}
         <!-- TODO: Make invidious instance confgurable -->
         <div class="flex flex-wrap items-center gap-2 sectionButtons">
             <Button class="!p-2" href="{$page.url.href}/readme/edit"><Fa icon={faPenToSquare} size="lg" /></Button>
         </div>
-        <LoadingIframe width='100%' height='200px' src='https://yt.artemislena.eu/embed/{data.ytUrl.id}?listen=1&autoplay=0&thin_mode=true&player_style=youtube' />    
+        <LoadingIframe width='100%' height='200px' src='https://inv.nadeko.net/embed/{ytUrl.id}?listen=1&autoplay=0&thin_mode=true&player_style=youtube' />    
     {:else}
         <PlaceholderBox>
             <Button href="{$page.url.href}/readme/edit">Add YouTube link</Button>
@@ -106,28 +166,33 @@
 </section>
 
 <section>
-    {#if data.chords}
+    <!-- TODO: chords not updating after manual sync -->
+    {#if chords}
         <div class="flex flex-wrap items-center gap-2 sectionButtons">
             <Button class="!p-2" href="{$page.url.href}/sheet/edit"><Fa icon={faPenToSquare} size="lg" /></Button>
         </div>
         <div class="chords">
-            <RenderedChords rawChords={data.chords} />
+            <RenderedChords rawChords={chords} />
         </div>
     {:else}
     <PlaceholderBox>
-        <!-- <Button href="{$page.url.href}/sheet/edit">Add Lyrics/Chords</Button> -->
-        <p style="color: gray; font-size: 0.8em; font-style: italic; margin-top: 1em;">Coming soon...</p>
+        <Button href="{$page.url.href}/sheet/edit">Add Lyrics/Chords</Button>
     </PlaceholderBox>
     {/if}
 </section>
 
-<section>
+<!-- <section>
     <PlaceholderBox>
         <p>(raw file list)</p>
     </PlaceholderBox>
-</section>
+</section> -->
 
 <style>
+    #syncStatus {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+    }
     section {
         margin-bottom: 1em;
     }

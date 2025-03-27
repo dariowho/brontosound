@@ -1,4 +1,5 @@
 import { promises as fs } from 'fs';
+import { readFileSync } from 'fs';
 
 import { localDataRoot, settingsFilename } from "$lib/server/config";
 import { WebdavStorage, FilesystemStorage, type PersistedStorage } from './storage';
@@ -7,6 +8,7 @@ export interface SettingsData {
     bandName: string;
     bandLogo?: string;
     authorizedGoogleSSOUsers: string[];
+    songsFolder?: string;
     webdavEnabled: boolean;
     webdavServer: string;
     webdavUsername: string;
@@ -19,6 +21,7 @@ export interface SettingsData {
 export const defaultSettings: SettingsData = {
     bandName: "My Band",
     authorizedGoogleSSOUsers: [],
+    songsFolder: "Songs",
     webdavEnabled: false,
     webdavServer: "",
     webdavUsername: "",
@@ -30,15 +33,16 @@ export const defaultSettings: SettingsData = {
 
 let cachedSettings: SettingsData | null = null;
 
-export async function readSettings(): Promise<SettingsData> {
+export function readSettings(): SettingsData {
     if (cachedSettings) {
         return cachedSettings;
     }
 
     const filePath = `${localDataRoot}/${settingsFilename}`;
     try {
-        const data = await fs.readFile(filePath, 'utf-8');
-        cachedSettings = JSON.parse(data) as SettingsData;
+        const data = readFileSync(filePath, 'utf-8');
+        const userSettings = JSON.parse(data) as SettingsData;
+        cachedSettings = {...defaultSettings, ...userSettings};
         return cachedSettings;
     } catch (error) {
         console.error(`Error reading settings from ${filePath}:`, error);
@@ -59,7 +63,7 @@ export async function writeSettings(settingsData: SettingsData): Promise<void> {
 }
 
 export async function getUserStorage(): Promise<PersistedStorage> {
-    const settings = await readSettings();
+    const settings = readSettings();
     if (settings.webdavEnabled) {
         return new WebdavStorage(
             settings.webdavServer,

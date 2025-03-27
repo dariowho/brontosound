@@ -5,6 +5,6 @@ export async function load({ }: ServerLoadEvent) {
     const storage = new FilesystemStorage('data/publicSite');
     
     return {
-        staticContent: storage.readTextFile('index.html'),
+        staticContent: storage.readTextFileContent('index.html'),
     }
 }

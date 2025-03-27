@@ -1,7 +1,7 @@
 import "reflect-metadata"
 import { DataSource, Repository, type EntityTarget } from "typeorm"
 import { Song, SongTag } from "$lib/dbEntities/song"
-import { StoredDirectory } from "./dbEntities/storage";
+import { StoredDirectory, StoredFile, StoredObject } from "./dbEntities/storage";
 import { LiveGig, LiveGigInteraction, LiveVenue, LiveVenueAddress } from "./dbEntities/live";
 import { User } from "./dbEntities/user";
 import { Contact } from "./dbEntities/contacts";
@@ -23,7 +23,9 @@ class TypeOrm {
             User,
             Song,
             SongTag,
+            StoredObject,
             StoredDirectory,
+            StoredFile,
             Contact,
             LiveVenue,
             LiveVenueAddress,

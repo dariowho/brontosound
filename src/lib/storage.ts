@@ -15,14 +15,14 @@ export class FilesystemStorage {
         this.basePath = basePath;
     }
 
-    readTextFile(...pathSegments: string[]): string {
+    readTextFileContent(...pathSegments: string[]): string {
         const fullPath = path.join(this.basePath,...pathSegments);
         try{
             return fs.readFileSync(fullPath).toString();
         } catch (err: any) {
             const nodeError: NodeJS.ErrnoException = err;
             if (nodeError.code == "ENOENT") {
-                // console.log("readTextFile: file not found: ", fullPath)
+                // console.log("readTextFileContent: file not found: ", fullPath)
                 throw new FileNotFoundError();
             } 
             throw err;
@@ -40,7 +40,7 @@ export class FilesystemStorage {
     }
 
     readJSON(...pathSegments: string[]) {
-        return JSON.parse(this.readTextFile(...pathSegments));
+        return JSON.parse(this.readTextFileContent(...pathSegments));
     }
 
     storedDirectory(dirPath: string): StoredDirectory {

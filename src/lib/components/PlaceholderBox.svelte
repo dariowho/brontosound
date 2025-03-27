@@ -4,7 +4,6 @@
 
 <style>
     .placeholderBox {
-        width: 95%;
         height: 200px;
         display: flex;
         flex-direction: column;

@@ -217,7 +217,7 @@ export class Song {
      */
     readme(): string {
         try {
-            return this.storage.readTextFile(this.songFolder.path, "README.md");
+            return this.storage.readTextFileContent(this.songFolder.path, "README.md");
         } catch (err) {
             if (err instanceof FileNotFoundError) return "";
             throw err;
@@ -243,7 +243,7 @@ export class Song {
 
     chords(): string {
         try {
-            return this.storage.readTextFile(this.songFolder.path, "chords.chordpro");
+            return this.storage.readTextFileContent(this.songFolder.path, "chords.chordpro");
         } catch (err) {
             if (err instanceof FileNotFoundError) return "";
             throw err;

@@ -1,6 +1,6 @@
+import TypeOrm from '$lib/db';
+import { Song, SongTag } from '$lib/dbEntities/song';
 import { isValidId } from '$lib/server/session';
-import { Song, type IndexedSongFolderData, SongIndex, SongNotFoundError } from '$lib/songs';
-import { FilesystemStorage } from '$lib/storage';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 
@@ -19,24 +19,29 @@ export const POST = (async ({ request, params }) => {
     if (! params.songId || ! isValidId(params.songId)) {
         error(400, "Invalid songId");
     }
+    const songId = parseInt(params.songId);
+    const [postTagRequest, db] = await Promise.all([
+        await request.json() as PostTagsRequest,
+        await TypeOrm.getDb(),
+    ]);
+    const songTagRepository = db.getRepository(SongTag);
 
-    const storage = new FilesystemStorage('data/persistedFilesystem');
-    let songFolder: IndexedSongFolderData;
-    let songIndex = new SongIndex(storage);
-
-    try {
-        songFolder = songIndex.songById(params.songId);
-    } catch (err) {
-    if (err instanceof SongNotFoundError) {
-        error(404, "Song not found: " + params.songId);
+    // Find or create tags - Gemini generated - TODO: optimize
+    const tags: SongTag[] = [];
+    for (const tagName of postTagRequest.tags) {
+        let tag = await songTagRepository.findOne({ where: { name: tagName } });
+        if (!tag) {
+            tag = songTagRepository.create({ name: tagName });
+            await songTagRepository.save(tag);
+        }
+        tags.push(tag);
     }
-        throw(err);
-    }
 
-    let song = new Song(storage, songFolder);
+    const updatedSong = await db.getRepository(Song).save({
+        id: songId,
+        tags: tags
+    })
+    console.log(updatedSong);
 
-    const postTagsRequest: PostTagsRequest = await request.json();
-    song.writeTags(postTagsRequest.tags);
-
-    return new Response(JSON.stringify({}));
+    return new Response(JSON.stringify(updatedSong));
 }) satisfies RequestHandler;

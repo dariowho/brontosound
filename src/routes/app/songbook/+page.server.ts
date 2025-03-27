@@ -2,7 +2,6 @@ import type { ServerLoadEvent } from "@sveltejs/kit";
 
 import {instanceToPlain} from "class-transformer"
 
-import { FilesystemStorage } from "$lib/storage"
 import { Song } from "$lib/dbEntities/song";
 import TypeOrm from "$lib/db";
 import { StoredDirectory } from "$lib/dbEntities/storage";
@@ -26,6 +25,6 @@ export async function load({ }: ServerLoadEvent) {
     songs: songs.map((song) => instanceToPlain(song)),
     cachedStoredDirs: cachedStoredDirs.map((dir) => instanceToPlain(dir)),
     lastCacheSync: lastSync,
-    allTags: []
+    allTags: [] // TODO: implement
   }
 }

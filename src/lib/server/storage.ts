@@ -1,14 +1,15 @@
 import fs from 'fs'
-import path from 'path'
-import { createClient, type FileStat, type WebDAVClient } from 'webdav';
+import path, { basename, dirname } from 'path'
+import { createClient, type FileStat, type ResponseDataDetailed, type WebDAVClient } from 'webdav';
 import pLimit from 'p-limit';
 
-import { StoredDirectory } from '$lib/dbEntities/storage';
+import { StoredDirectory, StoredFile } from '$lib/dbEntities/storage';
 
 export interface PersistedStorage {
-    readTextFile(...pathSegments: string[]): Promise<string>;
-    writeTextFile(content: string, filePath: string): Promise<void>;
-    readJSONFile(...pathSegments: string[]): Promise<any>;
+    readTextFile(...pathSegments: string[]): Promise<StoredFile>;
+    readTextFileContent(...pathSegments: string[]): Promise<string>;
+    writeTextFile(content: string, filePath: string): Promise<StoredFile>;
+    readJsonFileContent(...pathSegments: string[]): Promise<any>;
     writeJSONFile(content: any, filePath: string): Promise<void>;
 
     storedDirectory(dirPath: string): Promise<StoredDirectory>;
@@ -22,32 +23,39 @@ export class FilesystemStorage implements PersistedStorage {
         this.basePath = basePath;
     }
 
-    async readTextFile(...pathSegments: string[]): Promise<string> {
+
+
+    async readTextFile(...pathSegments: string[]): Promise<StoredFile> {
         const fullPath = path.join(this.basePath,...pathSegments);
         try{
-            return fs.readFileSync(fullPath).toString();
+            return makeStoredFileObject(fullPath, fs.readFileSync(fullPath).toString(), new Date()); // TODO: implement modification date
         } catch (err: any) {
             const nodeError: NodeJS.ErrnoException = err;
             if (nodeError.code == "ENOENT") {
-                // console.log("readTextFile: file not found: ", fullPath)
+                // console.log("readTextFileContent: file not found: ", fullPath)
                 throw new FileNotFoundError();
             } 
             throw err;
         }
     }
 
-    async writeTextFile(content: string, filePath: string) {
+    async readTextFileContent(...pathSegments: string[]): Promise<string> {
+        return (await this.readTextFile(...pathSegments)).content
+    }
+
+    async writeTextFile(content: string, filePath: string): Promise<StoredFile> {
         const fullPath = path.join(this.basePath, filePath);
         fs.mkdirSync(path.dirname(fullPath), { recursive: true });
         fs.writeFileSync(fullPath, content, 'utf-8');
+        return makeStoredFileObject(fullPath, content, new Date());
     }
 
     async writeJSONFile(content: any, filePath: string) {
         this.writeTextFile(JSON.stringify(content, null, 4), filePath);
     }
 
-    async readJSONFile(...pathSegments: string[]): Promise<any> {
-        return JSON.parse(await this.readTextFile(...pathSegments));
+    async readJsonFileContent(...pathSegments: string[]): Promise<any> {
+        return JSON.parse(await this.readTextFileContent(...pathSegments));
     }
 
     async storedDirectory(dirPath: string): Promise<StoredDirectory> {
@@ -102,10 +110,16 @@ export class WebdavStorage implements PersistedStorage {
         return true;
     }
 
-    async readTextFile(...pathSegments: string[]): Promise<string> {
+    async readTextFileContent(...pathSegments: string[]): Promise<string> {
+        return ((await this.readTextFile(...pathSegments)).content);
+    }
+
+    async readTextFile(...pathSegments: string[]): Promise<StoredFile> {
         try {
-            let data = await this.client.getFileContents(path.join(...pathSegments));
-            return data.toString();
+            const fullPath = path.join(...pathSegments);
+            let data = await this.client.getFileContents(fullPath, {format: "text", details: true}) as ResponseDataDetailed<string>;
+            // console.log("data:", data);
+            return makeStoredFileObject(fullPath, data.data, new Date(data.headers['last-modified']));
         } catch (err: any) {
             if (err.response.status == 404)
                 throw new FileNotFoundError(err.toString());
@@ -113,7 +127,7 @@ export class WebdavStorage implements PersistedStorage {
         }
     }
 
-    async writeTextFile(content: string, filePath: string): Promise<void> {
+    async writeTextFile(content: string, filePath: string): Promise<StoredFile> {
         let result = false;
         try {
             console.log("writeTextFile: creating dirs: ", path.dirname(filePath));
@@ -126,10 +140,12 @@ export class WebdavStorage implements PersistedStorage {
 
         if (! result)
             throw new FileAccessError("WebDAV 'putFileContents' call failed for path: " + filePath);
+
+        return makeStoredFileObject(filePath, content, new Date());
     }
 
-    async readJSONFile(...pathSegments: string[]): Promise<any> {
-        let data = await this.readTextFile(path.join(...pathSegments));
+    async readJsonFileContent(...pathSegments: string[]): Promise<any> {
+        let data = await this.readTextFileContent(path.join(...pathSegments));
         return JSON.parse(data);
     }
 
@@ -210,6 +226,17 @@ export class WebdavStorage implements PersistedStorage {
         // console.log("webdav listSubfolders: ", pathSegments, ": ", result);
         return result;
     }
+}
+
+function makeStoredFileObject(fullPath: string, content: string, modificationDate: Date): StoredFile {
+    let result = new StoredFile();
+    result.content = content;
+    result.parentPath = path.dirname(fullPath);
+    result.name = path.basename(fullPath);
+    result.path = fullPath;
+    result.modificationDate = modificationDate;
+    result.lastVisited = new Date();
+    return result;
 }
 
 export class FileNotFoundError extends Error {};

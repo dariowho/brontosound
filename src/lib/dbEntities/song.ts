@@ -1,3 +1,4 @@
+import path from "path"
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
 import { ManyToMany, JoinTable } from "typeorm"
 
