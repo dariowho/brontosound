@@ -14,9 +14,11 @@
   let cachedStoredDirs = data.cachedStoredDirs as StoredDirectory[];
   // console.log(data);
 
+  $: songs
+
   // Sync with remote storage
   let syncing = false;
-  const syncAfterSeconds = 60;
+  const syncAfterSeconds = 180;
   onMount(() => {
     if (!syncing && (new Date().getTime() - new Date(data.lastCacheSync).getTime()) / 1000 > syncAfterSeconds) {
       syncStoredDirs();
@@ -40,6 +42,7 @@
       .then(data => {
         console.log('Synced', data);
         cachedStoredDirs = data as unknown as StoredDirectory[];
+        data.lastCacheSync = new Date();
         syncing = false;
       });
   }
@@ -97,26 +100,22 @@
   async function saveNewSong(song: Song) {
     syncing = true;
     console.log('saving new song:', song);
-    const res = await fetch(`/api/song`, {
+    const response = await fetch(`/api/song`, {
         method: 'POST',
         body: JSON.stringify(instanceToPlain(song))
     })
-      .then(response => {
-        if (!response.ok) {
-          // TODO: test
-          console.error("Failed to save song:", response);
-          throw new Error("Failed to save song: " + response.statusText);
-        }
-        return response.json()
-      })
-      .then(json_response => {
-        console.log('Saved song:', json_response);
-        let song = plainToClass(Song, json_response);
-        songs.push(song);
-        songs = songs;
-        reconcileSongs();
-        return song;
-      });
+    if (!response.ok) {
+      // TODO: test
+      console.error("Failed to save song:", response);
+      throw new Error("Failed to save song: " + response.statusText);
+    }
+    const json_response = await response.json()
+    console.log('Saved song:', json_response);
+    let newSong = plainToClass(Song, json_response);
+    songs.push(newSong);
+    songs = songs;
+    console.log("Updated songs:", songs);
+    reconcileSongs();
     syncing = false;
   }
 
@@ -162,11 +161,13 @@
           </a>
         </TableBodyCell>
         <TableBodyCell>{song.artist}</TableBodyCell>
-        <TableBodyCell>{song.creationDate.toLocaleDateString('it-IT')}</TableBodyCell>
+        <TableBodyCell>{new Date(song.creationDate).toLocaleDateString('it-IT')}</TableBodyCell>
         <TableBodyCell>
-          {#each song.tags.map((v) => v.name) as songTag}
-            <Badge class="mr-2">{songTag}</Badge> 
-          {/each}
+          {#if song.tags}
+            {#each song.tags.map((v) => v.name) as songTag}
+              <Badge class="mr-2">{songTag}</Badge> 
+            {/each}
+          {/if}
         </TableBodyCell>
         <!-- <TableBodyCell>
           <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">
@@ -203,11 +204,15 @@
         <TableBodyCell class="!p-4">
           {dirFromName[newSong.storedDirName].path}
         </TableBodyCell>
-        <TableBodyCell>
-          <Input placeholder="Title" bind:value={newSong.title} disabled={syncing} />
+        <TableBodyCell class="px-2">
+          <div style="min-width:10rem;">
+            <Input placeholder="Title" bind:value={newSong.title} disabled={syncing} />
+          </div>
         </TableBodyCell>
-        <TableBodyCell>
-          <Input placeholder="Artist" bind:value={newSong.artist} disabled={syncing} />
+        <TableBodyCell class="px-2">
+          <div style="min-width:10rem;">
+            <Input placeholder="Artist" bind:value={newSong.artist} disabled={syncing} />
+          </div>
         </TableBodyCell>
         <!-- <TableBodyCell>{song.creationDate.toLocaleDateString('it-IT')}</TableBodyCell> -->
         <!-- <TableBodyCell>
@@ -215,7 +220,7 @@
             <Badge>{songTag}</Badge> 
           {/each}
         </TableBodyCell> -->
-        <TableBodyCell>
+        <TableBodyCell class="px-2">
           {#if syncing}
             <span title="Sync with remote storage in progress..."><Button color="alternative" disabled><Spinner size="5" /></Button></span>
           {:else}

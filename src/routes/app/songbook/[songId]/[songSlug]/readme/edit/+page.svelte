@@ -12,7 +12,7 @@
     export let form: ActionData;
 
     let song: StoredSong = plainToInstance(StoredSong, data.song);
-    let content: string = data.readmeFile.content;
+    let content: string = (data.readmeFile) ? data.readmeFile.content : null;
 
 
     if (! content && !form ) {

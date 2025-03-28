@@ -12,7 +12,7 @@
     export let form: ActionData;
 
     let song: StoredSong = plainToInstance(StoredSong, data.song);
-    let content: string = data.chordsFile.content;
+    let content: string = (data.chordsFile) ? data.chordsFile.content : null;
 
     if (! content && !form ) {
         content = `What [Em]child is [G]this, who, [D]laid to rest\nOn [Em]Mary's [Am]lap, is [B]sleeping?`;
@@ -24,6 +24,8 @@
 </script>
 
 <form action="?/save" method="post">
+    
+    <P style="margin-bottom:1em"><Span class="uppercase">Format:</Span> <A href="https://www.chordpro.org/chordpro/chordpro-cheat_sheet/" target="_blank">https://www.chordpro.org/chordpro/chordpro-cheat_sheet/</A>.</P>
     <P style="margin-bottom:1em"><Span class="uppercase">Tip:</Span> Use <A href="https://ultimate.ftes.de/" target="_blank">https://ultimate.ftes.de/</A> to convert from Ultimate Guitar format.</P>
     <textarea name="editor" id="editor" rows="20" bind:value={content}></textarea>
     <input type="hidden" name="path" value={song.buildPath(SongFilenames.CHORDS)}>

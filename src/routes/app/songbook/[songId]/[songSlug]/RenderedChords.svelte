@@ -4,9 +4,10 @@
     export let rawChords: string;
 
     const parser = new ChordSheetJS.ChordProParser();
-    const parsedChords = parser.parse(rawChords);
     const formatter = new ChordSheetJS.HtmlTableFormatter();
-    const renderedChords = formatter.format(parsedChords);
+    let parsedChords, renderedChords;
+    $: rawChords, parsedChords = parser.parse(rawChords);
+    $: parsedChords, renderedChords = formatter.format(parsedChords);
 </script>
 
 <div class="chords">

@@ -7,6 +7,8 @@
     import { Fa } from "svelte-fa";
 
     export let data;
+
+    let content = (data.readmeFile) ? data.readmeFile.content : null
 </script>
 
 <div class="buttons">
@@ -14,9 +16,9 @@
     <Button href="{$page.url.href}/edit">Edit</Button>
 </div>
 <div class="readme">
-    {#if data.readmeFile}
+    {#if content}
         <Markdown
-            source={data.readmeFile.content}
+            source={content}
         />
     {:else}
         <PlaceholderBox>

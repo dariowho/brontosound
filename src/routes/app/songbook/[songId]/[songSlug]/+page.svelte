@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Button, Heading, Spinner } from "flowbite-svelte";
     import LoadingIframe from "./LoadingIframe.svelte";
-    import { page } from "$app/stores";
+    import { page } from "$app/state";
     import PlaceholderBox from "$lib/components/PlaceholderBox.svelte";
     import RenderedChords from "./RenderedChords.svelte";
     import { Fa } from "svelte-fa";
@@ -10,24 +10,28 @@
     import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
     import type { SongTag } from "$lib/dbEntities/song";
     import { extractYTVideoUrl, type YTVideoUrl } from "$lib/yt";
-    import type { StoredFile } from "$lib/dbEntities/storage";
+    import { StoredFile } from "$lib/dbEntities/storage";
     import { arrayEquals } from "$lib/misc";
     import { SongFilenames, StoredSong } from "$lib/songbook";
     import { onMount } from "svelte";
     import { plainToInstance } from "class-transformer";
     import { RefreshOutline } from "flowbite-svelte-icons";
+    import { invalidateAll } from "$app/navigation";
     export let data;
 
     // console.log(data);
 
     let song: StoredSong = plainToInstance(StoredSong, data.song);
-    let readmeFile: StoredFile = data.readmeFile as StoredFile;
-    let chordsFile: StoredFile = data.chordsFile as StoredFile;
+    let readmeFile: StoredFile, chordsFile: StoredFile;
+    $: data.readmeFile, readmeFile = plainToInstance(StoredFile, data.readmeFile);
+    $: data.chordsFile, chordsFile = plainToInstance(StoredFile, data.chordsFile);
     
-    let readme: string, chords: string, ytUrl: YTVideoUrl = null;
-    $: if (readmeFile) readme = readmeFile.content;
-    $: if (chordsFile) chords = chordsFile.content;
+    let readme: string | null, chords: string | null, ytUrl: YTVideoUrl | null = null;
+    $: if (data.readmeFile) readme = data.readmeFile.content;
+    $: if (data.chordsFile) chords = data.chordsFile.content;
     $: if (readme) { ytUrl = extractYTVideoUrl(readme)}
+
+    $: readme, console.log("Readme:", readme);
 
     let currentTags: SongTag[]
     $: song, currentTags = [...data.song.tags].map((v) => v.name);
@@ -48,17 +52,20 @@
 
     const syncAfterSeconds = 120;
     function needsSync(file: StoredFile): boolean {
+        if (! file) {
+            return true;
+        }
         return (!syncing && (new Date().getTime() - new Date(file.lastVisited).getTime()) / 1000 > syncAfterSeconds)
     }
 
-    async function fetchSongFile(filename:string): Promise<string> {
+    async function fetchSongFile(filename:string): Promise<StoredFile> {
         const response = await fetch('/api/storage/file?' + new URLSearchParams({
             path: song.buildPath(filename)
         }).toString());
         // console.log(response);
         if (response.ok) {
             let data = (await response.json()) as StoredFile;
-            return data.content;
+            return data;
         }
 
         if (response.status != 404) {
@@ -73,10 +80,11 @@
             return;
         }
         syncing = true;
-        [readme, chords] = await Promise.all([
+        [data.readmeFile, data.chordsFile] = await Promise.all([
             fetchSongFile(SongFilenames.README),
             fetchSongFile(SongFilenames.CHORDS)
         ]);
+        await invalidateAll();
         syncing = false;
     }
     
@@ -154,12 +162,13 @@
     {#if ytUrl}
         <!-- TODO: Make invidious instance confgurable -->
         <div class="flex flex-wrap items-center gap-2 sectionButtons">
-            <Button class="!p-2" href="{$page.url.href}/readme/edit"><Fa icon={faPenToSquare} size="lg" /></Button>
+            <Button class="!p-2" href="{page.url.href}/readme/edit" disabled={syncing}><Fa icon={faPenToSquare} size="lg" /></Button>
         </div>
-        <LoadingIframe width='100%' height='200px' src='https://inv.nadeko.net/embed/{ytUrl.id}?listen=1&autoplay=0&thin_mode=true&player_style=youtube' />    
+        <LoadingIframe width='100%' height='200px' src='https://www.youtube.com/embed/{ytUrl.id}' />    
+        <!-- <LoadingIframe width='100%' height='200px' src='https://inv.nadeko.net/embed/{ytUrl.id}?listen=1&autoplay=0&thin_mode=true&player_style=youtube' />     -->
     {:else}
         <PlaceholderBox>
-            <Button href="{$page.url.href}/readme/edit">Add YouTube link</Button>
+            <Button href="{page.url.href}/readme/edit" disabled={syncing}>Add YouTube link</Button>
             <p style="color: gray; font-size: 0.8em; font-style: italic; margin-top: 1em;">YouTube links are extracted from the song's README.md</p>
         </PlaceholderBox>
     {/if}
@@ -169,14 +178,14 @@
     <!-- TODO: chords not updating after manual sync -->
     {#if chords}
         <div class="flex flex-wrap items-center gap-2 sectionButtons">
-            <Button class="!p-2" href="{$page.url.href}/sheet/edit"><Fa icon={faPenToSquare} size="lg" /></Button>
+            <Button class="!p-2" href="{page.url.href}/sheet/edit" disabled={syncing}><Fa icon={faPenToSquare} size="lg" /></Button>
         </div>
         <div class="chords">
             <RenderedChords rawChords={chords} />
         </div>
     {:else}
     <PlaceholderBox>
-        <Button href="{$page.url.href}/sheet/edit">Add Lyrics/Chords</Button>
+        <Button href="{page.url.href}/sheet/edit" disabled={syncing}>Add Lyrics/Chords</Button>
     </PlaceholderBox>
     {/if}
 </section>
