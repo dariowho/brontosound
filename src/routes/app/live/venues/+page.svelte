@@ -4,6 +4,7 @@
     import { Button, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Input, Spinner } from 'flowbite-svelte';
     import { CirclePlusOutline } from 'flowbite-svelte-icons';
     import slugify from 'slugify';
+    import type { DeepPartial } from 'typeorm';
 
     export let data;
     export let venues = data.venues as LiveVenue[];
@@ -20,7 +21,7 @@
     async function addNewVenue() {
       busy = true;
       console.log('Adding venue', newVenueName);
-      let newVenue: LiveVenue = {
+      let newVenue: DeepPartial<LiveVenue> = {
         name: newVenueName,
       };
       let venue: LiveVenue = await saveEntityViaApi(LiveVenue, newVenue, '/api/live/venue');

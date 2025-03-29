@@ -27,6 +27,8 @@ You can preview the production build with `npm run preview`.
 
 ## Docker build
 
+First build with `npm run build`
+
 Build:
 
 ```bash
@@ -36,7 +38,7 @@ docker build . -t brontosound:latest
 Run:
 
 ```bash
-docker run --env-file .env -p 3888:3000 -v ./data:/app/data brontosound:latest
+docker run --env-file .env -p 3888:3000 -e ORIGIN="http://localhost:3888" -v ./data:/app/data brontosound:latest
 ```
 
 Debug:

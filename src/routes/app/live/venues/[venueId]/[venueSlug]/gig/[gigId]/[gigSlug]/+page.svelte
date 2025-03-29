@@ -1,11 +1,12 @@
 <script lang="ts">
   import PlaceholderBox from '$lib/components/PlaceholderBox.svelte';
   import { InteractionSender, LiveGig, LiveGigInteraction, LiveGigStatus, LiveVenue } from '$lib/dbEntities/live';
-  import { Badge, Button, Card, Datepicker, Spinner, Textarea, Toast, Toggle, Toolbar } from 'flowbite-svelte';
+  import { A, Badge, Button, Card, Datepicker, Spinner, Textarea, Toast, Toggle, Toolbar } from 'flowbite-svelte';
   import type { ActionData } from "./$types.js";
   import { instanceToPlain, plainToInstance } from 'class-transformer';
   import GigInteractionCard from './GigInteractionCard.svelte';
     import ToastMessages from '$lib/components/ToastMessages.svelte';
+    import Markdown from '@magidoc/plugin-svelte-marked';
 
   export let form: ActionData;
 
@@ -46,7 +47,7 @@
       <span class="text-base font-normal leading-tight"><strong>Status</strong>: {gig.status}</span>
     </li>
     <li class="flex space-x-2 rtl:space-x-reverse">
-      <span class="text-base font-normal leading-tight"><strong>Note</strong>: {gig.note}</span>
+      <span class="text-base font-normal leading-tight"><strong>Note</strong>: <span class="markdownContainer"><Markdown source={gig.note} renderers={{a: A}}/></span></span>
     </li>
   </ul>
   <!-- <Button class="w-full">Choose plan</Button> -->

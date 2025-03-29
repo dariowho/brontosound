@@ -1,9 +1,9 @@
 import "reflect-metadata"
-import { DataSource, Repository, type EntityTarget } from "typeorm"
+import { DataSource, Repository, type DeepPartial, type EntityTarget } from "typeorm"
 import { Song, SongTag } from "$lib/dbEntities/song"
 import { StoredDirectory, StoredFile, StoredObject } from "./dbEntities/storage";
 import { LiveGig, LiveGigInteraction, LiveVenue, LiveVenueAddress } from "./dbEntities/live";
-import { User } from "./dbEntities/user";
+import { User, UserCreatedEntity } from "./dbEntities/user";
 import { Contact } from "./dbEntities/contacts";
 import { instanceToPlain, plainToClass, type ClassConstructor } from "class-transformer";
 
@@ -72,7 +72,7 @@ class TypeOrm {
 }
 export default TypeOrm;
 
-export async function saveEntityViaApi<Type>(entityCls: ClassConstructor<Type>, entityObject: Type, endpoint: string): Promise<Type> {
+export async function saveEntityViaApi<Type>(entityCls: ClassConstructor<Type>, entityObject: Type | DeepPartial<UserCreatedEntity>, endpoint: string): Promise<Type> {
   const body = entityObject instanceof entityCls ? instanceToPlain(entityObject) : entityObject;
   const res = await fetch(endpoint, {
     method: 'POST',
@@ -86,6 +86,6 @@ export async function saveEntityViaApi<Type>(entityCls: ClassConstructor<Type>, 
   }
 
   const jsonResponse = await res.json();
-  let result = plainToClass(entityCls, jsonResponse);
+  let result = plainToClass(entityCls, jsonResponse) as Type;
   return result;
 }

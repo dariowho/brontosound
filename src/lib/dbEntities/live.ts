@@ -1,17 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, ManyToOne } from "typeorm"
-import { User } from "./user"
+import { User, UserCreatedEntity } from "./user"
 import { Contact } from "./contacts"
 
 @Entity()
-export class LiveVenue {
-    @PrimaryGeneratedColumn()
-    id?: number
-
+export class LiveVenue extends UserCreatedEntity {
     @Column({ type: 'varchar'})
     name: string
-
-    @Column({type: 'datetime', default: () => 'CURRENT_TIMESTAMP'})
-    creationDate?: Date
 
     @OneToOne(() => LiveVenueAddress, liveVenueLocation => liveVenueLocation.venue, {nullable: true})
     location?: LiveVenueAddress
@@ -63,10 +57,7 @@ export interface MoneyAmount {
 }
 
 @Entity()
-export class LiveGig {
-    @PrimaryGeneratedColumn()
-    id: number = null
-
+export class LiveGig extends UserCreatedEntity {
     @Column({ type: 'varchar'})
     name: string
 
@@ -85,9 +76,6 @@ export class LiveGig {
     @OneToMany(() => LiveGigInteraction, interaction => interaction.gig)
     interactions: LiveGigInteraction[] = null
 
-    @Column({type: 'datetime', default: () => 'CURRENT_TIMESTAMP'})
-    creationDate?: Date
-
     @Column({ type: 'json', nullable: true})
     proposedCachet?: MoneyAmount
 
@@ -104,15 +92,9 @@ export enum InteractionSender {
 }
 
 @Entity()
-export class LiveGigInteraction {
-    @PrimaryGeneratedColumn()
-    id: number = null
-
+export class LiveGigInteraction extends UserCreatedEntity {
     @Column({ type: 'datetime'})
     date: Date
-
-    @ManyToOne(() => User)
-    createdBy: User
 
     @Column({ type: 'varchar', nullable: true})
     note: string

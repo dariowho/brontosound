@@ -21,10 +21,10 @@ export async function load({ params }: ServerLoadEvent) {
 import type { Actions } from './$types';
 
 export const actions = {
-    saveNewGig: async ({request}) => {
+    saveNewGig: async ({request, locals}) => {
         const data = await request.formData();
         console.log("data:", data);
-        const savedGig = await TypeOrm.saveEntity(LiveGig, data.get("newGigJson"));
+        const savedGig = await TypeOrm.saveEntity(LiveGig, data.get("newGigJson"), {"createdBy": locals['brontoSession'].user});
         return {
             success: true,
             savedGig: JSON.stringify(instanceToPlain(savedGig)),

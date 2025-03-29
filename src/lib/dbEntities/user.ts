@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 export enum UserRole {
     VIEWER = 'viewer',
@@ -30,4 +30,15 @@ export class User {
 
     @Column({ type: 'simple-enum', enum: UserRole })
     role: UserRole;
+}
+
+export abstract class UserCreatedEntity {
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @ManyToOne(() => User, {nullable: true})
+    createdBy: User
+
+    @Column({type: 'datetime', default: () => 'CURRENT_TIMESTAMP'})
+    creationDate?: Date
 }
