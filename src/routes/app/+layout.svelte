@@ -28,11 +28,13 @@
         </div>
     {/if}
     
-    <div class="header">
-        <Heading tag="h1" class="break-words">{$page.data.pageTitle}</Heading>
-    </div>
+    
 
     <div class="pageContent">
+        <div class="header">
+            <Heading tag="h1" class="break-words mb-5">{$page.data.pageTitle}</Heading>
+        </div>
+        
         <slot />
     </div>
 </section>
@@ -50,9 +52,9 @@
 </div>
 
 <style>
-    .header {
+    /* .header {
         margin-bottom: 2em;
-    }
+    } */
 
 
     #content {

@@ -1,16 +1,53 @@
 <script lang="ts">
   import PlaceholderBox from '$lib/components/PlaceholderBox.svelte';
-  import { LiveGig, LiveGigStatus, LiveVenue } from '$lib/dbEntities/live';
+  import { LiveGig, LiveGigStatus, LiveVenue, LiveVenueLocation } from '$lib/dbEntities/live';
   import { Button, Heading, Input, Label, Select, Spinner, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Textarea, Toast } from 'flowbite-svelte';
   import type { ActionData } from "./$types.js";
     import { instanceToPlain } from 'class-transformer';
     import slugify from 'slugify';
     import ToastMessages from '$lib/components/ToastMessages.svelte';
-
+    import type { DeepPartial } from 'typeorm';
+    import { saveEntityViaApi } from '$lib/db.js';
+    import type { Location } from '$lib/dbEntities/location';
+    import GoogleMapAndSearch from '$lib/components/GoogleMapAndSearch.svelte';
+  
   export let form: ActionData;
   export let data;
   export let venue = data.venue as LiveVenue;
   // console.log('Venue', venue);
+  
+  const googlemapsToken = data.safeBandSettings.googlemapsToken;
+  let lng, lat;
+  lat = (venue.location) ? venue.location.latitude : null;
+  lng = (venue.location) ? venue.location.longitude : null;
+  let addingNewLocation = false;
+  // $: if (venue.location) { [lat, lng] = [venue.location.latitude, venue.location.longitude] }
+
+
+  async function updateVenue(newProperties:DeepPartial<LiveVenue>) {
+    busy = true;
+    let updatedVenue: DeepPartial<LiveVenue> = {
+      id: venue.id,
+      ...newProperties
+    };
+    console.log('Updating venue:', updateVenue);
+
+    let newVenue: LiveVenue = await saveEntityViaApi(LiveVenue, updatedVenue, '/api/live/venue');
+    console.log('Updated venue:', newVenue);
+    venue = newVenue;
+    busy = false;
+  }
+
+  async function updateVenueLocation(newLocation: Location) {
+    // let newVenueLocation = {...newLocation, venue: venue};
+    if (venue.location) {
+      newLocation.id = venue.location.id;
+    }
+    return updateVenue({
+      location: newLocation
+      // location: newVenueLocation
+    });
+  }
 
   let busy = false;
   let newGig: LiveGig = null;
@@ -40,13 +77,29 @@
   ]
 </script>
   
-<div class="busyContainer">
+<!-- <div class="busyContainer">
   {#if busy}
     <Spinner class="mt-2" />
   {:else}
     <p class="mt-2">&nbsp;</p>
   {/if}
-</div>
+</div> -->
+
+{#if googlemapsToken}
+  <div class="map mb-5" style="width:100%; height: 300px;">
+     <GoogleMapAndSearch {googlemapsToken} {lat} {lng} handleUpdateLocation={updateVenueLocation} />
+  </div>
+  <!-- {#if ((lat && lng) || addingNewLocation)}
+    <div class="map mb-5" style="width:100%; height: 300px;">
+      <GoogleMapsMap {googlemapsToken} {lat} {lng} handleUpdateLocation={updateVenueLocation}/>
+    </div>
+  {:else}
+    <PlaceholderBox>
+        <Button on:click={()=>{addingNewLocation = true}}>Add Location</Button>
+    </PlaceholderBox>
+  {/if} -->
+
+{/if}
 
 <Heading tag="h2" class="mb-3">Gigs</Heading>
 

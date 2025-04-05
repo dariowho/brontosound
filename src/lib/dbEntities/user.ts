@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 export enum UserRole {
     VIEWER = 'viewer',
@@ -39,6 +39,16 @@ export abstract class UserCreatedEntity {
     @ManyToOne(() => User, {nullable: true})
     createdBy: User
 
+    @ManyToOne(() => User, {nullable: true})
+    lastModifiedBy: User
+
     @Column({type: 'datetime', default: () => 'CURRENT_TIMESTAMP'})
     creationDate?: Date
+
+    @BeforeInsert()
+    setCreatedByAsLastModifiedByDefault() {
+        if (!this.createdBy && this.lastModifiedBy) {
+            this.createdBy = this.lastModifiedBy;
+        }
+    }
 }

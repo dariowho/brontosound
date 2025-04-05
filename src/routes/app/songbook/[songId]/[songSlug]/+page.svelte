@@ -215,6 +215,7 @@
         border: 1px solid lightgray;
         padding: 1em;
         background: #f8f8f8;
+        overflow: scroll;
     }
 
     :global(.svelte-tags-input-tag) {

@@ -15,7 +15,8 @@ export interface SettingsData {
     webdavPassword: string;
     webdavConcurrentConnections: number;
     ytInvidiousEnabled: boolean;
-    ytInvidiousServer: string
+    ytInvidiousServer: string,
+    googlemapsToken?: string
 }
 
 export const defaultSettings: SettingsData = {

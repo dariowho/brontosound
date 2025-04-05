@@ -1,14 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, ManyToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, ManyToOne, JoinColumn } from "typeorm"
 import { User, UserCreatedEntity } from "./user"
 import { Contact } from "./contacts"
+import { Location } from "./location"
 
 @Entity()
 export class LiveVenue extends UserCreatedEntity {
     @Column({ type: 'varchar'})
     name: string
 
-    @OneToOne(() => LiveVenueAddress, liveVenueLocation => liveVenueLocation.venue, {nullable: true})
-    location?: LiveVenueAddress
+    @OneToOne(() => LiveVenueLocation, liveVenueLocation => liveVenueLocation.venue, {nullable: true, cascade: true, eager: true})
+    @JoinColumn()
+    location?: LiveVenueLocation
 
     @Column({ type: 'varchar', default: ""})
     note?: string
@@ -18,27 +20,9 @@ export class LiveVenue extends UserCreatedEntity {
 }
 
 @Entity()
-export class LiveVenueAddress {
-    @PrimaryGeneratedColumn()
-    id: number
-
+export class LiveVenueLocation extends Location {
     @OneToOne(() => LiveVenue, venue => venue.location)
     venue: LiveVenue
-
-    @Column({ type: 'varchar'})
-    street: string
-
-    @Column({ type: 'varchar'})
-    city: string
-
-    @Column({ type: 'varchar'})
-    state: string
-
-    @Column({ type: 'varchar'})
-    zip: string
-
-    @Column({ type: 'varchar'})
-    country: string
 }
 
 export enum LiveGigStatus {

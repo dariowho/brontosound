@@ -8,5 +8,6 @@ export default defineConfig({
 	},
 	ssr: {
 		external: ['reflect-metadata'],
-	}
+		// noExternal: ['google-maps']
+	},
 });
