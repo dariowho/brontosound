@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn, ViewColumn, ViewEntity } from "typeorm";
 
 export enum UserRole {
     VIEWER = 'viewer',
@@ -25,6 +25,9 @@ export class User {
     @Column({ type: 'varchar' })
     name: string;
 
+    @Column({ type: 'varchar', nullable: true, select: false })
+    passwordHash: string;
+
     @Column({ type: 'varchar', unique: true })
     email: string;
 
@@ -36,7 +39,7 @@ export abstract class UserCreatedEntity {
     @PrimaryGeneratedColumn()
     id: number
 
-    @ManyToOne(() => User, {nullable: true})
+    @ManyToOne(() => User, {nullable: true, cascade: true, eager: true})
     createdBy: User
 
     @ManyToOne(() => User, {nullable: true})

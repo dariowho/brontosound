@@ -1,6 +1,6 @@
 <script lang="ts">
   import PlaceholderBox from '$lib/components/PlaceholderBox.svelte';
-  import { LiveGig, LiveGigStatus, LiveVenue, LiveVenueLocation } from '$lib/dbEntities/live';
+  import { LIVE_GIG_STATUS_NAMES, LiveGig, LiveGigStatus, LiveVenue, LiveVenueLocation } from '$lib/dbEntities/live';
   import { Button, Heading, Input, Label, Select, Spinner, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Textarea, Toast } from 'flowbite-svelte';
   import type { ActionData } from "./$types.js";
     import { instanceToPlain } from 'class-transformer';
@@ -30,7 +30,7 @@
       id: venue.id,
       ...newProperties
     };
-    console.log('Updating venue:', updateVenue);
+    // console.log('Updating venue:', updatedVenue);
 
     let newVenue: LiveVenue = await saveEntityViaApi(LiveVenue, updatedVenue, '/api/live/venue');
     console.log('Updated venue:', newVenue);
@@ -66,15 +66,7 @@
     console.log('New gig', newGig);
   }
 
-  let newGigStatusValues = [
-    { value: LiveGigStatus.NEW, name: 'We are going to ask them 💪' },
-    { value: LiveGigStatus.WAITING_VENUE, name: 'Proposed, waiting for venue to reply' },
-    { value: LiveGigStatus.WAITING_BAND, name: 'Proposed, venue is waiting our reply' },
-    { value: LiveGigStatus.CONFIRMED, name: 'Confirmed' },
-    { value: LiveGigStatus.CANCELED, name: 'Canceled' },
-    { value: LiveGigStatus.WAITING_PAYMENT, name: 'Waiting for payment' },
-    { value: LiveGigStatus.COMPLETE, name: 'Complete' },
-  ]
+  
 </script>
   
 <!-- <div class="busyContainer">
@@ -122,7 +114,7 @@
       </div> -->
       <div>
         <Label for="gigStatus" class="mb-2">Status</Label>
-        <Select items={newGigStatusValues} bind:value={newGig.status} />
+        <Select items={LIVE_GIG_STATUS_NAMES} bind:value={newGig.status} />
         <!-- <Input type="text" id="gigStatus" placeholder="Doe" required /> -->
       </div>
     </div>

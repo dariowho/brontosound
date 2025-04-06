@@ -3,10 +3,12 @@ import { readFileSync } from 'fs';
 
 import { localDataRoot, settingsFilename } from "$lib/server/config";
 import { WebdavStorage, FilesystemStorage, type PersistedStorage } from './storage';
+import type { DeepPartial } from 'typeorm';
 
 export interface SettingsData {
     bandName: string;
     bandLogo?: string;
+    locale?: string;
     authorizedGoogleSSOUsers: string[];
     songsFolder?: string;
     webdavEnabled: boolean;
@@ -21,6 +23,7 @@ export interface SettingsData {
 
 export const defaultSettings: SettingsData = {
     bandName: "My Band",
+    locale: "it-IT",
     authorizedGoogleSSOUsers: [],
     songsFolder: "Songs",
     webdavEnabled: false,
@@ -74,5 +77,13 @@ export async function getUserStorage(): Promise<PersistedStorage> {
         );
     } else {
         return new FilesystemStorage("data/");
+    }
+}
+
+export function safeBandSettings(): DeepPartial<SettingsData> {
+    const bandSettings = readSettings();
+    return {
+        locale: bandSettings.locale,
+        googlemapsToken: bandSettings.googlemapsToken,
     }
 }

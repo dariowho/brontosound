@@ -7,7 +7,7 @@ import { instanceToPlain } from "class-transformer";
 export async function load({ params }: ServerLoadEvent) {
   let db = await TypeOrm.getDb()
   const [gig] = await Promise.all([
-    db.getRepository(LiveGig).findOne({where: {id: parseInt(params.gigId)}, relations: ["venue", "interactions"]}),
+    db.getRepository(LiveGig).findOne({where: {id: parseInt(params.gigId)}, relations: {"venue": true, "interactions": {"createdBy": true}}}),
   ]);
   // console.log("gig:", gig);
 

@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, ManyToOne,
 import { User, UserCreatedEntity } from "./user"
 import { Contact } from "./contacts"
 import { Location } from "./location"
+import type { CurrencyCode } from "$lib/currencyCodes"
 
 @Entity()
 export class LiveVenue extends UserCreatedEntity {
@@ -35,9 +36,19 @@ export enum LiveGigStatus {
     COMPLETE = 'COMPLETE',
 }
 
+export const LIVE_GIG_STATUS_NAMES = [
+    { value: LiveGigStatus.NEW, name: 'We are going to ask them 💪' },
+    { value: LiveGigStatus.WAITING_VENUE, name: 'Proposed, waiting for venue to reply' },
+    { value: LiveGigStatus.WAITING_BAND, name: 'Proposed, venue is waiting our reply' },
+    { value: LiveGigStatus.CONFIRMED, name: 'Confirmed' },
+    { value: LiveGigStatus.CANCELED, name: 'Canceled' },
+    { value: LiveGigStatus.WAITING_PAYMENT, name: 'Waiting for payment' },
+    { value: LiveGigStatus.COMPLETE, name: 'Complete' },
+  ]
+
 export interface MoneyAmount {
     amount: number,
-    currency: string,
+    currency: CurrencyCode,
 }
 
 @Entity()

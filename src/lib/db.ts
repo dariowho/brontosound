@@ -57,17 +57,16 @@ class TypeOrm {
       if (typeof entity === 'string') {
           entity = JSON.parse(entity);
       }
-      const [entityObject, db] = await Promise.all([
+      const [entityObject, entityRepository] = await Promise.all([
           await entity,
-          await TypeOrm.getDb(),
+          await TypeOrm.getRepository(entityCls),
       ]);
       if (overrideProperties) {
         Object.entries(overrideProperties).forEach(([key, value]) => {
           entityObject[key] = value;
         });
       }
-      const newEntity = plainToClass(entityCls, entityObject);
-      return db.manager.save(newEntity);
+      return entityRepository.save(entityObject as DeepPartial<Type>);
   }
 }
 export default TypeOrm;

@@ -1,9 +1,13 @@
 <script lang="ts">
+    import { page } from "$app/state";
     import { InteractionSender, type LiveGigInteraction } from "$lib/dbEntities/live";
     import { Card, Dropdown, DropdownItem } from "flowbite-svelte";
     import { DotsHorizontalOutline, StoreOutline, UserOutline } from "flowbite-svelte-icons";
 
     export let interaction: LiveGigInteraction;
+    export let locale: string;
+
+    let interactionDate = new Date(interaction.date)
 </script>
 
 <div class="interactionCard bandInteraction w-full pb-5">
@@ -27,7 +31,7 @@
                 </span>
             {/if}
         <span class="message">
-          <span class="date">{interaction.date}</span>
+          <span class="date">Posted by {interaction.createdBy.name}, interaction date: {interactionDate.toLocaleDateString(locale)}</span>
           {interaction.note}
         </span>
       </div>
