@@ -1,9 +1,9 @@
 <script lang="ts">
     import { saveEntityViaApi } from '$lib/db';
     import { LiveVenue } from '$lib/dbEntities/live';
+    import { buildVenueUrl } from '$lib/misc.js';
     import { Button, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Input, Spinner } from 'flowbite-svelte';
     import { CirclePlusOutline } from 'flowbite-svelte-icons';
-    import slugify from 'slugify';
     import type { DeepPartial } from 'typeorm';
 
     export let data;
@@ -12,11 +12,6 @@
 
     let busy = false;
     let newVenueName = '';
-
-    function buildVenueURL(venue) {
-      const slug = slugify(venue.name, { lower: true });
-      return `/app/live/venues/${venue.id}/${slug}`;
-    }
 
     async function addNewVenue() {
       busy = true;
@@ -68,7 +63,7 @@
           <Checkbox />
         </TableBodyCell> -->
         <TableBodyCell>
-          <a href="{buildVenueURL(venue)}">
+          <a href="{buildVenueUrl(venue)}">
             {venue.name}
           </a>
         </TableBodyCell>

@@ -10,6 +10,7 @@
     import { saveEntityViaApi } from '$lib/db.js';
     import type { Location } from '$lib/dbEntities/location';
     import GoogleMapAndSearch from '$lib/components/GoogleMapAndSearch.svelte';
+    import { buildGigUrl } from '$lib/misc.js';
   
   export let form: ActionData;
   export let data;
@@ -51,10 +52,6 @@
 
   let busy = false;
   let newGig: LiveGig = null;
-
-  function getGigUrl(gig: LiveGig) {
-    return `/app/live/venues/${venue.id}/${slugify(venue.name)}/gig/${gig.id}/${slugify(gig.name)}`;
-  }
 
   function startNewGig() {
     newGig = new LiveGig();
@@ -152,7 +149,7 @@
           <!-- <TableBodyCell class="!p-4">
             <Checkbox />
           </TableBodyCell> -->
-          <TableBodyCell><a href={getGigUrl(gig)}>{gig.name}</a></TableBodyCell>
+          <TableBodyCell><a href={buildGigUrl(gig, venue)}>{gig.name}</a></TableBodyCell>
           <TableBodyCell>{gig.status}</TableBodyCell>
           <TableBodyCell>{new Date(gig.creationDate).toLocaleDateString('it-IT')}</TableBodyCell>
           <TableBodyCell>{gig.note}</TableBodyCell>          

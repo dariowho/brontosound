@@ -36,15 +36,25 @@ export enum LiveGigStatus {
     COMPLETE = 'COMPLETE',
 }
 
+export const LIVE_GIG_STATUS_NAME_FROM_ENUM = {
+    [LiveGigStatus.NEW]: '💪 We are going to ask them',
+    [LiveGigStatus.WAITING_VENUE]: '⌛ Proposed, waiting for venue',
+    [LiveGigStatus.WAITING_BAND]: '❗ Proposed, waiting for us',
+    [LiveGigStatus.CONFIRMED]: '🤝🏻 Confirmed',
+    [LiveGigStatus.CANCELED]: '❌ Canceled',
+    [LiveGigStatus.WAITING_PAYMENT]: '🫰🏻 Waiting for payment',
+    [LiveGigStatus.COMPLETE]: '✅ Complete',
+}
+
 export const LIVE_GIG_STATUS_NAMES = [
-    { value: LiveGigStatus.NEW, name: 'We are going to ask them 💪' },
-    { value: LiveGigStatus.WAITING_VENUE, name: 'Proposed, waiting for venue to reply' },
-    { value: LiveGigStatus.WAITING_BAND, name: 'Proposed, venue is waiting our reply' },
-    { value: LiveGigStatus.CONFIRMED, name: 'Confirmed' },
-    { value: LiveGigStatus.CANCELED, name: 'Canceled' },
-    { value: LiveGigStatus.WAITING_PAYMENT, name: 'Waiting for payment' },
-    { value: LiveGigStatus.COMPLETE, name: 'Complete' },
-  ]
+    { value: LiveGigStatus.NEW, name: LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.NEW]},
+    { value: LiveGigStatus.WAITING_VENUE, name: LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.WAITING_VENUE]},
+    { value: LiveGigStatus.WAITING_BAND, name: LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.WAITING_BAND]},
+    { value: LiveGigStatus.CONFIRMED, name: LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.CONFIRMED]},
+    { value: LiveGigStatus.CANCELED, name: LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.CANCELED]},
+    { value: LiveGigStatus.WAITING_PAYMENT, name: LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.WAITING_PAYMENT]},
+    { value: LiveGigStatus.COMPLETE, name: LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.COMPLETE]},
+]
 
 export interface MoneyAmount {
     amount: number,
