@@ -169,7 +169,7 @@
     {:else}
         <PlaceholderBox>
             <Button href="{page.url.href}/readme/edit" disabled={syncing}>Add YouTube link</Button>
-            <p style="color: gray; font-size: 0.8em; font-style: italic; margin-top: 1em;">YouTube links are extracted from the song's README.md</p>
+            <p style="color: gray; font-size: 0.8em; font-style: italic; margin-top: 1em; text-align:center;">YouTube links are extracted from the song's README.md</p>
         </PlaceholderBox>
     {/if}
 </section>

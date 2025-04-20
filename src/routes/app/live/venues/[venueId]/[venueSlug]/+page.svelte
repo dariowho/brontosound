@@ -11,6 +11,7 @@
     import type { Location } from '$lib/dbEntities/location';
     import GoogleMapAndSearch from '$lib/components/GoogleMapAndSearch.svelte';
     import { buildGigUrl } from '$lib/misc.js';
+    import EditableTextBox from '$lib/components/EditableTextBox.svelte';
   
   export let form: ActionData;
   export let data;
@@ -50,6 +51,10 @@
     });
   }
 
+  async function handleSaveNote(value: string) {
+    return updateVenue({note: value})
+  }
+
   let busy = false;
   let newGig: LiveGig = null;
 
@@ -74,8 +79,9 @@
   {/if}
 </div> -->
 
-{#if googlemapsToken}
-  <div class="map mb-5" style="width:100%; height: 300px;">
+<div class="grid md:grid-cols-2 gap-2 mb-5" style="min-height:300px;">
+  {#if googlemapsToken}
+  <div class="map mb-5" style="width:100%; height: 100%; min-height:300px;">
      <GoogleMapAndSearch {googlemapsToken} {lat} {lng} handleUpdateLocation={updateVenueLocation} />
   </div>
   <!-- {#if ((lat && lng) || addingNewLocation)}
@@ -87,8 +93,12 @@
         <Button on:click={()=>{addingNewLocation = true}}>Add Location</Button>
     </PlaceholderBox>
   {/if} -->
+  {/if}
+  <div class="venueNote" style="min-height:200px;">
+    <EditableTextBox bind:content={venue.note} bind:editingDisabled={busy} handleSave={handleSaveNote} height="100%"/>
+  </div>
+</div>
 
-{/if}
 
 <Heading tag="h2" class="mb-3">Gigs</Heading>
 

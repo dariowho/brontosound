@@ -1,18 +1,14 @@
 <script lang="ts">
-  import PlaceholderBox from '$lib/components/PlaceholderBox.svelte';
   import { InteractionSender, LIVE_GIG_STATUS_NAMES, LiveGig, LiveGigInteraction, LiveGigStatus, LiveVenue } from '$lib/dbEntities/live';
-  import { A, Badge, Button, Card, Datepicker, Heading, Input, Label, Select, Spinner, Textarea, Toast, Toggle, Toolbar } from 'flowbite-svelte';
+  import { Button, Datepicker, Heading, Input, Label, Select, Spinner, Textarea, Toggle, Toolbar } from 'flowbite-svelte';
   import type { ActionData } from "./$types.js";
   import { instanceToPlain, plainToInstance } from 'class-transformer';
   import GigInteractionCard from './GigInteractionCard.svelte';
   import ToastMessages from '$lib/components/ToastMessages.svelte';
-  import Markdown from '@magidoc/plugin-svelte-marked';
-    import { page } from '$app/state';
-    import Fa from 'svelte-fa';
-    import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
-    import type { DeepPartial } from 'typeorm';
-    import { saveEntityViaApi } from '$lib/db.js';
-    import { CurrencyCode } from '$lib/currencyCodes.js';
+  import type { DeepPartial } from 'typeorm';
+  import { saveEntityViaApi } from '$lib/db.js';
+  import { CurrencyCode } from '$lib/currencyCodes.js';
+  import EditableTextBox from '$lib/components/EditableTextBox.svelte';
 
   export let form: ActionData;
 
@@ -21,7 +17,6 @@
   // console.log('Gig', gig);
 
   let busy = false;
-  let editingNotes = false;
 
   let newInteractionFromToggle = false;
   let newInteraction: LiveGigInteraction = new LiveGigInteraction();
@@ -45,14 +40,16 @@
     busy = false;
   }
 
+  async function handleSaveNote(value: string) {
+    return updateGig({note: value})
+  }
+
   function handleEscape(event) {
 		if (event.key === 'Escape') {
-      console.log(event);
+      console.log("handleEscape:", event);
       if (event.target.id == "proposedCachet") {
         event.target.value = (gig.proposedCachet) ? gig.proposedCachet.amount : null;
         event.target.blur();
-      } else if (event.target.id == "gigNoteTextarea") {
-        editingNotes = false;
       } else {
         console.error("Invalid id for escape handler:", event.target.id)
       }
@@ -86,51 +83,7 @@
     </div>
   </div>
 
-  {#if gig.note || editingNotes}
-    <div class="gigNotes">
-      {#if editingNotes}
-        <Textarea id="gigNoteTextarea" style="min-height:10rem" value={gig.note} disabled={busy} on:keydown={handleEscape} on:blur={async (e) => {
-          const value =  (e.target as HTMLTextAreaElement).value;
-          await updateGig({note: value});
-          editingNotes = false;
-        }}/>
-      {:else}
-        <div class="gigNotesMarkdown p-2 rounded-md">
-          <div class="sectionButtons">
-            <Button class="!p-2 mb-2" on:click={() => editingNotes = true} disabled={busy}><Fa icon={faPenToSquare} size="lg" /></Button>
-          </div>
-          <Markdown source={gig.note} />
-        </div>
-      {/if}
-
-      <!-- <div
-        class="gigNotesMarkdown p-2 rounded-md" class:editing={editingNotes} class:bg-gray-50={editingNotes}
-        contenteditable={editingNotes && ! busy} on:blur={
-          async (e) => {
-            const target = e.target as HTMLDivElement
-            const value = target.innerText;
-            await updateGig({note: value});
-            editingNotes = false;
-          }}
-        >
-        <div class="sectionButtons">
-          <Button class="!p-2 mb-2" on:click={() => editingNotes = true} disabled={busy}><Fa icon={faPenToSquare} size="lg" /></Button>
-        </div>
-        {#if editingNotes}
-          TEXT
-          {gig.note}
-        {:else}
-          MARKDOWN
-          <Markdown source={gig.note} />
-        {/if}
-      </div> -->
-      
-    </div>
-  {:else}
-    <PlaceholderBox>
-      <Button disabled={busy} on:click={() => {editingNotes = true}}>Add Gig notes</Button>
-    </PlaceholderBox>
-  {/if}
+  <EditableTextBox bind:content={gig.note} bind:editingDisabled={busy} handleSave={handleSaveNote} />
 
   
   
@@ -172,21 +125,8 @@
 <ToastMessages form={form} />
 
 <style>
-  .gigNotesMarkdown {
-    border: 1px solid lightgray;
-    min-height: 5rem;
-  }
-
-  .sectionButtons {
-    float: right;
-  }
-
   .interactionCards {
       width: 100%;
       text-align: center;
   }
-
-  /* .editing {
-    font-family: monospace;
-  } */
 </style>
