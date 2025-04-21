@@ -2,7 +2,7 @@ import "reflect-metadata"
 import { DataSource, Repository, type DeepPartial, type EntityTarget } from "typeorm"
 import { Song, SongTag } from "$lib/dbEntities/song"
 import { StoredDirectory, StoredFile, StoredObject } from "./dbEntities/storage";
-import { LiveGig, LiveGigInteraction, LiveVenue, LiveVenueLocation } from "./dbEntities/live";
+import { LiveGig, LiveGigInteraction, LiveVenue, LiveVenueLink, LiveVenueLocation } from "./dbEntities/live";
 import { User, UserCreatedEntity } from "./dbEntities/user";
 import { Contact } from "./dbEntities/contacts";
 import { instanceToPlain, plainToClass, type ClassConstructor } from "class-transformer";
@@ -29,6 +29,7 @@ class TypeOrm {
             Contact,
             LiveVenue,
             LiveVenueLocation,
+            LiveVenueLink,
             LiveGig,
             LiveGigInteraction,
           ],

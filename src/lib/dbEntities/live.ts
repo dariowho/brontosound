@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, ManyToOne, JoinColumn } from "typeorm"
 import { User, UserCreatedEntity } from "./user"
 import { Contact } from "./contacts"
-import { Location } from "./location"
+import { Location, LocationLink } from "./location"
 import type { CurrencyCode } from "$lib/currencyCodes"
 
 @Entity()
@@ -16,8 +16,29 @@ export class LiveVenue extends UserCreatedEntity {
     @Column({ type: 'varchar', default: ""})
     note?: string
 
+    @OneToMany(() => LiveVenueLink, link => link.venue, {cascade: true, eager: true})
+    links?: LiveVenueLink[]
+
     @OneToMany(() => LiveGig, gig => gig.venue)
     gigs?: LiveGig[]
+}
+
+export enum LiveVenueLinkSource {
+    MANUAL = 'MANUAL',
+    README = 'README',
+    GOOGLE_MAPS = 'GOOGLE_MAPS',
+}
+
+@Entity()
+export class LiveVenueLink extends LocationLink {
+    @Column({type: 'boolean', default: false})
+    hidden?: boolean = false
+
+    @Column({ type: 'simple-enum', enum: LiveVenueLinkSource})
+    source: LiveVenueLinkSource
+
+    @ManyToOne(() => LiveVenue, venue => venue.gigs)
+    venue: LiveVenue
 }
 
 @Entity()

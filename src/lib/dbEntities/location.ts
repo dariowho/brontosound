@@ -1,4 +1,5 @@
 import { Column, PrimaryGeneratedColumn } from "typeorm"
+import { UserCreatedEntity } from "./user"
 
 export class Location {
     @PrimaryGeneratedColumn()
@@ -33,6 +34,30 @@ export class Location {
 
     @Column({ type: 'varchar', nullable: true})
     country: string
+}
+
+export enum LocationLinkType {
+    GOOGLE_MAPS_URL = 'GOOGLE_MAPS_URL',
+    WEBSITE = 'WEBSITE',
+    FACEBOOK = 'FACEBOOK',
+    INSTAGRAM = 'INSTAGRAM',
+    YOUTUBE = 'YOUTUBE',
+    PHONE_NUMBER = 'PHONE_NUMBER',
+    EMAIL = 'EMAIL',
+}
+
+export class LocationLink extends UserCreatedEntity{
+    @Column({ type: 'simple-enum', enum: LocationLinkType})
+    type: LocationLinkType
+
+    @Column({ type: 'varchar', nullable: true})
+    customLabel?: string = null
+
+    @Column({ type: 'varchar'})
+    value: string
+
+    @Column({ type: 'varchar', nullable: true})
+    note?: string = null
 }
 
 type GoogleAddressComponent = {

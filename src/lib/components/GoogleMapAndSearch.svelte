@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { parseGooglemapsPlace } from "$lib/dbEntities/location";
+    import { LocationLink, LocationLinkType, parseGooglemapsPlace } from "$lib/dbEntities/location";
     import { Button } from "flowbite-svelte";
     import { GoogleSdk } from '@beyonk/svelte-googlemaps'
     import { onMount } from "svelte";
+    import type { DeepPartial } from "typeorm";
 
     export let googlemapsToken: string;
     export let lat: number, lng: number;
@@ -135,15 +136,35 @@
             throw Error("Save action called but no place is selected. newPlace:", newPlace);
         }
 
+        // console.debug("handleSave:", newPlace);
         const newLocation = parseGooglemapsPlace(newPlace);
+        const locationLinks = locationLinksFromPlace(newPlace);
+        // console.log("handleSave, links:", locationLinks);
 
         console.log("Saving location:", newLocation);
 
-        const result = await handleUpdateLocation(newLocation);
+        const result = await handleUpdateLocation(newLocation, locationLinks);
         lat = newLocation.latitude;
         lng = newLocation.longitude;
         newPlace = null;
         return result
+    }
+
+    function locationLinksFromPlace(place) : DeepPartial<LocationLink>[] {
+        if (! place) {
+            throw Error("linksFromPlace called but no place is selected. place:", place);
+        }
+        const links: DeepPartial<LocationLink>[] = [];
+        if (place.url) {
+            links.push({type: LocationLinkType.GOOGLE_MAPS_URL, value: place.url});
+        }
+        if (place.website) {
+            links.push({type: LocationLinkType.WEBSITE, value: place.website});
+        }
+        if (place.international_phone_number) {
+            links.push({type: LocationLinkType.PHONE_NUMBER, value: place.international_phone_number});
+        }
+        return links;
     }
 </script>
 
@@ -203,6 +224,10 @@
 
     .search {
         margin: 1rem;
+        pointer-events: none;
+    }
+
+    .search input {
         pointer-events: all;
     }
 

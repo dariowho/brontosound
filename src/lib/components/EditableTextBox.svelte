@@ -32,7 +32,9 @@
           <div class="sectionButtons">
             <Button class="!p-2 mb-2" on:click={() => isEditing = true} disabled={editingDisabled}><Fa icon={faPenToSquare} size="lg" /></Button>
           </div>
-          <Markdown source={content} />
+          <div class="markdown">
+            <Markdown source={content} />
+          </div>
         </div>
       {/if}
 

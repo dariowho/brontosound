@@ -1,17 +1,18 @@
 <script lang="ts">
   import PlaceholderBox from '$lib/components/PlaceholderBox.svelte';
-  import { LIVE_GIG_STATUS_NAMES, LiveGig, LiveGigStatus, LiveVenue, LiveVenueLocation } from '$lib/dbEntities/live';
-  import { Button, Heading, Input, Label, Select, Spinner, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Textarea, Toast } from 'flowbite-svelte';
+  import { LIVE_GIG_STATUS_NAME_FROM_ENUM, LIVE_GIG_STATUS_NAMES, LiveGig, LiveGigStatus, LiveVenue, LiveVenueLink, LiveVenueLinkSource, LiveVenueLocation } from '$lib/dbEntities/live';
+  import { Badge, Button, Heading, Input, Label, Select, Spinner, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Textarea, Toast } from 'flowbite-svelte';
   import type { ActionData } from "./$types.js";
     import { instanceToPlain } from 'class-transformer';
     import slugify from 'slugify';
     import ToastMessages from '$lib/components/ToastMessages.svelte';
     import type { DeepPartial } from 'typeorm';
     import { saveEntityViaApi } from '$lib/db.js';
-    import type { Location } from '$lib/dbEntities/location';
+    import { LocationLinkType, type Location, type LocationLink } from '$lib/dbEntities/location';
     import GoogleMapAndSearch from '$lib/components/GoogleMapAndSearch.svelte';
     import { buildGigUrl } from '$lib/misc.js';
     import EditableTextBox from '$lib/components/EditableTextBox.svelte';
+    import { GlobeOutline, LinkOutline, MapPinOutline, PhoneOutline, ProfileCardOutline } from 'flowbite-svelte-icons';
   
   export let form: ActionData;
   export let data;
@@ -25,6 +26,64 @@
   let addingNewLocation = false;
   // $: if (venue.location) { [lat, lng] = [venue.location.latitude, venue.location.longitude] }
 
+  let venueLinkProperies = []
+  $: venueLinkProperies = venue.links.map(link => {
+    return getLinkProperties(link);
+  });
+
+  function getLinkProperties(link: LiveVenueLink) {
+    let result = {};
+    if (link.type === LocationLinkType.WEBSITE) {
+      result = {
+        id: link.id,
+        icon: GlobeOutline,
+        text: link.value,
+        href: link.value
+      };
+    } else if (link.type === LocationLinkType.PHONE_NUMBER) {
+      result = {
+        id: link.id,
+        icon: PhoneOutline,
+        text: link.value,
+        href: `tel:${link.value}`,
+      };
+    } else if (link.type === LocationLinkType.EMAIL) {
+      result = {
+        type: LocationLinkType.EMAIL,
+        text: link.value,
+        href: `mailto:${link.value}`,
+      };
+    } else if (link.type === LocationLinkType.INSTAGRAM) {
+      result = {
+        id: link.id,
+        icon: ProfileCardOutline,
+        href: `https://instagram.com/${link.value}`,
+        text: `@${link.value}`,
+      };
+    } else if (link.type === LocationLinkType.FACEBOOK) {
+      result = {
+        id: link.id,
+        icon: ProfileCardOutline,
+        href: `https://facebook.com/${link.value}`,
+        text: `@${link.value}`,
+      };
+    } else if (link.type === LocationLinkType.GOOGLE_MAPS_URL) {
+      result = {
+        id: link.id,
+        icon: MapPinOutline,
+        href: link.value,
+        text: "Google Maps",
+      };
+    } else {
+      result = {
+        id: link.id,
+        icon: LinkOutline,
+        href: null,
+        text: link.value,
+      };
+    }
+    return result;
+  }
 
   async function updateVenue(newProperties:DeepPartial<LiveVenue>) {
     busy = true;
@@ -40,13 +99,36 @@
     busy = false;
   }
 
-  async function updateVenueLocation(newLocation: Location) {
+  function mergeLocationLinks(locationLinks: LocationLink[]) : Partial<LiveVenueLink>[] {
+    if (! venue.links) {
+      venue.links = [];
+    }
+    let newLinks: Partial<LiveVenueLink>[] = structuredClone(venue.links).filter(link => link.source !== LiveVenueLinkSource.GOOGLE_MAPS);
+    for (let i = 0; i < locationLinks.length; i++) {
+      let newLink = {
+        id: locationLinks[i].id,
+        type: locationLinks[i].type,
+        value: locationLinks[i].value,
+        source: LiveVenueLinkSource.GOOGLE_MAPS,
+        venue: venue
+      };
+      
+      if (!newLinks.some(link => {link.value === newLink.value || link.type === newLink.type})) {
+        newLinks.push(newLink);
+      }
+    }
+    console.log('Merged links:', newLinks);
+    return newLinks;
+  }
+
+  async function updateVenueLocation(newLocation: Location, newLocationLinks: LocationLink[]) {
     // let newVenueLocation = {...newLocation, venue: venue};
     if (venue.location) {
       newLocation.id = venue.location.id;
     }
     return updateVenue({
-      location: newLocation
+      location: newLocation,
+      links: mergeLocationLinks(newLocationLinks),
       // location: newVenueLocation
     });
   }
@@ -99,6 +181,18 @@
   </div>
 </div>
 
+<div class="venueLinks mb-5">
+  {#each venueLinkProperies as link}
+  <Badge
+    dismissable on:close={() => updateVenue({links: venue.links.filter(l => l.id !== link.id)})}
+    href={link.href}
+    class="mb-2 mr-2 h-8" border
+  >
+    <link.icon style="display:inline"/>
+    {link.text}
+  </Badge>
+  {/each}
+</div>
 
 <Heading tag="h2" class="mb-3">Gigs</Heading>
 
@@ -160,7 +254,7 @@
             <Checkbox />
           </TableBodyCell> -->
           <TableBodyCell><a href={buildGigUrl(gig, venue)}>{gig.name}</a></TableBodyCell>
-          <TableBodyCell>{gig.status}</TableBodyCell>
+          <TableBodyCell>{LIVE_GIG_STATUS_NAME_FROM_ENUM[gig.status]}</TableBodyCell>
           <TableBodyCell>{new Date(gig.creationDate).toLocaleDateString('it-IT')}</TableBodyCell>
           <TableBodyCell>{gig.note}</TableBodyCell>          
           <!-- <TableBodyCell>
