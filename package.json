@@ -1,9 +1,13 @@
 {
   "name": "brontosound",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dariowho/brontosound.git"
+  },
   "scripts": {
-    "dev": "vite dev",
+    "dev": "NODE_OPTIONS=--no-network-family-autoselection vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
@@ -11,7 +15,10 @@
     "test": "npm run test:integration && npm run test:unit",
     "lint": "eslint .",
     "test:integration": "playwright test",
-    "test:unit": "vitest"
+    "test:unit": "vitest",
+    "release": "standard-version",
+    "release:dry": "standard-version --dry-run",
+    "update-version-file": "node scripts/update-version.js"
   },
   "devDependencies": {
     "@magidoc/plugin-svelte-marked": "^4.0.0",
@@ -28,6 +35,7 @@
     "marked": "^6.0.0",
     "postcss": "^8.4.24",
     "postcss-load-config": "^4.0.1",
+    "standard-version": "^9.5.0",
     "svelte": "^5.0.0",
     "svelte-check": "^4.1.4",
     "tailwindcss": "^3.3.2",
@@ -56,5 +64,65 @@
     "tailwind-merge": "^1.14.0",
     "typeorm": "^0.3.20",
     "webdav": "^5.8.0"
+  },
+  "standard-version": {
+    "bumpFiles": [
+      "package.json",
+      "package-lock.json",
+      {
+        "filename": "src/lib/version.json",
+        "type": "json"
+      }
+    ],
+    "scripts": {
+      "precommit": "node scripts/update-version.js && git add src/lib/version.json"
+    },
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "refactor",
+        "section": "Refactors"
+      },
+      {
+        "type": "perf",
+        "section": "Performance"
+      },
+      {
+        "type": "revert",
+        "section": "Reverts"
+      },
+      {
+        "type": "docs",
+        "section": "Documentation",
+        "hidden": true
+      },
+      {
+        "type": "style",
+        "hidden": true
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      },
+      {
+        "type": "test",
+        "hidden": true
+      },
+      {
+        "type": "build",
+        "hidden": true
+      },
+      {
+        "type": "ci",
+        "hidden": true
+      }
+    ]
   }
 }

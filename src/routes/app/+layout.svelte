@@ -4,6 +4,7 @@
     import { page } from '$app/stores';
     import ResponsiveSidebar from './ResponsiveSidebar.svelte';
     import BrontoHeader from '../BrontoHeader.svelte';
+    import versionInfo from '$lib/version.json';
 
     let isMobile: boolean;
     let sidebarComponent;
@@ -42,6 +43,7 @@
 <div id="footerContainer">
 <Footer >
     <FooterCopyright href="/" by="Brontosauri Dischi" year={2023} />
+    <span class="text-sm text-gray-500 dark:text-gray-400" title="Released on {versionInfo.releaseDate}">v{versionInfo.version}</span>
     <FooterLinkGroup ulClass="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
         <FooterLink href="/">About</FooterLink>
         <FooterLink href="/">Privacy Policy</FooterLink>

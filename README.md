@@ -25,6 +25,15 @@ You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
 
+## Releasing
+
+```bash
+npm run release
+git push --follow-tags origin main
+```
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/). Details: [docs/releasing.md](docs/releasing.md).
+
 ## Docker build
 
 First build with `npm run build`
