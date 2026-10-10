@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Accordion, AccordionItem, Button, FloatingLabelInput, Toggle } from "flowbite-svelte";
+    import { Accordion, AccordionItem, Input, Label, Toggle } from "flowbite-svelte";
     import UsersSettings from "./UsersSettings.svelte";
     import type { PageData } from "./$types";
 
@@ -15,24 +15,19 @@
         </AccordionItem>
     {/if}
 
-    <AccordionItem>
-        <span slot="header">Band</span>
-        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text" >Band Name</FloatingLabelInput>
-    </AccordionItem>
-
-    <AccordionItem>
-        <span slot="header">Nextcloud Integration</span>
-        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text">Host</FloatingLabelInput>
-        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text">Username</FloatingLabelInput>
-        <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text">Password</FloatingLabelInput>
-    </AccordionItem>
-
-    <AccordionItem>
-        <span slot="header">YouTube Integration</span>
-        <form action="?/yt" method="post" class="mt-8 space-y-6">
-            <Toggle checked={true}>Use Invidious</Toggle>
-            <FloatingLabelInput id="ytInvidiousServer" name="ytInvidiousServer" type="text">Invidious Server</FloatingLabelInput>
-            <Button>Save</Button>
-        </form>
-    </AccordionItem>
+    {#each data.settings as section}
+        <AccordionItem>
+            <span slot="header">{section.title}</span>
+            <div class="space-y-4">
+                {#each Object.entries(section.entries) as [label, value]}
+                    {#if typeof value === 'boolean'}
+                        <Toggle checked={value} disabled>{label}</Toggle>
+                    {:else}
+                        <Label>{label}<Input class="mt-1" value={value ?? ''} disabled /></Label>
+                    {/if}
+                {/each}
+            </div>
+            <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">Read-only. Edit <code>data/{data.settingsFilename}</code> and restart the app.</p>
+        </AccordionItem>
+    {/each}
 </Accordion>
