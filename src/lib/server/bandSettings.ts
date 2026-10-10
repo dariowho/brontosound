@@ -10,6 +10,7 @@ export interface SettingsData {
     bandLogo?: string;
     locale?: string;
     authorizedGoogleSSOUsers: string[];
+    adminPasswordHash?: string; // required, checked at startup; generate with `npm run hash-password`
     songsFolder?: string;
     webdavEnabled: boolean;
     webdavServer: string;

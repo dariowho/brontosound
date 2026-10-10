@@ -22,7 +22,7 @@
 
 	} from 'flowbite-svelte';
 	import { sineIn } from 'svelte/easing';
-    import { faHeartPulse, faHome, faMusic } from '@fortawesome/free-solid-svg-icons';
+    import { faGears, faHeartPulse, faHome, faMusic } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
 
 	let transitionParams = {
@@ -71,6 +71,7 @@
         {name: "Home", path: "/app", icon: faHome},
         {name: "Songbook", path: "/app/songbook", icon: faMusic},
         {name: "Live", path: "/app/live", icon: faHeartPulse},
+        {name: "Settings", path: "/app/settings", icon: faGears},
     ]
 </script>
 

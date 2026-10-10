@@ -13,6 +13,14 @@ npm run dev
 npm run dev -- --open
 ```
 
+## Admin password
+
+The built-in `admin` user's password hash must be set as `adminPasswordHash` in `data/bandSettings.json`. Generate it with (then restart the server):
+
+```bash
+npm run -s hash-password
+```
+
 ## Building
 
 To create a production version of Brontosound:

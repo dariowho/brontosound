@@ -1,9 +1,20 @@
 <script lang="ts">
     import { Accordion, AccordionItem, Button, FloatingLabelInput, Toggle } from "flowbite-svelte";
+    import UsersSettings from "./UsersSettings.svelte";
+    import type { PageData } from "./$types";
+
+    export let data: PageData;
 </script>
 
 
 <Accordion>
+    {#if data.users}
+        <AccordionItem>
+            <span slot="header">Users</span>
+            <UsersSettings users={data.users} currentUserId={data.brontoSession.user.id} />
+        </AccordionItem>
+    {/if}
+
     <AccordionItem>
         <span slot="header">Band</span>
         <FloatingLabelInput style="outlined" id="floating_outlined" name="floating_outlined" type="text" >Band Name</FloatingLabelInput>

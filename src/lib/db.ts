@@ -3,7 +3,7 @@ import { DataSource, Repository, type DeepPartial, type EntityTarget } from "typ
 import { Song, SongTag } from "$lib/dbEntities/song"
 import { StoredDirectory, StoredFile, StoredObject } from "./dbEntities/storage";
 import { LiveGig, LiveGigInteraction, LiveVenue, LiveVenueLink, LiveVenueLocation } from "./dbEntities/live";
-import { User, UserCreatedEntity } from "./dbEntities/user";
+import { User, UserAccount, UserCreatedEntity } from "./dbEntities/user";
 import { Contact } from "./dbEntities/contacts";
 import { instanceToPlain, plainToClass, type ClassConstructor } from "class-transformer";
 
@@ -21,6 +21,7 @@ class TypeOrm {
           database: "data/database/database.sqlite", // TODO: use a config file
           entities: [
             User,
+            UserAccount,
             Song,
             SongTag,
             StoredObject,

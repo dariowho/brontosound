@@ -34,7 +34,7 @@
   </div>
   <div class="flex md:order-2">
     {#if page.data.brontoSession}
-      <Avatar href="/signin" size="sm" src={page.data.brontoSession.auth?.user.image} />
+      <Avatar href="/app/profile" size="sm" src={page.data.brontoSession.auth?.user.image} />
     {:else}
       <Button size="sm" href="/signin">Sign in</Button>
     {/if}
