@@ -1,4 +1,4 @@
-import type { Handle, ServerInit } from "@sveltejs/kit";
+import type { Handle, HandleServerError, ServerInit } from "@sveltejs/kit";
 import { handle as authenticationHandle } from "./auth"
 import { sequence } from "@sveltejs/kit/hooks";
 import type { BrontoSession } from "$lib/server/session";
@@ -50,5 +50,12 @@ export const authorizationHandle: Handle = async ({ event, resolve }) => {
 
     return resolve(event)
 };
+
+// Send the actual error message to API clients, so the UI can display it
+export const handleError: HandleServerError = ({ error, event }) => {
+    console.error(error);
+    if (event.url.pathname.startsWith('/api'))
+        return { message: error instanceof Error ? error.message : String(error) };
+}
 
 export const handle: Handle = sequence(debugHandle, authenticationHandle, authorizationHandle)

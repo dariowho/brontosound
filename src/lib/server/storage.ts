@@ -13,6 +13,7 @@ export interface PersistedStorage {
     writeJSONFile(content: any, filePath: string): Promise<void>;
 
     storedDirectory(dirPath: string): Promise<StoredDirectory>;
+    createDirectory(dirPath: string): Promise<void>;
     listSubfolders(...pathSegments: string[]): Promise<StoredDirectory[]>;
 }
 
@@ -68,6 +69,10 @@ export class FilesystemStorage implements PersistedStorage {
         r.customProperties = null;
         r.lastVisited = new Date();
         return r;
+    }
+
+    async createDirectory(dirPath: string): Promise<void> {
+        fs.mkdirSync(path.join(this.basePath, dirPath), { recursive: true });
     }
 
     async listSubfolders(...pathSegments: string[]): Promise<StoredDirectory[]> {
@@ -164,6 +169,10 @@ export class WebdavStorage implements PersistedStorage {
         r.customProperties = null;
         r.lastVisited = new Date();
         return r;
+    }
+
+    async createDirectory(dirPath: string): Promise<void> {
+        await this.client.createDirectory(dirPath, {recursive: true});
     }
 
     async listSubfoldersWithMetadata(...pathSegments: string[]): Promise<StoredDirectory[]> {

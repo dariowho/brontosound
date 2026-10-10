@@ -20,6 +20,7 @@ export async function syncFolder(path: string): Promise<StoredDirectory[]> {
 
 export async function syncSongsFolder() {
     const bandSettings = await readSettings();
+    await (await getUserStorage()).createDirectory(bandSettings.songsFolder);
     return await syncFolder(bandSettings.songsFolder);
 }
 

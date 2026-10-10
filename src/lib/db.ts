@@ -75,18 +75,18 @@ export default TypeOrm;
 
 export async function saveEntityViaApi<Type>(entityCls: ClassConstructor<Type>, entityObject: Type | DeepPartial<UserCreatedEntity>, endpoint: string): Promise<Type> {
   const body = entityObject instanceof entityCls ? instanceToPlain(entityObject) : entityObject;
-  const res = await fetch(endpoint, {
+  const jsonResponse = await fetchApi(endpoint, {
     method: 'POST',
     body: JSON.stringify(body),
   });
-  
-  if (!res.ok) {
-    // TODO: test
-    console.error("Failed to save entity:", res);
-    throw new Error("Failed to save entity: " + res.statusText);
-  }
+  return plainToClass(entityCls, jsonResponse) as Type;
+}
 
-  const jsonResponse = await res.json();
-  let result = plainToClass(entityCls, jsonResponse) as Type;
-  return result;
+/** Client-side fetch of an /api endpoint: returns the parsed JSON, throws with the server's error message */
+export async function fetchApi(input: RequestInfo, init?: RequestInit): Promise<any> {
+  const res = await fetch(input, init);
+  const body = await res.json().catch(() => null);
+  if (!res.ok)
+    throw new Error(body?.message ?? res.statusText);
+  return body;
 }
