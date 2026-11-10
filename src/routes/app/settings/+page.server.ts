@@ -10,7 +10,7 @@ export const load = (async ({ locals }) => {
     // Read-only; secrets (passwords, tokens) are never sent.
     const settings = [
         { title: "Band", entries: { "Band name": s.bandName, "Locale": s.locale } },
-        { title: "Nextcloud (WebDAV)", entries: {
+        { title: "WebDAV", entries: {
             "Enabled": s.webdavEnabled,
             "Server": s.webdavServer,
             "Username": s.webdavUsername,

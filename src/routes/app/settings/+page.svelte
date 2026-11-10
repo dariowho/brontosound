@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Accordion, AccordionItem, Input, Label, Toggle } from "flowbite-svelte";
     import UsersSettings from "./UsersSettings.svelte";
+    import TestStorage from "./TestStorage.svelte";
     import type { PageData } from "./$types";
 
     export let data: PageData;
@@ -27,6 +28,9 @@
                     {/if}
                 {/each}
             </div>
+            {#if section.title === "WebDAV"}
+                <TestStorage />
+            {/if}
             <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">Read-only. Edit <code>data/{data.settingsFilename}</code> and restart the app.</p>
         </AccordionItem>
     {/each}

@@ -11,6 +11,7 @@ export interface PersistedStorage {
     writeTextFile(content: string, filePath: string): Promise<StoredFile>;
     readJsonFileContent(...pathSegments: string[]): Promise<any>;
     writeJSONFile(content: any, filePath: string): Promise<void>;
+    deleteFile(filePath: string): Promise<void>;
 
     storedDirectory(dirPath: string): Promise<StoredDirectory>;
     createDirectory(dirPath: string): Promise<void>;
@@ -57,6 +58,10 @@ export class FilesystemStorage implements PersistedStorage {
 
     async readJsonFileContent(...pathSegments: string[]): Promise<any> {
         return JSON.parse(await this.readTextFileContent(...pathSegments));
+    }
+
+    async deleteFile(filePath: string): Promise<void> {
+        fs.rmSync(path.join(this.basePath, filePath));
     }
 
     async storedDirectory(dirPath: string): Promise<StoredDirectory> {
@@ -147,6 +152,10 @@ export class WebdavStorage implements PersistedStorage {
             throw new FileAccessError("WebDAV 'putFileContents' call failed for path: " + filePath);
 
         return makeStoredFileObject(filePath, content, new Date());
+    }
+
+    async deleteFile(filePath: string): Promise<void> {
+        await this.client.deleteFile(filePath);
     }
 
     async readJsonFileContent(...pathSegments: string[]): Promise<any> {
