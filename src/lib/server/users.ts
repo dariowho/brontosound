@@ -51,7 +51,8 @@ let dummyHash: Promise<string> | null = null;
 
 // Brute-force guard: at most MAX_LOGIN_ATTEMPTS per key per window, reset on success. Sign-in keys include the
 // client address, so nobody can lock out a known login (like `admin`) for everyone
-const MAX_LOGIN_ATTEMPTS = 10, LOGIN_WINDOW_MS = 15 * 60 * 1000;
+export const MAX_LOGIN_ATTEMPTS = 10;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const loginAttempts = new Map<string, { count: number, windowStart: number }>();
 
 function clientAddress(): string {
@@ -62,7 +63,7 @@ function clientAddress(): string {
     }
 }
 
-function countLoginAttempt(key: string): number {
+export function countLoginAttempt(key: string): number {
     const now = Date.now();
     if (loginAttempts.size > 10_000) {
         loginAttempts.forEach((entry, key) => now - entry.windowStart > LOGIN_WINDOW_MS && loginAttempts.delete(key));

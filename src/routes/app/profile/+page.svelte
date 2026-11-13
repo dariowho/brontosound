@@ -2,6 +2,7 @@
     import { enhance } from "$app/forms";
     import { Alert, Button, Heading, Input, Label, P } from "flowbite-svelte";
     import SignOut from "../../signin/SignOut.svelte";
+    import BacklineLinks from "./BacklineLinks.svelte";
     import type { ActionData, PageData } from "./$types";
 
     export let data: PageData;
@@ -52,6 +53,8 @@
             </form>
         {/if}
     </section>
+
+    <BacklineLinks links={data.backlineLinks} />
 
     <SignOut options={{ redirectTo: '/signin' }} />
 </div>

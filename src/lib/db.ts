@@ -5,6 +5,7 @@ import { StoredDirectory, StoredFile, StoredObject } from "./dbEntities/storage"
 import { LiveGig, LiveGigInteraction, LiveVenue, LiveVenueLink, LiveVenueLocation } from "./dbEntities/live";
 import { User, UserAccount, UserCreatedEntity } from "./dbEntities/user";
 import { Contact } from "./dbEntities/contacts";
+import { BacklineLink } from "./dbEntities/backline";
 import { instanceToPlain, plainToClass, type ClassConstructor } from "class-transformer";
 
 class TypeOrm {
@@ -33,6 +34,7 @@ class TypeOrm {
             LiveVenueLink,
             LiveGig,
             LiveGigInteraction,
+            BacklineLink,
           ],
           synchronize: true,
           logging: false,

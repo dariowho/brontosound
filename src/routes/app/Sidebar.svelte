@@ -3,7 +3,7 @@
     import { Sidebar, SidebarWrapper, SidebarBrand, SidebarItem, SidebarGroup } from 'flowbite-svelte';
     import { Fa } from "svelte-fa";
   
-    import { faMusic, faUsers, faHeartPulse, faChartLine, faGears, faArrowRightFromBracket, faDrum } from '@fortawesome/free-solid-svg-icons'
+    import { faMusic, faUsers, faHeartPulse, faChartLine, faGears, faArrowRightFromBracket, faDrum, faTowerBroadcast } from '@fortawesome/free-solid-svg-icons'
     import { faNewspaper, faFileLines } from '@fortawesome/free-regular-svg-icons'
     
     let spanClass = 'flex-1 ml-3 whitespace-nowrap';
@@ -65,6 +65,11 @@
             <SidebarItem label="Live" href="/app/live" {spanClass} active={activeUrl === '/app/live'}>
                 <svelte:fragment slot="icon">
                     <span class="sidebarIcon"><Fa icon={faHeartPulse} /></span>
+                </svelte:fragment>
+            </SidebarItem>
+            <SidebarItem label="Backline" href="/backline" {spanClass}>
+                <svelte:fragment slot="icon">
+                    <span class="sidebarIcon"><Fa icon={faTowerBroadcast} /></span>
                 </svelte:fragment>
             </SidebarItem>
             <SidebarItem label="Public site" {spanClass} active={activeUrl === '/app/site'}>

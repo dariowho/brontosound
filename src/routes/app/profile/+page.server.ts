@@ -1,5 +1,6 @@
 import { changePassword, verifyCurrentPassword, getProfile, TooManyLoginAttempts, updateName } from '$lib/server/users';
 import { passwordProblem } from '$lib/server/password';
+import { listLinks, removeLink } from '$lib/server/backline/links';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -8,6 +9,7 @@ export const load = (async ({ locals }) => {
         pageTitle: "Profile",
         breadcrumb: [{title: "Profile"}],
         profile: await getProfile(locals.brontoSession!.user.id),
+        backlineLinks: await listLinks(locals.brontoSession!.user.id),
     };
 }) satisfies PageServerLoad;
 
@@ -51,5 +53,9 @@ export const actions = {
         }
         await changePassword(user.id, newPassword);
         redirect(303, '/signin?passwordChanged');
+    },
+
+    unlinkBackline: async ({ request, locals }) => {
+        await removeLink(locals.brontoSession!.user.id, Number((await request.formData()).get('id')));
     },
 } satisfies Actions;

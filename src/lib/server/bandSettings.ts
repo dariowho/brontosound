@@ -20,6 +20,7 @@ export interface SettingsData {
     ytInvidiousEnabled: boolean;
     ytInvidiousServer: string,
     googlemapsToken?: string
+    backlineStunServers: string[]; // tell Backline and the browsers on /backline their public addresses (docs/backline.md)
 }
 
 export const defaultSettings: SettingsData = {
@@ -33,7 +34,8 @@ export const defaultSettings: SettingsData = {
     webdavPassword: "",
     webdavConcurrentConnections: 5,
     ytInvidiousEnabled: true,
-    ytInvidiousServer: "https://yewtu.be/"
+    ytInvidiousServer: "https://yewtu.be/",
+    backlineStunServers: ["stun:stun.l.google.com:19302"],
 }
 
 let cachedSettings: SettingsData | null = null;

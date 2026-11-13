@@ -16,6 +16,7 @@ export const load = (async ({ locals }) => {
             "Username": s.webdavUsername,
             "Songs folder": s.songsFolder,
         } },
+        { title: "Backline", entries: { "STUN servers": s.backlineStunServers.join(", ") } },
         { title: "YouTube", entries: { "Use Invidious": s.ytInvidiousEnabled, "Invidious server": s.ytInvidiousServer } },
     ];
 

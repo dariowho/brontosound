@@ -36,7 +36,6 @@ export const authorizationHandle: Handle = async ({ event, resolve }) => {
 
         // Unauthenticated user
     } else {
-        console.log("hooks.server.ts: no authSession");
         if (event.url.pathname.startsWith('/api')) {
             error(401, 'Your session has expired. Sign in again.');
         }
