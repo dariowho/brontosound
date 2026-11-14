@@ -1,16 +1,15 @@
 <script lang="ts">
-    import { Footer, FooterCopyright, FooterLinkGroup, FooterLink, Heading, Breadcrumb, BreadcrumbItem } from 'flowbite-svelte'
-    import Sidebar from "./Sidebar.svelte";
+    import { Breadcrumb, BreadcrumbItem } from 'flowbite-svelte'
     import { page } from '$app/stores';
     import ResponsiveSidebar from './ResponsiveSidebar.svelte';
     import BrontoHeader from '../BrontoHeader.svelte';
+    import PageTitle from '$lib/components/PageTitle.svelte';
+    import PoweredBy from '$lib/components/PoweredBy.svelte';
     import versionInfo from '$lib/version.json';
 
     let isMobile: boolean;
     let sidebarComponent;
 </script>
-
-<!-- <Sidebar /> -->
 
 <BrontoHeader bind:isMobile bind:sidebarComponent />
 
@@ -19,7 +18,7 @@
 
     {#if $page.data.breadcrumb && $page.data.breadcrumb.length > 0 }
         <div id="breadcrumb">
-            <Breadcrumb aria-label="Default breadcrumb example">
+            <Breadcrumb aria-label="Breadcrumb">
                 <BreadcrumbItem href="/app" home>Home</BreadcrumbItem>
                 {#each $page.data.breadcrumb.slice(0, $page.data.breadcrumb.length-1) as item}
                     <BreadcrumbItem href={item.href || null}>{item.title}</BreadcrumbItem>
@@ -28,55 +27,41 @@
             </Breadcrumb>
         </div>
     {/if}
-    
-    
 
     <div class="pageContent">
-        <div class="header">
-            <Heading tag="h1" class="break-words mb-5">{$page.data.pageTitle}</Heading>
-        </div>
-        
+        <!-- Pages that need actions next to the title render their own PageTitle and omit `pageTitle` -->
+        {#if $page.data.pageTitle}
+            <PageTitle title={$page.data.pageTitle} />
+        {/if}
+
         <slot />
     </div>
 </section>
 
-<div id="footerContainer">
-<Footer >
-    <FooterCopyright href="/" by="Brontosauri Dischi" year={2023} />
-    <span class="text-sm text-gray-500 dark:text-gray-400" title="Released on {versionInfo.releaseDate}">v{versionInfo.version}</span>
-    <FooterLinkGroup ulClass="flex flex-wrap items-center mt-3 text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
-        <FooterLink href="/">About</FooterLink>
-        <FooterLink href="/">Privacy Policy</FooterLink>
-        <FooterLink href="/">Licensing</FooterLink>
-        <FooterLink href="/">Contact</FooterLink>
-    </FooterLinkGroup>
-</Footer>
-</div>
+<footer class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 px-6 py-5 text-sm text-gray-500">
+    <PoweredBy />
+    <div class="flex flex-wrap items-center gap-6">
+        <span title="Released on {versionInfo.releaseDate}">v{versionInfo.version}</span>
+        <a href="/" class="hover:text-gray-700">About</a>
+        <a href="/" class="hover:text-gray-700">Privacy Policy</a>
+        <a href="/" class="hover:text-gray-700">Licensing</a>
+        <a href="/" class="hover:text-gray-700">Contact</a>
+    </div>
+</footer>
 
 <style>
-    /* .header {
-        margin-bottom: 2em;
-    } */
-
-
     #content {
-        padding: 1em;
-        /* margin-left: 16rem; */
-        min-height: calc( 100vh - 69px ); /* more or less the footer... */
+        display: flow-root; /* contains the floating sidebar */
+        padding: 1.5rem 1.5rem 4rem;
+        min-height: calc( 100vh - 4rem - 65px ); /* header and footer */
     }
 
     #breadcrumb {
-        margin-bottom: 1em;
-        overflow: scroll;
+        margin-bottom: 1rem;
+        overflow: auto;
     }
 
     .pageContent {
         display: flow-root;
-    }
-
-    #footerContainer {
-        /* position: absolute; */
-        /* bottom: 0; */
-        width: 100%;
     }
 </style>

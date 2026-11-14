@@ -21,8 +21,9 @@ export async function load({ }: ServerLoadEvent) {
   }, null);
 
   return {
-    pageTitle: "Songbook",
+    // no `pageTitle`: the page renders its own, with actions
     breadcrumb: [{title: "Songbook", href: "/app/songbook"}],
+    songsFolder: readSettings().songsFolder,
     songs: songs.map((song) => instanceToPlain(song)),
     cachedStoredDirs: cachedStoredDirs.map((dir) => instanceToPlain(dir)),
     lastCacheSync: lastSync,

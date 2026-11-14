@@ -29,7 +29,7 @@ In-depth explanation goes in [docs/](docs/), not in README or chat — and short
 
 ## Coding
 
-Keep the code elegant, minimal and readable. Your edits should be straightforward to understand and code review.
+Keep the code elegant, minimal and readable. Your edits should be straightforward to understand and code review for human reviwers, minimize cognitive overload. If you need to add complex logic, factor it in components or libraries so that the abstract implementation remains clear.
 
 ## Commits & releases
 

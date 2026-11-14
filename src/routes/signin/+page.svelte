@@ -21,9 +21,9 @@
   
 <BrontoHeader />
 
-<div class='text-center items-center mt-3'>
+<main class="flex min-h-[calc(100vh-4rem)] items-center justify-center px-6 pb-28 pt-12">
   {#if page.data.brontoSession}
-    <div style="display:inline-block">
+    <div>
         <Card padding="md">
             <div class="flex flex-col items-center pb-4">
                 <p class="mb-3">You are signed in as</p>
@@ -41,7 +41,7 @@
     </div>
   {:else}
     <!-- <span class="notSignedInText">You are not signed in</span> -->
-    <div class="inline-block w-full max-w-sm text-left">
+    <div class="w-full max-w-sm">
       {#if errorMessage}
         <Alert color="red" class="mb-4">{errorMessage}</Alert>
       {:else if infoMessage}
@@ -64,4 +64,4 @@
       <SignIn provider="google" options={{ redirectTo: '/app' }} className="flex flex-col"><span slot="submitButton">Sign in with Google</span></SignIn>
     </div>
   {/if}
-  </div>
+</main>

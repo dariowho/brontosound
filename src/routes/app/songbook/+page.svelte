@@ -1,254 +1,172 @@
 <script lang="ts">
-  import slugify from 'slugify'
   import { onMount } from 'svelte';
-
-  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, Badge, Spinner, Button, Heading, P, Input, Alert} from 'flowbite-svelte';
-  import { PlusOutline, RefreshOutline } from 'flowbite-svelte-icons';
+  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Badge, Spinner, Button, Input, Alert } from 'flowbite-svelte';
+  import { faMusic, faPlus, faRotate, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+  import Fa from 'svelte-fa';
+  import slugify from 'slugify';
 
   import { Song } from '$lib/dbEntities/song.js';
   import type { StoredDirectory } from '$lib/dbEntities/storage';
   import { fetchApi, saveEntityViaApi } from '$lib/db';
-  
-  export let data;
-  let songs = data.songs as Song[];
-  let cachedStoredDirs = data.cachedStoredDirs as StoredDirectory[];
-  // console.log(data);
+  import { reconcileSongs } from '$lib/songbook';
+  import PageTitle from '$lib/components/PageTitle.svelte';
+  import EmptyState from '$lib/components/EmptyState.svelte';
+  import NewSongForm from './NewSongForm.svelte';
+  import DeletedSongs from './DeletedSongs.svelte';
 
-  $: songs
+  let { data } = $props();
+  let songs = $state(data.songs as Song[]);
+  let cachedStoredDirs = $state(data.cachedStoredDirs as StoredDirectory[]);
+  let lastCacheSync = $state(data.lastCacheSync);
 
-  // Sync with remote storage
-  let syncing = false;
-  let syncError: string | null = null;
-  const syncAfterSeconds = 180;
-  onMount(() => {
-    if (!syncing && (new Date().getTime() - new Date(data.lastCacheSync).getTime()) / 1000 > syncAfterSeconds) {
-      syncStoredDirs();
-    } else {
-      console.log("skipping sync");
-    }
+  // Songs are linked to storage folders by folder name
+  let reconciled = $derived(reconcileSongs(songs, cachedStoredDirs));
+  // Folders with no song yet, as editable new songs
+  let newSongs = $state<Song[]>([]);
+  $effect(() => {
+    newSongs = reconciled.newDirs.map(dir => ({ title: dir.name, artist: "", storedDirName: dir.name, deleted: false }) as Song);
   });
 
-  // TODO: dir list not updating after new song insert
-  async function syncStoredDirs() {
-    if (syncing) return;
-    syncing = true;
-    syncError = null;
+  let busy = $state(false);
+  let errorMessage: string | null = $state(null);
+  let showNewSongForm = $state(false);
+  let showDeletedSongs = $state(false);
+
+  /** Run a Songbook change, then sync with remote storage so folders and songs line up again */
+  async function update(failure: string, change: () => Promise<unknown>) {
+    if (busy) return;
+    busy = true;
+    errorMessage = null;
     try {
+      await change();
       cachedStoredDirs = await fetchApi('/api/storage/songsFolder');
-      data.lastCacheSync = new Date();
+      lastCacheSync = new Date();
     } catch (e) {
-      syncError = `Sync with remote storage failed: ${(e as Error).message}`;
+      errorMessage = `${failure}: ${(e as Error).message}`;
     } finally {
-      syncing = false;
+      busy = false;
     }
   }
 
+  const sync = () => update("Sync with remote storage failed", async () => {});
 
-  // Reconcile DB with stored directories. We use the remote storage path to link stored directory
-  // with Song objects (which are mapped to DB records)
-  let newSongs: Song[] = []; // New Song objects representing directories in cachedStoredDirs that don't have an existing Song in "songs". (i.e. there is no song so that song.storagePath matches)
-  let existingSongs: Song[] = []; // Songs that are in DB and in cachedStoredDirs
-  let deletedSongs: Song[] = []; // Songs that are in DB but not in cachedStoredDirs
-  let showDeletedSongs = false;
-  let songFromDirName: { [key: number]: Song } = {};
-  let dirFromName: { [key: string]: StoredDirectory } = {};
+  const saveSong = (song: Song) => update("Failed to save song", async () => {
+    const saved = await saveEntityViaApi(Song, song, '/api/song');
+    songs = [...songs.filter(s => s.id !== saved.id), saved];
+  });
 
-  $: cachedStoredDirs, reconcileSongs()
+  const createSong = (title: string, artist: string) => {
+    showNewSongForm = false;
+    return saveSong({ title, artist, storedDirName: title.replaceAll('/', '-'), deleted: false } as Song);
+  };
 
-  function reconcileSongs() {
-    let newNewSongs: Song[] = [];
+  const deleteSong = (song: Song) => update("Failed to delete song", async () => {
+    await fetchApi(`/api/song/${song.id}`, { method: 'DELETE' });
+    songs = songs.filter(s => s.id !== song.id);
+  });
 
-    songFromDirName = {};
-    songs.forEach(song => {
-      songFromDirName[song.storedDirName] = song;
-    });
+  const syncAfterSeconds = 180;
+  onMount(() => {
+    if ((Date.now() - new Date(data.lastCacheSync).getTime()) / 1000 > syncAfterSeconds) sync();
+  });
 
-    dirFromName = {};
-    cachedStoredDirs.forEach(cachedDir => {
-      dirFromName[cachedDir.name] = cachedDir;
-      if (!songFromDirName[cachedDir.name]) {
-        newNewSongs.push(buildNewSongFromDir(cachedDir));
-      }
-    });
-
-    newSongs = newNewSongs;
-    existingSongs = songs.filter(song => dirFromName[song.title]);
-    deletedSongs = songs.filter(song => !dirFromName[song.title]);
-
-    // console.log('newSongs', newSongs);
-    // console.log('deletedSongs', deletedSongs);
+  function syncedAgo(date: Date | string | null) {
+    if (!date) return "Never synced";
+    const minutes = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
+    if (minutes < 1) return "Synced just now";
+    if (minutes < 60) return `Synced ${minutes} minute${minutes == 1 ? '' : 's'} ago`;
+    return `Synced ${new Date(date).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' })}`;
   }
 
-  function buildNewSongFromDir(dir: StoredDirectory): Song {
-    let result: Song = new Song()
-    result.artist = "";
-    result.title = dir.name;
-    result.storedDirName = dir.name;
-    result.deleted = false;
-    return result;
-    // db.manager.save(result);
-  }
-  
-  async function saveNewSong(song: Song) {
-    syncing = true;
-    syncError = null;
-    try {
-      songs = [...songs, await saveEntityViaApi(Song, song, '/api/song')];
-      reconcileSongs();
-    } catch (e) {
-      syncError = `Failed to save song: ${(e as Error).message}`;
-    } finally {
-      syncing = false;
-    }
-  }
-
-  function buildSongURL(song: Song) {
-    const songSlug = slugify(song.title)
-    const query = new URLSearchParams({folderName: song.title})
-    return '/app/songbook/' + song.id + "/" + songSlug;
-  }
+  const buildSongURL = (song: Song) => `/app/songbook/${song.id}/${slugify(song.title)}`;
 </script>
 
-<div id="syncStatus">
-  {#if syncing}
-    <span title="Sync with remote storage in progress..."><Button color="alternative" disabled><Spinner size="5" /></Button></span>
-  {:else}
-    <span title="Last sync: {data.lastCacheSync}"><Button on:click={syncStoredDirs}><RefreshOutline /></Button></span>
-  {/if}  
-  
-</div>
+<PageTitle title="Songbook">
+  {#snippet actions()}
+    <span class="text-sm text-gray-500">{busy ? "Syncing…" : syncedAgo(lastCacheSync)}</span>
+    <Button color="alternative" disabled={busy} onclick={sync}>
+      {#if busy}<Spinner size="4" class="me-2" />{:else}<Fa icon={faRotate} class="me-2" />{/if}Sync storage
+    </Button>
+    {#if reconciled.existing.length > 0}
+      <Button onclick={() => showNewSongForm = !showNewSongForm}><Fa icon={faPlus} class="me-2" />New song</Button>
+    {/if}
+  {/snippet}
+</PageTitle>
 
-{#if syncError}
-  <Alert color="red" class="mb-4">{syncError}</Alert>
+{#if errorMessage}
+  <Alert color="red" class="mb-4">{errorMessage}</Alert>
 {/if}
 
-{#snippet songTable(tableSongs: Song[], deleted: boolean)}
-  <Table hoverable={true}>
-    <TableHead>
-      <!-- <TableHeadCell class="!p-4">
-        <Checkbox />
-      </TableHeadCell> -->
-      <TableHeadCell>Song Name</TableHeadCell>
-      <TableHeadCell>Artist</TableHeadCell>
-      <TableHeadCell>Added</TableHeadCell>
-      <TableHeadCell>Tags</TableHeadCell>
-      <!-- <TableHeadCell>
-        <span class="sr-only"> Edit </span>
-      </TableHeadCell> -->
-    </TableHead>
-    <TableBody>
+{#if showNewSongForm}
+  <div class="mb-6 rounded-lg border border-gray-200 p-6">
+    <NewSongForm songsFolder={data.songsFolder} {busy} onCreate={createSong} />
+  </div>
+{/if}
 
-      {#each tableSongs as song}
-        <TableBodyRow class={deleted ? 'opacity-50' : ''}>
-          <!-- <TableBodyCell class="!p-4">
-            <Checkbox />
-          </TableBodyCell> -->
-          <TableBodyCell>
-            {#if deleted}
-              {song.title}
-            {:else}
-              <a href="{buildSongURL(song)}">
-                {song.title}
-              </a>
-            {/if}
-          </TableBodyCell>
-          <TableBodyCell>{song.artist}</TableBodyCell>
-          <TableBodyCell>{new Date(song.creationDate).toLocaleDateString('it-IT')}</TableBodyCell>
-          <TableBodyCell>
-            {#if song.tags}
-              {#each song.tags.map((v) => v.name) as songTag}
-                <Badge class="mr-2">{songTag}</Badge> 
-              {/each}
-            {/if}
-          </TableBodyCell>
-          <!-- <TableBodyCell>
-            <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">
-              Edit
-            </a>
-          </TableBodyCell> -->
-        </TableBodyRow>
-      {/each}
-    </TableBody>
-  </Table>
-{/snippet}
-
-{@render songTable(existingSongs, false)}
-
-{#if newSongs.length >= 1}
-<div class="title">
-  <Heading tag="h2">New Songs</Heading>
-</div>
-<P size="sm" class="mb-3">These songs were found in your storage, but are not yet in your Songbook: add them!</P>
-<Table hoverable={true} class="songTable">
+<Table hoverable={reconciled.existing.length > 0}>
   <TableHead>
-    <TableHeadCell class="!p-4">
-      Storage Path
-    </TableHeadCell>
-    <TableHeadCell>Song Name</TableHeadCell>
+    <TableHeadCell>Song name</TableHeadCell>
     <TableHeadCell>Artist</TableHeadCell>
-    <!-- <TableHeadCell>Added</TableHeadCell> -->
-    <!-- <TableHeadCell>Tags</TableHeadCell> -->
-    <TableHeadCell>
-      <span class="sr-only"> Add </span>
-    </TableHeadCell>
+    <TableHeadCell>Added</TableHeadCell>
+    <TableHeadCell>Tags</TableHeadCell>
   </TableHead>
   <TableBody>
-
-    {#each newSongs as newSong}
+    {#each reconciled.existing as song (song.id)}
       <TableBodyRow>
-        <TableBodyCell class="!p-4">
-          {dirFromName[newSong.storedDirName].path}
-        </TableBodyCell>
-        <TableBodyCell class="px-2">
-          <div style="min-width:10rem;">
-            <Input placeholder="Title" bind:value={newSong.title} disabled={syncing} />
-          </div>
-        </TableBodyCell>
-        <TableBodyCell class="px-2">
-          <div style="min-width:10rem;">
-            <Input placeholder="Artist" bind:value={newSong.artist} disabled={syncing} />
-          </div>
-        </TableBodyCell>
-        <!-- <TableBodyCell>{song.creationDate.toLocaleDateString('it-IT')}</TableBodyCell> -->
-        <!-- <TableBodyCell>
-          {#each song.tags as songTag}
-            <Badge>{songTag}</Badge> 
+        <TableBodyCell><a href={buildSongURL(song)} class="text-gray-900 hover:text-primary-800">{song.title}</a></TableBodyCell>
+        <TableBodyCell class="font-normal text-gray-600">{song.artist}</TableBodyCell>
+        <TableBodyCell class="font-normal text-gray-600">{new Date(song.creationDate).toLocaleDateString('it-IT')}</TableBodyCell>
+        <TableBodyCell>
+          {#each song.tags ?? [] as tag}
+            <Badge class="mr-2">{tag.name}</Badge>
           {/each}
-        </TableBodyCell> -->
-        <TableBodyCell class="px-2">
-          {#if syncing}
-            <span title="Sync with remote storage in progress..."><Button color="alternative" disabled><Spinner size="5" /></Button></span>
-          {:else}
-            <Button on:click={(song) => saveNewSong(newSong)}><PlusOutline /></Button>
-          {/if}
+        </TableBodyCell>
+      </TableBodyRow>
+    {:else}
+      <TableBodyRow>
+        <TableBodyCell colspan={4}>
+          <EmptyState icon={faMusic} title="There are no songs in your Songbook yet">
+            <p class="text-sm font-normal text-gray-600">Create your first song here. Already have song folders in your storage? Sync storage and they will show up under New songs.</p>
+            <div class="mt-3 w-full font-normal"><NewSongForm songsFolder={data.songsFolder} {busy} onCreate={createSong} /></div>
+          </EmptyState>
         </TableBodyCell>
       </TableBodyRow>
     {/each}
   </TableBody>
 </Table>
+
+{#if newSongs.length > 0}
+  <h2 class="mb-2 mt-14 text-4xl font-bold text-gray-900">New songs</h2>
+  <p class="mb-4 text-sm text-gray-700">These folders were found in your storage, but are not yet in your Songbook: add them!</p>
+  <Table>
+    <TableHead>
+      <TableHeadCell>Storage path</TableHeadCell>
+      <TableHeadCell class="px-2">Song name</TableHeadCell>
+      <TableHeadCell class="px-2">Artist</TableHeadCell>
+      <TableHeadCell class="w-px"><span class="sr-only">Add</span></TableHeadCell>
+    </TableHead>
+    <TableBody>
+      {#each newSongs as newSong, i (newSong.storedDirName)}
+        <TableBodyRow>
+          <TableBodyCell class="font-mono font-normal text-gray-700">{reconciled.newDirs[i]?.path}</TableBodyCell>
+          <TableBodyCell class="px-2"><Input aria-label="Song name" class="min-w-40" bind:value={newSong.title} disabled={busy} /></TableBodyCell>
+          <TableBodyCell class="px-2"><Input aria-label="Artist" class="min-w-40" placeholder="Artist" bind:value={newSong.artist} disabled={busy} /></TableBodyCell>
+          <TableBodyCell class="w-px py-3 pl-2"><Button disabled={busy} onclick={() => saveSong(newSong)}><Fa icon={faPlus} class="me-2" />Add</Button></TableBodyCell>
+        </TableBodyRow>
+      {/each}
+    </TableBody>
+  </Table>
 {/if}
 
-{#if deletedSongs.length >= 1}
-<button class="mt-8 text-sm text-gray-500 hover:underline" on:click={() => showDeletedSongs = !showDeletedSongs}>
-  {showDeletedSongs ? 'Hide' : 'Show'} {deletedSongs.length} deleted song{deletedSongs.length == 1 ? '' : 's'}
-</button>
-{#if showDeletedSongs}
-<div class="title">
-  <Heading tag="h2">Deleted Songs</Heading>
-</div>
-<P size="sm" class="mb-3">These songs are in your Songbook, but their folder was not found in your storage. If this is unexpected, check your storage settings.</P>
-{@render songTable(deletedSongs, true)}
+{#if reconciled.deleted.length > 0}
+  <button class="mt-10 inline-flex items-center gap-2 py-2 text-sm text-gray-500 hover:text-gray-700" onclick={() => showDeletedSongs = !showDeletedSongs}>
+    <Fa icon={showDeletedSongs ? faChevronUp : faChevronDown} size="xs" />
+    {showDeletedSongs ? 'Hide' : 'Show'} {reconciled.deleted.length} deleted song{reconciled.deleted.length == 1 ? '' : 's'}
+  </button>
+  {#if showDeletedSongs}
+    <h2 class="mb-2 mt-4 text-4xl font-bold text-gray-900">Deleted songs</h2>
+    <p class="mb-1 text-sm text-gray-700">These songs are in your Songbook, but their folder was not found in your storage. If this is unexpected, check your storage settings.</p>
+    <p class="mb-4 text-sm text-gray-500"><strong class="font-medium text-gray-700">Re-create folder</strong> makes an empty folder for the song in your storage. <strong class="font-medium text-gray-700">Delete</strong> removes the song from your Songbook for good.</p>
+    <DeletedSongs songs={reconciled.deleted} {busy} onRecreate={saveSong} onDelete={deleteSong} />
+  {/if}
 {/if}
-{/if}
-
-<style>
-  #syncStatus {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 1rem;
-  }
-
-  .title {
-    margin: 2rem 0 1rem 0;
-  }
-</style>

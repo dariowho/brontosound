@@ -1,73 +1,37 @@
 <script lang="ts">
-  import { Button, Avatar, NavHamburger } from 'flowbite-svelte'
-
+  import { Button } from 'flowbite-svelte'
   import { page } from '$app/state';
-    import Fa from 'svelte-fa';
-    import { faBars } from '@fortawesome/free-solid-svg-icons';
+  import Fa from 'svelte-fa';
+  import { faBars, faUser } from '@fortawesome/free-solid-svg-icons';
 
-  export let solid: boolean = true;
-  export let isMobile: boolean;
+  export let isMobile: boolean = false;
   export let sidebarComponent = null;
-
 </script>
 
 
-<div class="header {solid ? 'headerSolid' : ''}">
-  {#if (isMobile && sidebarComponent)}
-    <div class="hamburger">
-      <Button on:click={sidebarComponent.toggleDrawer} color="light">
-        <Fa icon={faBars} on:click={sidebarComponent.toggleDrawer}/>
-      </Button>
-    </div>
-  {/if}
-  <div class="siteName">
-    <a href="/">
-      <img
-        src={page.data.bandLogo}
-        class="mr-3 h-6 sm:h-9"
-        alt="Brontosound"
-      />
-      <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-        {page.data.bandName}
-      </span>
+<header class="relative z-10 flex h-16 items-center justify-between gap-4 bg-charcoal px-6 shadow-header">
+  <div class="flex items-center gap-3">
+    {#if (isMobile && sidebarComponent)}
+      <button type="button" class="text-white" aria-label="Open menu" on:click={sidebarComponent.toggleDrawer}>
+        <Fa icon={faBars} />
+      </button>
+    {/if}
+    <a href="/" class="inline-flex items-center gap-3 whitespace-nowrap text-xl font-medium text-white">
+      <img src={page.data.bandLogo} class="h-9 w-9 invert" alt="" />
+      {page.data.bandName}
     </a>
   </div>
-  <div class="flex md:order-2">
-    {#if page.data.brontoSession}
-      <Avatar href="/app/profile" size="sm" src={page.data.brontoSession.auth?.user.image} />
-    {:else}
-      <Button size="sm" href="/signin">Sign in</Button>
-    {/if}
-  </div>
-</div>
+  {#if page.data.brontoSession}
+    <a href="/app/profile" aria-label="Your profile" class="flex h-9 w-9 items-end justify-center overflow-hidden rounded-full bg-charcoal-raised text-2xl text-stone-200">
+      {#if page.data.brontoSession.auth?.user.image}
+        <img src={page.data.brontoSession.auth.user.image} class="h-full w-full object-cover" alt="" />
+      {:else}
+        <Fa icon={faUser} />
+      {/if}
+    </a>
+  {:else}
+    <Button size="sm" href="/signin">Sign in</Button>
+  {/if}
+</header>
 
 <slot />
-
-<style>
-  .header {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem;
-    /* background-color: #dedede; */
-  }
-
-  .headerSolid {
-    background-color: #00000020;
-  }
-
-  .hamburger {
-    padding-right: 1em;
-    display: block;
-    align-self: center;
-  }
-
-  .siteName {
-    display: flex;
-    flex-grow: 1;
-  }
-
-  .siteName a {
-    display: inline-flex;
-    align-items: center;
-  }
-</style>

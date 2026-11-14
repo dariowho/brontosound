@@ -64,7 +64,7 @@
 	};
 	let spanClass = 'pl-2 self-center text-md text-gray-900 whitespace-nowrap dark:text-white';
 
-    const fixedDrawerClass="relative float-left min-h-screen"
+    const fixedDrawerClass="relative float-left"
     const mobileDrawerClass="overflow-scroll pb-32"
 
     const menuItems = [
