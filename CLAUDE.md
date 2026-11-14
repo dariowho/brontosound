@@ -50,6 +50,7 @@ Conventional Commits (`feat:`, `fix:`, `refactor:`, …) — `standard-version` 
 - Song files (readme, chordpro) live in file storage, not the DB: `PersistedStorage` in [src/lib/server/storage.ts](src/lib/server/storage.ts) with a filesystem (`data/`) or WebDAV backend, selected by settings via `getUserStorage()`.
 - `+page.server.ts` loads conventionally return `pageTitle` and `breadcrumb` alongside data.
 - URLs are `/<id>/<slug>`; build them with `buildVenueUrl`/`buildGigUrl` in [src/lib/misc.ts](src/lib/misc.ts).
+- UI follows the design system in [docs/design-system/](docs/design-system/README.md): read it before building or restyling a page.
 
 ## Notes
 
