@@ -10,7 +10,7 @@ export interface PlaybackEngine {
     seek(to: number): void;
     pause(): void;
     setSpeed(rate: number): void; // 1 = the song's own tempo
-    setTranspose(semitones: number): void;
+    setTranspose(semitones: number): void; // fractions of a semitone for fine pitch
     dispose(): void;
 }
 

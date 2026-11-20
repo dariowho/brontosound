@@ -1,9 +1,9 @@
 # Song page
 
-A song's page shows its folder in storage, the selected document, and a player fixed to the bottom of the screen.
+A song's page shows its title and artist (click either to edit both), its folder in storage, the selected document, and a player fixed to the bottom of the screen. On phones the player is one bar that opens a sheet with every control.
 
-- **Folder**: icons for everything in the song folder, browsable into subfolders. Accent icons open in Brontosound; grey ones can only be downloaded.
-- **Viewer**: the selected document. Files Brontosound can't show get a download panel.
+- **Folder**: icons for everything in the song folder, browsable into subfolders. Accent icons open in Brontosound; grey ones can only be downloaded. Upload, or files dropped on the folder, go into the folder shown, one at a time; a name already there is refused.
+- **Viewer**: the selected document. Files Brontosound can't show get a download panel. Plain-text files (text, Markdown, ChordPro, OnSong) can be edited: Ctrl+S saves, leaving with unsaved changes asks first. Delete, here or in the player, removes the file from storage and unpins it.
 - **Player**: audio and MIDI files, or the chart in the viewer (a metronome counting through its bars). With both, the player asks which; the file is the default. × next to a file's name takes it out of the player; with no chart in the viewer, the player closes.
 
 One document and one audio file can be pinned (`Song.pinnedDocument`, `Song.pinnedAudio`, paths relative to the song folder). Pinned files open with the page; with nothing pinned, the first document and the first audio file by name do.
@@ -32,6 +32,7 @@ Charts don't say how long a line lasts, so: a lyrics line lasts one bar per chor
 
 Space plays and pauses. Click the timeline to set a start point: every play starts there. Drag across it to loop a part. Arrows move 5 s (a bar on a chart).
 
+- Tempo (Speed for audio files), Transpose (semitones, ±12) and Pitch (cents, ±50) can be typed or stepped.
 - Audio files are decoded in memory, so playback starts at once from any point. Speed and pitch change independently through [SoundTouch](https://github.com/cutterbl/SoundTouchJS) (an AudioWorklet), bypassed at the original speed and pitch. Formats the browser can't decode (AIFF outside Safari) can't be played.
 - MIDI files play through a soundfont (sampled General MIDI instruments and drums) or a small built-in synth (oscillators, noise drums), with tracks that can be switched off. **Sound** picks which; see below.
 
@@ -51,4 +52,5 @@ A soundfont is the [MIDI.js](https://github.com/gleitz/midi-js-soundfonts) layou
 - `src/lib/player/`: one engine per source, behind `PlaybackEngine`; `transport.svelte.ts` holds the practice controls. MIDI notes go to `MidiInstruments`: `sampler.ts` (soundfonts) or `midiSynth.ts`.
 - `src/lib/server/soundfonts.ts`: the soundfonts on offer and the user's pick; `/api/soundfont` remembers it.
 - `src/lib/components/{songFolder,viewer,player}/`, and the page in `src/routes/app/songbook/[songId]/[songSlug]/`.
-- `/api/song/[songId]/folder`, `/file` and `/pins`: files are addressed relative to the song folder and can't leave it.
+- `/api/song/[songId]/folder`, `/file` and `/pins`: files are addressed relative to the song folder and can't leave it. `/file` also takes uploads (POST), saves (PUT) and deletions (DELETE); the request body is the file. adapter-node caps bodies at 512K unless `BODY_SIZE_LIMIT` is set (the Dockerfile sets 200M).
+- `PATCH /api/song/[songId]`: title and artist. The folder keeps its name.

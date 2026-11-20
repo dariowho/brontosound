@@ -50,9 +50,9 @@ export class Sampler implements MidiInstruments {
         this.fallback.stopAll();
     }
 
-    /** The closest sample, re-pitched to the note; held until `end`, or to its own end */
+    /** The closest sample, re-pitched to the note (which can fall between semitones); held until `end`, or to its own end */
     private play(output: AudioNode, samples: Samples, note: SynthNote, end: number | null) {
-        const sampled = closest(samples, note.midi);
+        const sampled = closest(samples, Math.round(note.midi));
         if (sampled === undefined) return;
         const source = new AudioBufferSourceNode(this.context, {
             buffer: samples.get(sampled),

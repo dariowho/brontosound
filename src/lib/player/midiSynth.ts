@@ -4,7 +4,7 @@
  */
 
 export interface SynthNote {
-    midi: number; // note number
+    midi: number; // note number, between semitones for fine pitch
     velocity: number; // 0 to 1
     start: number; // AudioContext time
     duration: number; // seconds

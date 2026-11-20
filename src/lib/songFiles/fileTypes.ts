@@ -67,6 +67,9 @@ export function slotOf(file: SongFile): 'folder' | 'player' | 'viewer' {
     return kind == 'audio' || kind == 'midi' ? 'player' : 'viewer';
 }
 
+/** Plain-text files, which can be edited in the browser */
+export const isEditableText = (file: SongFile): boolean => ['chordpro', 'onsong', 'text', 'markdown'].includes(fileKind(file)) && !isWebPage(file);
+
 export const isDownloadOnly = (file: SongFile): boolean => fileKind(file) == 'other';
 export const isDocument = (file: SongFile): boolean => slotOf(file) == 'viewer' && !isDownloadOnly(file);
 export const isPlayable = (file: SongFile): boolean => slotOf(file) == 'player';

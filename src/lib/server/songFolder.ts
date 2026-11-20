@@ -33,9 +33,22 @@ export async function readSongFile(song: StoredSong, filePath: string): Promise<
     return notFoundAs404(storage.readFileStream(storagePath(song, filePath)));
 }
 
+/** Write a file of the song folder. Without `replace`, an existing file is a 409 error. */
+export async function writeSongFile(song: StoredSong, filePath: string, data: Uint8Array, replace: boolean): Promise<void> {
+    const storage = await getUserStorage();
+    const target = storagePath(song, filePath);
+    if (!replace && await storage.fileExists(target)) error(409, `There's already a file called ${filePath.split('/').pop()} here`);
+    await storage.writeFile(target, data);
+}
+
+export async function deleteSongFile(song: StoredSong, filePath: string): Promise<void> {
+    const storage = await getUserStorage();
+    await notFoundAs404(storage.deleteFile(storagePath(song, filePath)));
+}
+
 /** The storage path of a path relative to the song folder, which must stay inside it */
 function storagePath(song: StoredSong, relativePath: string): string {
-    if (relativePath.split('/').some(segment => segment == '..')) error(400, "Invalid path");
+    if (relativePath.split(/[/\\]/).some(segment => segment == '..')) error(400, "Invalid path");
     return song.buildPath(relativePath);
 }
 

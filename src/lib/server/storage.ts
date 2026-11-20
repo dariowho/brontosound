@@ -27,6 +27,8 @@ export interface PersistedStorage {
     writeJSONFile(content: any, filePath: string): Promise<void>;
     deleteFile(filePath: string): Promise<void>;
     readFileStream(filePath: string): Promise<FileStream>;
+    writeFile(filePath: string, data: Uint8Array): Promise<void>;
+    fileExists(filePath: string): Promise<boolean>;
 
     storedDirectory(dirPath: string): Promise<StoredDirectory>;
     createDirectory(dirPath: string): Promise<void>;
@@ -89,6 +91,16 @@ export class FilesystemStorage implements PersistedStorage {
             stream: Readable.toWeb(fs.createReadStream(fullPath)) as ReadableStream<Uint8Array>,
             size: stats.size,
         };
+    }
+
+    async writeFile(filePath: string, data: Uint8Array): Promise<void> {
+        const fullPath = path.join(this.basePath, filePath);
+        await fs.promises.mkdir(path.dirname(fullPath), { recursive: true });
+        await fs.promises.writeFile(fullPath, data);
+    }
+
+    async fileExists(filePath: string): Promise<boolean> {
+        return fs.existsSync(path.join(this.basePath, filePath));
     }
 
     async storedDirectory(dirPath: string): Promise<StoredDirectory> {
@@ -205,6 +217,16 @@ export class WebdavStorage implements PersistedStorage {
             stream: Readable.toWeb(this.client.createReadStream(filePath) as Readable) as ReadableStream<Uint8Array>,
             size: stats.size,
         };
+    }
+
+    async writeFile(filePath: string, data: Uint8Array): Promise<void> {
+        await this.client.createDirectory(path.dirname(filePath), { recursive: true });
+        if (!await this.client.putFileContents(filePath, Buffer.from(data)))
+            throw new FileAccessError("WebDAV 'putFileContents' call failed for path: " + filePath);
+    }
+
+    async fileExists(filePath: string): Promise<boolean> {
+        return this.client.exists(filePath);
     }
 
     async listFolder(dirPath: string): Promise<StorageEntry[]> {
