@@ -47,6 +47,22 @@ export const authorizationHandle: Handle = async ({ event, resolve }) => {
     return resolve(event)
 };
 
+// Defence in depth: pages can't be framed by other sites (clickjacking), and browsers don't guess content types.
+// No CSP yet: it needs a policy per maps provider, and its own for /backline
+const SECURITY_HEADERS = {
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+};
+
+export const securityHeadersHandle: Handle = async ({ event, resolve }) => {
+    const response = await resolve(event);
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+        response.headers.set(name, value);
+    }
+    return response;
+};
+
 // Send the actual error message to API clients, so the UI can display it
 export const handleError: HandleServerError = ({ error, event }) => {
     console.error(error);
@@ -54,4 +70,4 @@ export const handleError: HandleServerError = ({ error, event }) => {
         return { message: error instanceof Error ? error.message : String(error) };
 }
 
-export const handle: Handle = sequence(debugHandle, authenticationHandle, authorizationHandle)
+export const handle: Handle = sequence(securityHeadersHandle, debugHandle, authenticationHandle, authorizationHandle)
