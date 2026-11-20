@@ -49,6 +49,14 @@ export async function removeLink(userId: number, id: number): Promise<void> {
     }
 }
 
+/** Removes all of a user's links, and cuts off their Backline if it is live */
+export async function removeLinksOf(userId: number): Promise<void> {
+    const links = await TypeOrm.getRepository(BacklineLink);
+    const userLinks = await links.findBy({ createdBy: { id: userId } });
+    await links.remove(userLinks);
+    userLinks.forEach(link => dropHost(link.tokenHash));
+}
+
 /** The active user a Backline's token belongs to */
 export async function findLinkedUser(token: string): Promise<User | null> {
     const link = await (await TypeOrm.getRepository(BacklineLink)).findOneBy({ tokenHash: hashToken(token) });

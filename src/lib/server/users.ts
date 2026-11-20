@@ -7,6 +7,7 @@ import { User, UserAccount, UserRole } from '$lib/dbEntities/user';
 import { readSettings } from '$lib/server/bandSettings';
 import { hashPassword, isPasswordHash, MAX_PASSWORD_LENGTH, passwordProblem, verifyPassword } from '$lib/server/password';
 import { localDataRoot, settingsFilename } from '$lib/server/config';
+import { removeLinksOf } from '$lib/server/backline/links';
 
 // Built-in admin, whose password hash lives in band settings (`adminPasswordHash`)
 export const DEFAULT_ADMIN_USERNAME = 'admin';
@@ -247,7 +248,7 @@ export async function createUser(input: { email: unknown, name?: unknown, passwo
     }
 }
 
-// Revokes all sign-in methods and sessions, and hides the user; see `User.removedDate`
+// Revokes all sign-in methods, sessions and Backline links, and hides the user; see `User.removedDate`
 export async function removeUser(id: number): Promise<void> {
     const user = await findActiveUser(id);
     if (!user) {
@@ -262,6 +263,7 @@ export async function removeUser(id: number): Promise<void> {
         await manager.update(User, id, { removedDate: new Date(), passwordHash: null });
         await manager.increment(User, { id }, 'sessionVersion', 1);
     });
+    await removeLinksOf(id);
 }
 
 export async function getProfile(id: number) {

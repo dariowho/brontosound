@@ -21,7 +21,8 @@
     {:else}
         <P>Backline shows this code:</P>
         <P class="text-3xl font-bold tracking-widest">{data.code}</P>
-        <P class="text-sm text-gray-500">It will share its Live page at /backline as {data.brontoSession.user.name}.</P>
+        <P class="text-sm text-gray-500">It will share its Live page at /backline as {data.brontoSession.user.name}, replacing the one live now.</P>
+        <P class="rounded-lg border border-primary-300 bg-primary-50 p-3 text-sm">Link only a Backline you just opened yourself and that shows this code. If someone sent you this page, don't.</P>
         <form method="POST" use:enhance>
             <Button type="submit" class="w-full">Link</Button>
         </form>
