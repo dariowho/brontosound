@@ -57,6 +57,5 @@ Conventional Commits (`feat:`, `fix:`, `refactor:`, …) — `standard-version` 
 
 ## Notes
 
-- `src/routes/app/songbookLegacy/` is the old filesystem-indexed songbook; `songbook/` is the DB-backed replacement. Prefer the latter.
 - Secrets in `.env` (`AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET`); see `.env.template`.
 - Test suites are still the create-svelte placeholders.
