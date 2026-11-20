@@ -5,7 +5,7 @@ Auth.js, configured in [src/auth.ts](../src/auth.ts). Two ways in:
 - **Email (or username) + password** — Credentials provider. Passwords are scrypt-hashed ([password.ts](../src/lib/server/password.ts)). 10 attempts per login and client address per 15 minutes.
 - **Google SSO** — allowed if the Google account is already linked to a user, or its verified email matches a user that has a password (i.e. was added by an admin). In the latter case it gets linked.
 
-The session JWT carries `userId` and `sessionVersion`. The `jwt` callback drops the session when the user is removed or their `sessionVersion` has changed.
+The session JWT carries `userId` and `sessionVersion`, signed with `AUTH_SECRET`: the server won't start without it or with the `.env.template` placeholder, and warns when it is under 32 characters. The `jwt` callback drops the session when the user is removed or their `sessionVersion` has changed.
 
 Users change their display name and password at `/app/profile` (header avatar). Changing the password signs them out everywhere. Users who only have Google can set a password there.
 

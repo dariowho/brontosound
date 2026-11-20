@@ -7,8 +7,11 @@ import { instanceToPlain } from "class-transformer";
 import { permissionsFromRole } from "$lib/dbEntities/user";
 import { error, redirect } from "@sveltejs/kit";
 import { ensureDefaultAdmin, findActiveUser } from "$lib/server/users";
+import { checkAuthSecret } from "$lib/server/authSecret";
+import { env } from "$env/dynamic/private";
 
 export const init: ServerInit = async () => {
+    checkAuthSecret(env.AUTH_SECRET);
     await ensureDefaultAdmin();
 }
 
