@@ -41,6 +41,6 @@
 
 {#if page.fileSource || page.chartSource}
     <PlayerBar songId={song.id} fileSource={page.fileSource} chartSource={page.chartSource} bind:playChart={page.playChart} bind:transpose={page.transpose}
-        bind:position pinned={!!page.playerFile && page.pins.pinnedAudio == page.playerFile.path} onTogglePin={() => page.togglePin('pinnedAudio')}
+        bind:position pinned={!!page.playerFile && page.pins.pinnedAudio == page.playerFile.path} soundfonts={data.soundfonts} onTogglePin={() => page.togglePin('pinnedAudio')}
         onCloseFile={() => page.closePlayerFile()} />
 {/if}

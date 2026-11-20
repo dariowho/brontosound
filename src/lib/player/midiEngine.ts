@@ -1,7 +1,8 @@
 import { Midi } from '@tonejs/midi';
 import { audioContext, fetchArrayBuffer, resumeAudio, type PlaybackEngine } from './engine';
 import { LookaheadScheduler, MediaClock } from './mediaClock';
-import { MidiSynth } from './midiSynth';
+import { MidiSynth, type MidiInstruments } from './midiSynth';
+import { Sampler } from './sampler';
 
 interface MidiNote {
     midi: number;
@@ -19,7 +20,7 @@ export interface MidiTrack {
     enabled: boolean;
 }
 
-/** A MIDI file, played by the built-in synth. Tracks can be switched off, notes transposed. */
+/** A MIDI file, played by a soundfont or the built-in synth. Tracks can be switched off, notes transposed. */
 export class MidiEngine implements PlaybackEngine {
     readonly tracks: MidiTrack[];
     readonly duration: number;
@@ -28,6 +29,8 @@ export class MidiEngine implements PlaybackEngine {
     private clock = new MediaClock(this.context);
     private scheduler = new LookaheadScheduler(this.context, this.clock, (from, to) => this.schedule(from, to));
     private synth = new MidiSynth(this.context);
+    private instruments: MidiInstruments = this.synth;
+    private soundfontRequest = 0; // the latest wins
     private outputs: GainNode[]; // one per track, to mute it at once
     private rate = 1;
     private semitones = 0;
@@ -58,7 +61,7 @@ export class MidiEngine implements PlaybackEngine {
 
     play(from: number) {
         resumeAudio();
-        this.synth.stopAll();
+        this.instruments.stopAll();
         this.clock.start(from, this.rate);
         this.scheduler.start(from);
     }
@@ -70,7 +73,7 @@ export class MidiEngine implements PlaybackEngine {
     pause() {
         this.scheduler.stop();
         this.clock.stop();
-        this.synth.stopAll();
+        this.instruments.stopAll();
     }
 
     setSpeed(rate: number) {
@@ -82,12 +85,24 @@ export class MidiEngine implements PlaybackEngine {
         this.semitones = semitones;
     }
 
+    /** Play through the soundfont at `url` (null: the built-in synth), once its instruments are loaded */
+    async useSoundfont(url: string | null) {
+        const programs = [...new Set(this.tracks.filter(track => !track.percussion).map(track => track.program))];
+        const request = ++this.soundfontRequest;
+        const instruments = url ? await Sampler.load(this.context, url, programs, this.tracks.some(track => track.percussion), this.synth) : this.synth;
+        if (request != this.soundfontRequest) return; // another soundfont was picked, or the file closed
+        this.instruments.stopAll();
+        this.instruments = instruments;
+        if (this.clock.running) this.play(this.position()); // reschedule the notes in the lookahead
+    }
+
     setTrackEnabled(index: number, enabled: boolean) {
         this.tracks[index].enabled = enabled;
         this.outputs[index].gain.value = enabled ? 1 : 0;
     }
 
     dispose() {
+        this.soundfontRequest++;
         this.pause();
         this.outputs.forEach(output => output.disconnect());
     }
@@ -102,8 +117,8 @@ export class MidiEngine implements PlaybackEngine {
                     start: this.clock.contextTimeOf(note.time),
                     duration: note.duration / this.rate,
                 };
-                if (track.percussion) this.synth.playDrum(this.outputs[i], synthNote);
-                else this.synth.playNote(this.outputs[i], track.program, synthNote);
+                if (track.percussion) this.instruments.playDrum(this.outputs[i], synthNote);
+                else this.instruments.playNote(this.outputs[i], track.program, synthNote);
             }
         });
     }

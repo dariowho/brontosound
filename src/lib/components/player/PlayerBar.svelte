@@ -6,17 +6,19 @@
     import { loadEngine, type LoadedEngine, type PlayerSource } from '$lib/player/loadEngine';
     import { Transport } from '$lib/player/transport.svelte';
     import { songFileUrl } from '$lib/songFiles/songFile';
+    import type { SoundfontChoice } from '$lib/soundfonts';
     import PinButton from '../controls/PinButton.svelte';
     import Stepper from '../controls/Stepper.svelte';
     import ToggleButton from '../controls/ToggleButton.svelte';
     import SourcePicker from './SourcePicker.svelte';
+    import SoundfontPicker from './SoundfontPicker.svelte';
     import Timeline, { type TimelineView } from './Timeline.svelte';
 
     /**
      * The player, fixed to the bottom of the screen, made for practising (docs/songPage.md):
      * Space plays and pauses, every play starts from the start point, arrows move 5 s (a bar on a chart).
      */
-    let { songId, fileSource, chartSource, playChart = $bindable(), transpose = $bindable(), position = $bindable(), pinned, onTogglePin, onCloseFile }: {
+    let { songId, fileSource, chartSource, playChart = $bindable(), transpose = $bindable(), position = $bindable(), pinned, soundfonts, onTogglePin, onCloseFile }: {
         songId: number,
         fileSource: PlayerSource | null, // the audio or MIDI file in the player
         chartSource: PlayerSource | null, // the chart in the viewer, if it can drive the player
@@ -24,6 +26,7 @@
         transpose: number, // the chart's key, shared with the viewer
         position: number, // seconds, for the viewer to follow a chart
         pinned: boolean,
+        soundfonts: SoundfontChoice, // for MIDI files
         onTogglePin: () => void,
         onCloseFile: () => void, // take the audio or MIDI file out of the player
     } = $props();
@@ -40,6 +43,7 @@
     let tracksOn = $state<boolean[]>([]);
     let click = $state(true);
     let countIn = $state(true);
+    let soundfont = $state(soundfonts.selected); // kept from file to file
 
     $effect(() => {
         const current = source;
@@ -188,6 +192,7 @@
                         <ToggleButton dot on={tracksOn[i]} onclick={() => tracksOn[i] = !tracksOn[i]}>{track.name}</ToggleButton>
                     {/each}
                 </div>
+                <SoundfontPicker engine={loaded.engine} soundfonts={soundfonts.soundfonts} bind:selected={soundfont} />
             {:else if loaded?.kind == 'chart'}
                 <div role="group" aria-label="Metronome" class="flex flex-wrap items-center gap-1.5">
                     <span class="mr-1 text-sm text-gray-500">Metronome</span>

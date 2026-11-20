@@ -6,7 +6,7 @@ export class MediaClock {
     private from = 0; // song time when playback started
     private startedAt = 0; // context time when it started, maybe in the future (count-in)
     private rate = 1;
-    private running = false;
+    private isRunning = false;
 
     constructor(private context: AudioContext) {}
 
@@ -14,16 +14,20 @@ export class MediaClock {
         this.from = from;
         this.rate = rate;
         this.startedAt = this.context.currentTime + delay;
-        this.running = true;
+        this.isRunning = true;
+    }
+
+    get running() {
+        return this.isRunning;
     }
 
     stop() {
         this.from = this.position();
-        this.running = false;
+        this.isRunning = false;
     }
 
     setRate(rate: number) {
-        if (this.running) {
+        if (this.isRunning) {
             this.from = this.position();
             this.startedAt = Math.max(this.startedAt, this.context.currentTime);
         }
@@ -35,7 +39,7 @@ export class MediaClock {
     }
 
     positionAt(contextTime: number): number {
-        if (!this.running) return this.from;
+        if (!this.isRunning) return this.from;
         return this.from + Math.max(0, contextTime - this.startedAt) * this.rate;
     }
 

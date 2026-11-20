@@ -10,6 +10,13 @@ export interface SynthNote {
     duration: number; // seconds
 }
 
+/** What plays a MIDI file's notes: the built-in synth or a soundfont's samples */
+export interface MidiInstruments {
+    playNote(output: AudioNode, program: number, note: SynthNote): void;
+    playDrum(output: AudioNode, note: SynthNote): void;
+    stopAll(): void; // silence every note, played or scheduled
+}
+
 interface Timbre {
     wave: OscillatorType;
     attack: number; // seconds
@@ -33,7 +40,7 @@ const VOLUME = 0.25; // per note, leaving headroom for chords
 
 const frequencyOf = (midi: number) => 440 * Math.pow(2, (midi - 69) / 12);
 
-export class MidiSynth {
+export class MidiSynth implements MidiInstruments {
     private voices = new Set<AudioScheduledSourceNode>();
     private noise: AudioBuffer;
 
@@ -73,7 +80,6 @@ export class MidiSynth {
         }
     }
 
-    /** Silence every note, played or scheduled */
     stopAll() {
         this.voices.forEach(voice => voice.stop());
         this.voices.clear();

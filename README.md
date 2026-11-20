@@ -21,6 +21,14 @@ The built-in `admin` user's password hash must be set as `adminPasswordHash` in 
 npm run -s hash-password
 ```
 
+## Soundfonts
+
+The Song page integrates a MIDI player. By default it runs baseline synthetized instruments. To download a real SoundFont:
+
+```bash
+npm run fetch-soundfont
+```
+
 ## Building
 
 To create a production version of Brontosound:

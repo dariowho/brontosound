@@ -45,6 +45,10 @@ export class User {
     @Column({ type: 'integer', default: 0 })
     sessionVersion: number;
 
+    // The soundfont last picked in the player, by name
+    @Column({ type: 'varchar', nullable: true })
+    soundfont?: string | null;
+
     @OneToMany(() => UserAccount, account => account.user)
     accounts?: UserAccount[];
 }

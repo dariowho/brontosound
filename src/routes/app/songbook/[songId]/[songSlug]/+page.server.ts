@@ -1,8 +1,9 @@
 import type { ServerLoadEvent } from "@sveltejs/kit";
 import { findStoredSong, listSongFolder } from "$lib/server/songFolder";
 import type { SongFile } from "$lib/songFiles/songFile";
+import { soundfontChoice } from "$lib/server/soundfonts";
 
-export async function load({ params }: ServerLoadEvent) {
+export async function load({ params, locals }: ServerLoadEvent) {
   const song = await findStoredSong(params.songId);
 
   // The page still opens when storage can't be read, and says so
@@ -18,5 +19,6 @@ export async function load({ params }: ServerLoadEvent) {
     pageTitle: null, // the page renders its own title, with tags and actions
     rootFiles,
     folderError,
+    soundfonts: await soundfontChoice(locals.brontoSession?.user),
   };
 }

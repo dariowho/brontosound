@@ -33,12 +33,22 @@ Charts don't say how long a line lasts, so: a lyrics line lasts one bar per chor
 Space plays and pauses. Click the timeline to set a start point: every play starts there. Drag across it to loop a part. Arrows move 5 s (a bar on a chart).
 
 - Audio files are decoded in memory, so playback starts at once from any point. Speed and pitch change independently through [SoundTouch](https://github.com/cutterbl/SoundTouchJS) (an AudioWorklet), bypassed at the original speed and pitch. Formats the browser can't decode (AIFF outside Safari) can't be played.
-- MIDI files play through a small built-in synth (oscillators, noise drums), with tracks that can be switched off.
+- MIDI files play through a soundfont (sampled General MIDI instruments and drums) or a small built-in synth (oscillators, noise drums), with tracks that can be switched off. **Sound** picks which; see below.
+
+## Soundfonts
+
+The player offers the built-in synth, every folder in `data/soundfonts/`, then `soundfonts` in band settings (`[{ "name": …, "url": … }]`). `defaultSoundfont` (a name) is where users start; each user's last pick is kept (`User.soundfont`). With neither, the first soundfont after the synth.
+
+A soundfont is the [MIDI.js](https://github.com/gleitz/midi-js-soundfonts) layout: `<instrument>-mp3.js` per GM instrument, plus `percussion-mp3.js` for drums. Only the instruments a file uses are loaded. An instrument that can't load plays through the built-in synth; if none can, the player says so.
+
+- **Self-hosted** (no third-party requests): `npm run fetch-soundfont` downloads FluidR3_GM (MIT, ~300 MB) into `data/soundfonts/FluidR3_GM/`, served to signed-in users by `/api/soundfont/<folder>/<file>`. `npm run fetch-soundfont -- <name> [<base URL>]` for another one.
+- **By URL**: e.g. `https://gleitz.github.io/midi-js-soundfonts/MusyngKite/` (no drums) or `https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/`. Every browser that plays a MIDI file then fetches from that host. The server must allow CORS.
 
 ## Code
 
 - `src/lib/songFiles/`: file kinds by extension, loading a file into a `SongDocument`.
 - `src/lib/chords/`: one parser per format into `ChordChart` (or `IRealSong`), transposition, `chartTimeline.ts` (bars for the player).
-- `src/lib/player/`: one engine per source, behind `PlaybackEngine`; `transport.svelte.ts` holds the practice controls.
+- `src/lib/player/`: one engine per source, behind `PlaybackEngine`; `transport.svelte.ts` holds the practice controls. MIDI notes go to `MidiInstruments`: `sampler.ts` (soundfonts) or `midiSynth.ts`.
+- `src/lib/server/soundfonts.ts`: the soundfonts on offer and the user's pick; `/api/soundfont` remembers it.
 - `src/lib/components/{songFolder,viewer,player}/`, and the page in `src/routes/app/songbook/[songId]/[songSlug]/`.
 - `/api/song/[songId]/folder`, `/file` and `/pins`: files are addressed relative to the song folder and can't leave it.

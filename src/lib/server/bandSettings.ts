@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 
 import { localDataRoot, settingsFilename } from "$lib/server/config";
 import { WebdavStorage, FilesystemStorage, type PersistedStorage } from './storage';
+import type { Soundfont } from '$lib/soundfonts';
 import { MAPS_PROVIDERS, type MapsConfig, type MapsProviderId } from '$lib/maps/providers';
 
 export interface SettingsData {
@@ -25,6 +26,8 @@ export interface SettingsData {
     googlemapsToken?: string;
     osmTileServer: string;
     osmNominatimServer?: string; // no default: check the public server's usage policy first (docs/maps.md)
+    soundfonts: Soundfont[]; // MIDI.js soundfonts by URL, besides those in data/soundfonts (docs/songPage.md)
+    defaultSoundfont?: string; // by name
     backlineStunServers: string[]; // tell Backline and the browsers on /backline their public addresses (docs/backline.md)
 }
 
@@ -42,6 +45,7 @@ export const defaultSettings: SettingsData = {
     ytInvidiousServer: "https://yewtu.be/",
     mapsProvider: "openstreetmap",
     osmTileServer: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    soundfonts: [],
     backlineStunServers: ["stun:stun.l.google.com:19302"],
 }
 

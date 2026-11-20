@@ -37,6 +37,10 @@ export const load = (async ({ locals }) => {
             text("OpenStreetMap tile server", "osmTileServer"),
             text("OpenStreetMap Nominatim server", "osmNominatimServer"),
         ] },
+        { title: "Soundfonts", hint: "MIDI files play through these, or folders in data/soundfonts. Each user picks one in the player.", entries: [
+            text("Default", "defaultSoundfont"),
+            ...s.soundfonts.map(({ name, url }): SettingEntry => ({ kind: 'text', label: name, key: 'soundfonts', value: url ?? '' })),
+        ] },
         { title: "Backline", entries: [list("STUN servers", "backlineStunServers")] },
         { title: "YouTube", entries: [toggle("Use Invidious", "ytInvidiousEnabled"), text("Invidious server", "ytInvidiousServer")] },
     ];

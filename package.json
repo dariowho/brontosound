@@ -19,7 +19,8 @@
     "release": "standard-version",
     "release:dry": "standard-version --dry-run",
     "update-version-file": "node scripts/update-version.js",
-    "hash-password": "vite-node --root scripts scripts/hash-password.js"
+    "hash-password": "vite-node --root scripts scripts/hash-password.js",
+    "fetch-soundfont": "vite-node --root scripts scripts/fetch-soundfont.js"
   },
   "devDependencies": {
     "@magidoc/plugin-svelte-marked": "^4.0.0",

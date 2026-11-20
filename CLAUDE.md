@@ -14,6 +14,7 @@ npm run test:integration  # playwright
 npm run release      # standard-version: bump, changelog, tag
 npm run release:dry  # preview the release
 npm run -s hash-password  # hash for adminPasswordHash in bandSettings.json
+npm run fetch-soundfont   # download FluidR3_GM into data/soundfonts (MIDI playback)
 ```
 
 Docker build/run instructions: see [README.md](README.md).
