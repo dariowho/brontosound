@@ -1,8 +1,11 @@
 <script lang="ts">
     import type { LiveGig } from '$lib/dbEntities/live';
     import { buildGigUrl } from '$lib/misc';
+    import { startGigDrag } from './gigDrag';
 
     let { gig }: { gig: LiveGig } = $props();
+
+    let dragging = $state(false);
 
     const interactionCount = $derived(gig.interactions?.length ?? 0);
     const lastInteractionDate = $derived(
@@ -12,7 +15,11 @@
 
 <a
     href={buildGigUrl(gig, gig.venue)}
-    class="flex flex-col gap-0.5 rounded-lg border border-gray-200 bg-white px-4 py-3.5 text-gray-900 hover:border-primary-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-800"
+    draggable="true"
+    ondragstart={(e) => { startGigDrag(e, gig.id); dragging = true; }}
+    ondragend={() => (dragging = false)}
+    class:opacity-50={dragging}
+    class="flex cursor-grab flex-col gap-0.5 rounded-lg border border-gray-200 bg-white px-4 py-3.5 text-gray-900 hover:border-primary-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-800"
 >
     <h3 class="text-[15px] font-bold leading-snug [overflow-wrap:anywhere]">{gig.venue.name}</h3>
     <span class="text-sm text-gray-600 [overflow-wrap:anywhere]">{gig.name}</span>
