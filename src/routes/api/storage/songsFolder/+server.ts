@@ -2,9 +2,9 @@ import { syncSongsFolder } from '$lib/server/cachedStorage';
 import type { RequestHandler } from '@sveltejs/kit';
 
 /**
- * List the content of a folder in the configured backend storage
+ * Sync the songs folder: create it if missing, list its song folders and cache them. POST: it changes state
  */
-export const GET = (async ({ url }) => {
+export const POST = (async () => {
     return new Response(JSON.stringify(await syncSongsFolder()));
 
 }) satisfies RequestHandler;

@@ -39,7 +39,7 @@
     errorMessage = null;
     try {
       await change();
-      cachedStoredDirs = await fetchApi('/api/storage/songsFolder');
+      cachedStoredDirs = await fetchApi('/api/storage/songsFolder', { method: 'POST' });
       lastCacheSync = new Date();
     } catch (e) {
       errorMessage = `${failure}: ${(e as Error).message}`;
