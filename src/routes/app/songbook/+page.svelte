@@ -57,7 +57,7 @@
 
   const createSong = (title: string, artist: string) => {
     showNewSongForm = false;
-    return saveSong({ title, artist, storedDirName: title.replaceAll('/', '-'), deleted: false } as Song);
+    return saveSong({ title, artist, storedDirName: title.replace(/[/\\]/g, '-'), deleted: false } as Song);
   };
 
   const deleteSong = (song: Song) => update("Failed to delete song", async () => {

@@ -5,13 +5,10 @@
     import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
     import { Fa } from "svelte-fa";
     import { browser } from "$app/environment";
-    import { SongFilenames, StoredSong } from "$lib/songbook.js";
-    import { plainToInstance } from "class-transformer";
 
     export let data;
     export let form: ActionData;
 
-    let song: StoredSong = plainToInstance(StoredSong, data.song);
     let content: string = (data.readmeFile) ? data.readmeFile.content : null;
 
 
@@ -26,7 +23,6 @@
 
 <form action="?/save" method="post">
     <textarea name="editor" id="editor" rows="20" bind:value={content}></textarea>
-    <input type="hidden" name="path" value={song.buildPath(SongFilenames.README)}>
 
     <Button href="{data.breadcrumb[data.breadcrumb.length-2].href}" color="alternative"><Fa icon={faArrowLeft} size="sm" /> &nbsp; Back</Button>
     <Button type="submit">Save</Button>

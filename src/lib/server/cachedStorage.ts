@@ -24,23 +24,6 @@ export async function syncSongsFolder() {
     return await syncFolder(bandSettings.songsFolder);
 }
 
-export async function syncFile(path: string): Promise<StoredFile> {
-    const [storage, db] = await Promise.all([
-        getUserStorage(),
-        TypeOrm.getDb()
-      ]);
-
-    // Fetch remote storage
-    const result = await storage.readTextFile(path);
-    // console.log(result);
-
-    // Sync cache
-    let files = db.getRepository(StoredFile)
-    files.save(result);
-
-    return result
-}
-
 export async function writeTextFile(path:string, content: string) {
     const [storage, db] = await Promise.all([
         getUserStorage(),

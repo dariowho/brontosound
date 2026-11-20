@@ -80,6 +80,7 @@ export async function writeSettings(settingsData: SettingsData): Promise<void> {
     }
 }
 
+/** The band's file storage. Paths start with the songs folder, and can't leave it. */
 export async function getUserStorage(): Promise<PersistedStorage> {
     const settings = readSettings();
     if (settings.webdavEnabled) {
@@ -87,10 +88,11 @@ export async function getUserStorage(): Promise<PersistedStorage> {
             settings.webdavServer,
             settings.webdavUsername,
             settings.webdavPassword,
+            settings.songsFolder!,
             settings.webdavConcurrentConnections
         );
     } else {
-        return new FilesystemStorage("data/");
+        return new FilesystemStorage("data/", settings.songsFolder!);
     }
 }
 

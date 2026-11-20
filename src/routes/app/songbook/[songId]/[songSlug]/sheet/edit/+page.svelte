@@ -5,13 +5,10 @@
     import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
     import { Fa } from "svelte-fa";
     import { browser } from "$app/environment";
-    import { SongFilenames, StoredSong } from "$lib/songbook.js";
-    import { plainToInstance } from "class-transformer";
 
     export let data;
     export let form: ActionData;
 
-    let song: StoredSong = plainToInstance(StoredSong, data.song);
     let content: string = (data.chordsFile) ? data.chordsFile.content : null;
 
     if (! content && !form ) {
@@ -28,7 +25,6 @@
     <P style="margin-bottom:1em"><Span class="uppercase">Format:</Span> <A href="https://www.chordpro.org/chordpro/chordpro-cheat_sheet/" target="_blank">https://www.chordpro.org/chordpro/chordpro-cheat_sheet/</A>.</P>
     <P style="margin-bottom:1em"><Span class="uppercase">Tip:</Span> Use <A href="https://ultimate.ftes.de/" target="_blank">https://ultimate.ftes.de/</A> to convert from Ultimate Guitar format.</P>
     <textarea name="editor" id="editor" rows="20" bind:value={content}></textarea>
-    <input type="hidden" name="path" value={song.buildPath(SongFilenames.CHORDS)}>
 
     <Button href="{data.breadcrumb[data.breadcrumb.length-2].href}" color="alternative"><Fa icon={faArrowLeft} size="sm" /> &nbsp; Back</Button>
     <Button type="submit">Save</Button>

@@ -1,11 +1,13 @@
 import type { Actions } from './$types';
 import { writeTextFile } from "$lib/server/cachedStorage";
 import { instanceToPlain } from "class-transformer";
+import { findStoredSong } from "$lib/server/songFolder";
+import { SongFilenames } from "$lib/songbook";
 
 export const actions = {
-    save: async ({request}) => {
+    save: async ({request, params}) => {
         const data = await request.formData();
-        const path = data.get('path')?.toString()
+        const path = (await findStoredSong(params.songId)).buildPath(SongFilenames.README);
         const newContent = data.get('editor')?.toString();
         if (newContent == null) return {
             success: false,
