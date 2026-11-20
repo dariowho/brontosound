@@ -9,6 +9,19 @@ export interface BrontoSession {
     permissions: string[],
 }
 
+// Routes open to visitors: every other route needs a signed-in user. `/backline` checks access itself.
+const PUBLIC_ROUTES = ['/', '/signin', '/signout'];
+
+/**
+ * Whether visitors may reach a route, by its id: the route SvelteKit matched, not the URL, which may be
+ * percent-encoded (`/%61pi/…` matches `/api/…`). No route (a 404) has nothing to guard.
+ */
+export function isPublicRoute(routeId: string | null): boolean {
+    return routeId === null || PUBLIC_ROUTES.includes(routeId) || routeId === '/backline' || routeId.startsWith('/backline/');
+}
+
+export const isApiRoute = (routeId: string | null) => !!routeId?.startsWith('/api/');
+
 export function isValidId(slug: string): boolean {
     return slugify(slug) == slug
 }

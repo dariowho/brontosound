@@ -1,7 +1,7 @@
 import type { Handle, HandleServerError, ServerInit } from "@sveltejs/kit";
 import { handle as authenticationHandle } from "./auth"
 import { sequence } from "@sveltejs/kit/hooks";
-import type { BrontoSession } from "$lib/server/session";
+import { isApiRoute, isPublicRoute, type BrontoSession } from "$lib/server/session";
 import { User } from "$lib/dbEntities/user";
 import { instanceToPlain } from "class-transformer";
 import { permissionsFromRole } from "$lib/dbEntities/user";
@@ -35,14 +35,11 @@ export const authorizationHandle: Handle = async ({ event, resolve }) => {
         }
 
         // Unauthenticated user
-    } else {
-        if (event.url.pathname.startsWith('/api')) {
+    } else if (!isPublicRoute(event.route.id)) {
+        if (isApiRoute(event.route.id)) {
             error(401, 'Your session has expired. Sign in again.');
         }
-        if (event.url.pathname.startsWith('/app')) {
-            console.log("invalid auth")
-            redirect(303, '/');
-        }
+        redirect(303, '/');
     }
 
     event.locals['brontoSession'] = brontoSession;
@@ -53,7 +50,7 @@ export const authorizationHandle: Handle = async ({ event, resolve }) => {
 // Send the actual error message to API clients, so the UI can display it
 export const handleError: HandleServerError = ({ error, event }) => {
     console.error(error);
-    if (event.url.pathname.startsWith('/api'))
+    if (isApiRoute(event.route.id))
         return { message: error instanceof Error ? error.message : String(error) };
 }
 
