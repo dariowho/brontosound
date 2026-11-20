@@ -42,6 +42,8 @@ The player offers the built-in synth, every folder in `data/soundfonts/`, then `
 
 A soundfont is the [MIDI.js](https://github.com/gleitz/midi-js-soundfonts) layout: `<instrument>-mp3.js` per GM instrument, plus `percussion-mp3.js` for drums. Only the instruments a file uses are loaded. An instrument that can't load plays through the built-in synth; if none can, the player says so.
 
+Each instrument is normalised when it loads: its samples are scaled so the loudest peak is full scale, keeping the notes' relative levels. Soundfonts are recorded well below that (FluidR3 peaks around -20 dBFS), so unscaled they'd play far quieter than the built-in synth. The soundfont's balance between instruments is lost; velocities and track switches still set the mix. A limiter on the MIDI output keeps chords from clipping, with either sound.
+
 - **Self-hosted** (no third-party requests): `npm run fetch-soundfont` downloads FluidR3_GM (MIT, ~300 MB) into `data/soundfonts/FluidR3_GM/`, served to signed-in users by `/api/soundfont/<folder>/<file>`. `npm run fetch-soundfont -- <name> [<base URL>]` for another one.
 - **By URL**: e.g. `https://gleitz.github.io/midi-js-soundfonts/MusyngKite/` (no drums) or `https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/`. Every browser that plays a MIDI file then fetches from that host. The server must allow CORS.
 

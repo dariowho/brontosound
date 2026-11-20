@@ -32,6 +32,7 @@ export class MidiEngine implements PlaybackEngine {
     private instruments: MidiInstruments = this.synth;
     private soundfontRequest = 0; // the latest wins
     private outputs: GainNode[]; // one per track, to mute it at once
+    private limiter = new DynamicsCompressorNode(this.context, { threshold: -6, knee: 0, ratio: 20, attack: 0.003, release: 0.25 }); // chords don't clip
     private rate = 1;
     private semitones = 0;
 
@@ -52,7 +53,8 @@ export class MidiEngine implements PlaybackEngine {
                 enabled: true,
             }));
         this.outputs = this.tracks.map(() => new GainNode(this.context));
-        this.outputs.forEach(output => output.connect(this.context.destination));
+        this.outputs.forEach(output => output.connect(this.limiter));
+        this.limiter.connect(this.context.destination);
     }
 
     position() {
@@ -105,6 +107,7 @@ export class MidiEngine implements PlaybackEngine {
         this.soundfontRequest++;
         this.pause();
         this.outputs.forEach(output => output.disconnect());
+        this.limiter.disconnect();
     }
 
     /** Play the notes starting between `from` and `to` (song time) */

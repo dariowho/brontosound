@@ -8,7 +8,7 @@ import type { MidiInstruments, SynthNote } from './midiSynth';
 
 type Samples = Map<number, AudioBuffer>; // by note number
 
-const VOLUME = 0.5; // per note, leaving headroom for chords
+const VOLUME = 0.5; // per note, for samples normalised to full scale: about as loud as the built-in synth
 const RELEASE = 0.15; // seconds
 
 const loaded = new Map<string, Promise<Samples>>(); // by file URL, for every player on the page
@@ -97,7 +97,20 @@ async function decodeSoundfontFile(context: AudioContext, url: string): Promise<
     const notes = [...(await response.text()).matchAll(/"([A-G][b#]?-?\d)"\s*:\s*"data:[^;]*;base64,([^"]*)"/g)];
     const decoded = await Promise.all(notes.map(async ([, name, base64]) =>
         [noteNumber(name), await context.decodeAudioData(bytesOf(base64))] as const));
+    normalise(decoded.map(([, buffer]) => buffer));
     return new Map(decoded);
+}
+
+/**
+ * Scale an instrument's samples so its loudest peak is full scale, keeping the notes' relative levels.
+ * Soundfonts are recorded well below it (FluidR3 peaks around -20 dBFS), and each at its own level.
+ */
+function normalise(buffers: AudioBuffer[]) {
+    const channels = buffers.flatMap(buffer => Array.from({ length: buffer.numberOfChannels }, (_, i) => buffer.getChannelData(i)));
+    let peak = 0;
+    for (const data of channels) for (const sample of data) peak = Math.max(peak, Math.abs(sample));
+    if (peak == 0) return;
+    for (const data of channels) for (let i = 0; i < data.length; i++) data[i] /= peak;
 }
 
 const PITCH_CLASSES: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
