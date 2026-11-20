@@ -128,6 +128,7 @@ export class FilesystemStorage implements PersistedStorage {
             .filter(dirent => dirent.name[0] != '.');
         dirents.forEach(dirent => {
             const r = new StoredDirectory();
+            r.parentPath = path.join(...pathSegments);
             r.name = dirent.name;
             r.path = path.join(...pathSegments, dirent.name);
             r.creationDate = new Date(); // TODO: implement
