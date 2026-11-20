@@ -1,4 +1,5 @@
 import type { Handle, HandleServerError, ServerInit } from "@sveltejs/kit";
+import { randomBytes } from "node:crypto";
 import { handle as authenticationHandle } from "./auth"
 import { sequence } from "@sveltejs/kit/hooks";
 import { isApiRoute, isPublicRoute, type BrontoSession } from "$lib/server/session";
@@ -66,11 +67,15 @@ export const securityHeadersHandle: Handle = async ({ event, resolve }) => {
     return response;
 };
 
-// Send the actual error message to API clients, so the UI can display it
-export const handleError: HandleServerError = ({ error, event }) => {
-    console.error(error);
-    if (isApiRoute(event.route.id))
-        return { message: error instanceof Error ? error.message : String(error) };
+// Unexpected errors: the details (paths, SQL, WebDAV URLs) stay in the server log, under an id the user can quote.
+// Expected ones, thrown with `error(4xx, message)`, never get here: their message reaches the UI as is
+export const handleError: HandleServerError = ({ error, status, message }) => {
+    if (status < 500) {
+        return { message };
+    }
+    const id = randomBytes(4).toString('hex');
+    console.error(`Error ${id}:`, error);
+    return { message: `Something went wrong (error ${id})` };
 }
 
 export const handle: Handle = sequence(securityHeadersHandle, debugHandle, authenticationHandle, authorizationHandle)
