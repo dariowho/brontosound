@@ -13,12 +13,14 @@
     import { locationLatLng, PLACE_PAGE_LABELS, type Place, type PlaceLink } from '$lib/maps/place';
     import { buildGigUrl } from '$lib/misc.js';
     import { safeUrl } from '$lib/safeUrl';
+    import { can } from '$lib/permissions';
     import EditableTextBox from '$lib/components/EditableTextBox.svelte';
     import { EnvelopeOutline, GlobeOutline, LinkOutline, MapPinOutline, PhoneOutline, ProfileCardOutline } from 'flowbite-svelte-icons';
   
   export let form: ActionData;
   export let data;
   export let venue = data.venue as LiveVenue;
+  const canEdit = can(data.brontoSession, 'live.write');
   // console.log('Venue', venue);
   
   $: venueLatLng = venue.location ? locationLatLng(venue.location) : null;
@@ -161,17 +163,17 @@
 
 <div class="grid md:grid-cols-2 gap-2 mb-5" style="min-height:300px;">
   <div class="map mb-5" style="width:100%; height: 100%; min-height:300px;">
-    <VenueMap config={data.safeBandSettings.maps} location={venueLatLng} onSave={updateVenueLocation} />
+    <VenueMap config={data.safeBandSettings.maps} location={venueLatLng} onSave={canEdit ? updateVenueLocation : undefined} />
   </div>
   <div class="venueNote" style="min-height:200px;">
-    <EditableTextBox bind:content={venue.note} bind:editingDisabled={busy} handleSave={handleSaveNote} height="100%"/>
+    <EditableTextBox bind:content={venue.note} bind:editingDisabled={busy} editable={canEdit} handleSave={handleSaveNote} height="100%"/>
   </div>
 </div>
 
 <div class="venueLinks mb-5">
   {#each venueLinkProperies as link}
   <Badge
-    dismissable on:close={() => updateVenue({links: venue.links.filter(l => l.id !== link.id)})}
+    dismissable={canEdit} on:close={() => updateVenue({links: venue.links.filter(l => l.id !== link.id)})}
     href={link.href}
     class="mb-2 mr-2 h-8" border
   >
@@ -185,8 +187,12 @@
 
 {#if venue.gigs.length == 0 && ! newGig}
   <PlaceholderBox>
-    <p class="mb-3">You never performed here 😢. Add a new gig if you did so in th past, or if you want to ask {data.venue.name} for the future!</p>
-    <Button on:click={startNewGig}>Add a past or future gig</Button>
+    {#if canEdit}
+      <p class="mb-3">You never performed here 😢. Add a new gig if you did so in th past, or if you want to ask {data.venue.name} for the future!</p>
+      <Button on:click={startNewGig}>Add a past or future gig</Button>
+    {:else}
+      <p>You never performed here 😢</p>
+    {/if}
   </PlaceholderBox>
 {:else}
   {#if newGig}
@@ -217,7 +223,7 @@
   </form>
   {/if}
   {#if venue.gigs.length > 0}
-    {#if ! newGig}
+    {#if canEdit && ! newGig}
       <Button on:click={startNewGig} class="mt-5 mb-3">Add a past or future gig</Button>
     {/if}
     <Table hoverable={true}>

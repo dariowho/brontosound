@@ -9,12 +9,14 @@
   import type { StoredDirectory } from '$lib/dbEntities/storage';
   import { fetchApi, saveEntityViaApi } from '$lib/db';
   import { reconcileSongs } from '$lib/songbook';
+  import { can } from '$lib/permissions';
   import PageTitle from '$lib/components/PageTitle.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import NewSongForm from './NewSongForm.svelte';
   import DeletedSongs from './DeletedSongs.svelte';
 
   let { data } = $props();
+  const canEdit = can(data.brontoSession, 'songbook.write');
   let songs = $state(data.songs as Song[]);
   let cachedStoredDirs = $state(data.cachedStoredDirs as StoredDirectory[]);
   let lastCacheSync = $state(data.lastCacheSync);
@@ -87,7 +89,7 @@
     <Button color="alternative" disabled={busy} onclick={sync}>
       {#if busy}<Spinner size="4" class="me-2" />{:else}<Fa icon={faRotate} class="me-2" />{/if}Sync storage
     </Button>
-    {#if reconciled.existing.length > 0}
+    {#if canEdit && reconciled.existing.length > 0}
       <Button onclick={() => showNewSongForm = !showNewSongForm}><Fa icon={faPlus} class="me-2" />New song</Button>
     {/if}
   {/snippet}
@@ -126,8 +128,10 @@
       <TableBodyRow>
         <TableBodyCell colspan={4}>
           <EmptyState icon={faMusic} title="There are no songs in your Songbook yet">
-            <p class="text-sm font-normal text-gray-600">Create your first song here. Already have song folders in your storage? Sync storage and they will show up under New songs.</p>
-            <div class="mt-3 w-full font-normal"><NewSongForm songsFolder={data.songsFolder} {busy} onCreate={createSong} /></div>
+            {#if canEdit}
+              <p class="text-sm font-normal text-gray-600">Create your first song here. Already have song folders in your storage? Sync storage and they will show up under New songs.</p>
+              <div class="mt-3 w-full font-normal"><NewSongForm songsFolder={data.songsFolder} {busy} onCreate={createSong} /></div>
+            {/if}
           </EmptyState>
         </TableBodyCell>
       </TableBodyRow>
@@ -135,7 +139,8 @@
   </TableBody>
 </Table>
 
-{#if newSongs.length > 0}
+<!-- Adding and removing songs: editors only -->
+{#if canEdit && newSongs.length > 0}
   <h2 class="mb-2 mt-14 text-4xl font-bold text-gray-900">New songs</h2>
   <p class="mb-4 text-sm text-gray-700">These folders were found in your storage, but are not yet in your Songbook: add them!</p>
   <Table>
@@ -158,7 +163,7 @@
   </Table>
 {/if}
 
-{#if reconciled.deleted.length > 0}
+{#if canEdit && reconciled.deleted.length > 0}
   <button class="mt-10 inline-flex items-center gap-2 py-2 text-sm text-gray-500 hover:text-gray-700" onclick={() => showDeletedSongs = !showDeletedSongs}>
     <Fa icon={showDeletedSongs ? faChevronUp : faChevronDown} size="xs" />
     {showDeletedSongs ? 'Hide' : 'Show'} {reconciled.deleted.length} deleted song{reconciled.deleted.length == 1 ? '' : 's'}

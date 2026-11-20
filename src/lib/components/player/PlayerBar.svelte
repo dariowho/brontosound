@@ -19,7 +19,8 @@
      * Space plays and pauses, every play starts from the start point, arrows move 5 s (a bar on a chart).
      * On phones it's a single bar that opens a sheet with every control.
      */
-    let { songId, fileSource, chartSource, playChart = $bindable(), transpose = $bindable(), position = $bindable(), pinned, soundfonts, onTogglePin, onCloseFile, onDeleteFile }: {
+    let { editable, songId, fileSource, chartSource, playChart = $bindable(), transpose = $bindable(), position = $bindable(), pinned, soundfonts, onTogglePin, onCloseFile, onDeleteFile }: {
+        editable: boolean, // pin and delete the file
         songId: number,
         fileSource: PlayerSource | null, // the audio or MIDI file in the player
         chartSource: PlayerSource | null, // the chart in the viewer, if it can drive the player
@@ -34,6 +35,7 @@
     } = $props();
 
     let source = $derived(playChart && chartSource ? chartSource : fileSource ?? chartSource);
+    let fileActions = $derived(editable && source?.kind == 'file'); // pin and delete
     const player = new PlayerState(songId, () => source);
     const transport = player.transport;
     let soundfont = $state(soundfonts.selected); // kept from file to file
@@ -164,7 +166,7 @@
             </div>
             <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
                 <PlayerSettings {player} {source} bind:transpose />
-                {#if source?.kind == 'file'}
+                {#if fileActions}
                     <div class="flex gap-2">
                         <PinButton {pinned} onToggle={onTogglePin} />
                         {@render deleteButton('h-9')}
@@ -196,7 +198,7 @@
     <BottomSheet label="Player" onClose={() => sheetOpen = false}>
         <div class="mt-1 flex items-start gap-2">
             <div class="flex min-w-0 flex-1"><SourcePicker {fileSource} {chartSource} bind:playChart onCloseFile={closeFile} /></div>
-            {#if source?.kind == 'file'}<PinButton {pinned} onToggle={onTogglePin} class="h-10 shrink-0 gap-1.5" />{/if}
+            {#if fileActions}<PinButton {pinned} onToggle={onTogglePin} class="h-10 shrink-0 gap-1.5" />{/if}
         </div>
 
         <div class="mt-6 flex flex-col">
@@ -218,7 +220,7 @@
             <PlayerSettings {player} {source} bind:transpose itemClass={sheetRow} />
             <PlayerExtras {player} soundfonts={soundfonts.soundfonts} bind:soundfont itemClass={sheetRow} />
         </div>
-        {#if source?.kind == 'file'}
+        {#if fileActions}
             <div class="-mx-6 mt-6 flex flex-col">
                 <div class="px-6">{@render deleteButton('h-11 w-full')}</div>
                 <div class="mt-3">{@render confirmDelete()}</div>

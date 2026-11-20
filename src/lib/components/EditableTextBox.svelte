@@ -6,6 +6,7 @@
     import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 
     export let content: string;
+    export let editable: boolean; // else the notes only show
     export let handleSave: CallableFunction;
     export let isEditing = false;
     export let editingDisabled = false;
@@ -29,9 +30,11 @@
         }}/>
       {:else}
         <div class="gigNotesMarkdown p-2 rounded-md" style="min-height: {height};">
-          <div class="sectionButtons">
-            <Button class="!p-2 mb-2" on:click={() => isEditing = true} disabled={editingDisabled}><Fa icon={faPenToSquare} size="lg" /></Button>
-          </div>
+          {#if editable}
+            <div class="sectionButtons">
+              <Button class="!p-2 mb-2" on:click={() => isEditing = true} disabled={editingDisabled}><Fa icon={faPenToSquare} size="lg" /></Button>
+            </div>
+          {/if}
           <div class="markdown">
             <Markdown source={content} />
           </div>
@@ -63,7 +66,11 @@
     </div>
   {:else}
     <PlaceholderBox {height}>
-      <Button disabled={editingDisabled} on:click={() => {isEditing = true}}>Add Notes</Button>
+      {#if editable}
+        <Button disabled={editingDisabled} on:click={() => {isEditing = true}}>Add Notes</Button>
+      {:else}
+        <p class="text-sm text-gray-500">No notes yet.</p>
+      {/if}
     </PlaceholderBox>
   {/if}
 

@@ -1,9 +1,11 @@
 <script lang="ts">
     import { LIVE_GIG_STATUS_NAME_FROM_ENUM, LiveGig, LiveGigStatus } from '$lib/dbEntities/live';
     import { saveEntityViaApi } from '$lib/db';
+    import { can } from '$lib/permissions';
     import GigPursuitColumn from './GigPursuitColumn.svelte';
 
     let { data } = $props();
+    const canMove = can(data.brontoSession, 'live.write');
 
     /** Board columns in pipeline order; each shows the gigs in any of its statuses, and dropping a gig sets `status`. */
     const COLUMNS: { status: LiveGigStatus, alsoShows?: LiveGigStatus[], needsUs?: boolean }[] = [
@@ -47,7 +49,7 @@
             title={LIVE_GIG_STATUS_NAME_FROM_ENUM[column.status]}
             gigs={gigsIn(column)}
             needsUs={column.needsUs}
-            onDropGig={(gigId) => moveGig(gigId, column)}
+            onDropGig={canMove ? (gigId) => moveGig(gigId, column) : undefined}
         />
     {/each}
 </div>

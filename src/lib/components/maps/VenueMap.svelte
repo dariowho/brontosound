@@ -5,11 +5,11 @@
     import GoogleMap from './GoogleMap.svelte';
     import LeafletMap from './LeafletMap.svelte';
 
-    /** A venue's map, drawn by the maps provider chosen in band settings. */
+    /** A venue's map, drawn by the maps provider chosen in band settings. Without `onSave`, it only shows the location. */
     let { config, location, onSave }: {
         config: MapsConfig,
         location: LatLng | null,
-        onSave: (place: Place) => Promise<unknown>,
+        onSave?: (place: Place) => Promise<unknown>,
     } = $props();
 
     let { name, keySetting } = $derived(MAPS_PROVIDERS[config.provider]);

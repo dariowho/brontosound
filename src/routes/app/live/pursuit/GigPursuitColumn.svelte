@@ -3,18 +3,18 @@
     import GigPursuitCard from './GigPursuitCard.svelte';
     import { droppedGigId, isGigDrag } from './gigDrag';
 
-    /** `needsUs`: the gigs here wait on the band, so a dot flags a non-empty column. */
+    /** `needsUs`: the gigs here wait on the band, so a dot flags a non-empty column. Without `onDropGig`, gigs can't be moved. */
     let { title, gigs, needsUs = false, onDropGig }: {
         title: string,
         gigs: LiveGig[],
         needsUs?: boolean,
-        onDropGig: (gigId: number) => void,
+        onDropGig?: (gigId: number) => void,
     } = $props();
 
     let dropTarget = $state(false);
 
     function onDragOver(event: DragEvent) {
-        if (!isGigDrag(event)) return;
+        if (!onDropGig || !isGigDrag(event)) return;
         event.preventDefault();  // accept the drop
         dropTarget = true;
     }
@@ -28,7 +28,7 @@
         event.preventDefault();
         dropTarget = false;
         const gigId = droppedGigId(event);
-        if (gigId) onDropGig(gigId);
+        if (gigId) onDropGig?.(gigId);
     }
 </script>
 
@@ -49,7 +49,7 @@
     </div>
 
     {#each gigs as gig (gig.id)}
-        <GigPursuitCard {gig} />
+        <GigPursuitCard {gig} movable={!!onDropGig} />
     {:else}
         <p class="px-1 pb-2 pt-1 text-[13px] text-gray-600">No gigs</p>
     {/each}

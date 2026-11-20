@@ -18,9 +18,10 @@
     import TextEditor from './TextEditor.svelte';
     import TextView from './TextView.svelte';
 
-    /** The file selected in the folder, shown in full: charts, documents, or a download panel. Text files can be edited. */
-    let { songId, file, document, error, pinned, onTogglePin, transpose = $bindable(), activeBar,
+    /** The file selected in the folder, shown in full: charts, documents, or a download panel. When `editable`, text files can be edited. */
+    let { editable, songId, file, document, error, pinned, onTogglePin, transpose = $bindable(), activeBar,
         editing = $bindable(), unsavedText = $bindable(), onSaveText, onCloseEditor, onDelete }: {
+        editable: boolean, // edit, pin and delete
         songId: number,
         file: SongFile | null,
         document: SongDocument | null, // `file`, once loaded
@@ -74,17 +75,19 @@
                     </div>
                 {/if}
                 <div class="grid w-full auto-cols-fr grid-flow-col gap-2 sm:flex sm:w-auto">
-                    {#if isEditableText(file) && document}
+                    {#if editable && isEditableText(file) && document}
                         <button type="button" class="{actionButton} border-gray-300 bg-white text-gray-900 hover:bg-gray-50" onclick={() => editing = true}><Fa icon={faPencil} size="xs" />Edit</button>
                     {/if}
                     {#if document?.kind != 'download'}
                         <a href={songFileUrl(songId, file, true)} class="{actionButton} border-gray-300 bg-white text-gray-900 hover:bg-gray-50"><Fa icon={faDownload} size="xs" />Download</a>
-                        <PinButton {pinned} onToggle={onTogglePin} class={actionLayout} />
+                        {#if editable}<PinButton {pinned} onToggle={onTogglePin} class={actionLayout} />{/if}
                     {/if}
-                    <button type="button" aria-expanded={confirmingDelete == file.path} onclick={() => confirmingDelete = file.path}
-                        class="{actionButton} border-red-300 text-red-700 {confirmingDelete == file.path ? 'bg-red-50' : 'bg-white hover:bg-red-50'}">
-                        <Fa icon={faTrashCan} size="xs" />Delete
-                    </button>
+                    {#if editable}
+                        <button type="button" aria-expanded={confirmingDelete == file.path} onclick={() => confirmingDelete = file.path}
+                            class="{actionButton} border-red-300 text-red-700 {confirmingDelete == file.path ? 'bg-red-50' : 'bg-white hover:bg-red-50'}">
+                            <Fa icon={faTrashCan} size="xs" />Delete
+                        </button>
+                    {/if}
                 </div>
             </div>
         </div>

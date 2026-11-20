@@ -9,11 +9,13 @@
   import { saveEntityViaApi } from '$lib/db.js';
   import { CurrencyCode } from '$lib/currencyCodes.js';
   import EditableTextBox from '$lib/components/EditableTextBox.svelte';
+  import { can } from '$lib/permissions';
 
   export let form: ActionData;
 
   export let data;
   export let gig = data.gig as LiveGig;
+  const canEdit = can(data.brontoSession, 'live.write');
   // console.log('Gig', gig);
 
   let busy = false;
@@ -69,21 +71,21 @@
   <div class="gigData grid gap-6 mb-6 md:grid-cols-2">
     <div>
       <Label for="first_name" class="mb-2">Status</Label>
-      <Select items={LIVE_GIG_STATUS_NAMES} value={gig.status} disabled={busy} on:change={async (e) => {
+      <Select items={LIVE_GIG_STATUS_NAMES} value={gig.status} disabled={busy || !canEdit} on:change={async (e) => {
         const value =  (e.target as HTMLSelectElement).value;
         await updateGig({status: LiveGigStatus[value]});
       }}/>
     </div>
     <div>
       <Label for="first_name" class="mb-2">We aksed (EUR)</Label>
-      <Input type="number" step="0.01" id="proposedCachet" placeholder="500" value={(gig.proposedCachet) ? gig.proposedCachet.amount : null} on:keydown={handleEscape} on:change={async (e) => {
+      <Input type="number" step="0.01" id="proposedCachet" placeholder="500" value={(gig.proposedCachet) ? gig.proposedCachet.amount : null} disabled={!canEdit} on:keydown={handleEscape} on:change={async (e) => {
         const value =  (e.target as HTMLInputElement).value;
         await updateGig({proposedCachet: {amount: parseFloat(value), currency: CurrencyCode.EUR}});
       }} />
     </div>
   </div>
 
-  <EditableTextBox bind:content={gig.note} bind:editingDisabled={busy} handleSave={handleSaveNote} />
+  <EditableTextBox bind:content={gig.note} bind:editingDisabled={busy} editable={canEdit} handleSave={handleSaveNote} />
 
   
   
@@ -91,6 +93,7 @@
 
 <Heading tag="h2" class="mb-3">Interactions</Heading>
 <div class="gigInteractions">
+  {#if canEdit}
   <form action="?/saveNewInteraction" method="POST">
     <Textarea class="mb-8" placeholder="Post an update" bind:value={newInteraction.note}>
       <div slot="footer" class="flex items-center justify-between gap-3 flex-wrap">
@@ -109,6 +112,7 @@
       </div>
     </Textarea>
   </form>
+  {/if}
 
   <div class="interactionCards">
     {#each gig.interactions.sort((a, b) => {return new Date(b.date).getTime() - new Date(a.date).getTime()}) as interaction}

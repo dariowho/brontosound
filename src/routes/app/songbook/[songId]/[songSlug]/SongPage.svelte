@@ -4,6 +4,7 @@
     import DocumentViewer from '$lib/components/viewer/DocumentViewer.svelte';
     import PlayerBar from '$lib/components/player/PlayerBar.svelte';
     import { pathJoin } from '$lib/misc';
+    import { can } from '$lib/permissions';
     import type { SongFile } from '$lib/songFiles/songFile';
     import SongHeader from './SongHeader.svelte';
     import { SongPageState } from './songPage.svelte';
@@ -12,6 +13,7 @@
     let { data } = $props();
 
     const song = data.song;
+    const editable = can(data.brontoSession, 'songbook.write'); // else the page only shows and plays
     const page = new SongPageState(song.id, data.rootFiles, data.folderError, {
         pinnedDocument: song.pinnedDocument ?? null,
         pinnedAudio: song.pinnedAudio ?? null,
@@ -26,10 +28,10 @@
 </script>
 
 <SongHeader songId={song.id} initialTitle={song.title} initialArtist={song.artist ?? ''} tags={song.tags.map((tag: { name: string }) => tag.name)} allTags={data.allTags}
-    syncing={page.syncing} onSync={() => page.sync()} />
+    {editable} syncing={page.syncing} onSync={() => page.sync()} />
 
 <div class="flex flex-col gap-6">
-    <FolderBrowser rootName={song.storedDirName} folderPath={page.folderPath} files={page.files} error={page.folderError}
+    <FolderBrowser {editable} rootName={song.storedDirName} folderPath={page.folderPath} files={page.files} error={page.folderError}
         storagePath={pathJoin('', song.songsFolder, song.storedDirName, page.folderPath).replace(/\/$/, '')} uploads={page.uploads.filter(upload => upload.folder == page.folderPath)}
         isInViewer={file => isSame(page.viewerFile, file)}
         isInPlayer={file => isSame(page.chartIsPlaying ? page.viewerFile : page.playerFile, file)}
@@ -37,7 +39,7 @@
         onBrowse={path => page.browse(path)} onOpen={file => page.open(file)}
         onUpload={files => page.upload(files)} onDismissUpload={upload => page.dismissUpload(upload)} />
 
-    <DocumentViewer songId={song.id} file={page.viewerFile} document={page.document} error={page.documentError}
+    <DocumentViewer {editable} songId={song.id} file={page.viewerFile} document={page.document} error={page.documentError}
         pinned={!!page.viewerFile && page.pins.pinnedDocument == page.viewerFile.path} onTogglePin={() => page.togglePin('pinnedDocument')}
         bind:transpose={page.transpose} {activeBar}
         bind:editing={page.editing} bind:unsavedText={page.unsavedText} onCloseEditor={() => page.leaveEditor()}
@@ -45,7 +47,7 @@
 </div>
 
 {#if page.fileSource || page.chartSource}
-    <PlayerBar songId={song.id} fileSource={page.fileSource} chartSource={page.chartSource} bind:playChart={page.playChart} bind:transpose={page.transpose}
+    <PlayerBar {editable} songId={song.id} fileSource={page.fileSource} chartSource={page.chartSource} bind:playChart={page.playChart} bind:transpose={page.transpose}
         bind:position pinned={!!page.playerFile && page.pins.pinnedAudio == page.playerFile.path} soundfonts={data.soundfonts} onTogglePin={() => page.togglePin('pinnedAudio')}
         onCloseFile={() => page.closePlayerFile()} onDeleteFile={() => page.deleteFile(page.playerFile!)} />
 {/if}

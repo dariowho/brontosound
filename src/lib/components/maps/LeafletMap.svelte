@@ -7,11 +7,11 @@
     import PlaceSearch from './PlaceSearch.svelte';
     import SelectedPlace from './SelectedPlace.svelte';
 
-    /** A Leaflet map of a provider's tiles: pins the saved location, finds and saves a new one. */
+    /** A Leaflet map of a provider's tiles: pins the saved location; with `onSave`, finds and saves a new one. */
     let { provider, location, onSave }: {
         provider: TileProvider,
         location: LatLng | null,
-        onSave: (place: Place) => Promise<unknown>,
+        onSave?: (place: Place) => Promise<unknown>,
     } = $props();
 
     const PIN_STYLE: Leaflet.CircleMarkerOptions = { radius: 9, weight: 3, color: '#FFFFFF', fillColor: '#EB4F27', fillOpacity: 1 };
@@ -58,15 +58,15 @@
     }
 
     async function save() {
-        await onSave(selected!);
+        await onSave!(selected!);
         selected = null;
     }
 </script>
 
 <div class="flex h-full flex-col gap-2">
-    {#if provider.search}
+    {#if onSave && provider.search}
         <PlaceSearch search={provider.search} area={visibleArea} onSelect={select} />
-    {:else}
+    {:else if onSave}
         <p class="text-sm text-gray-500">Place search is not set up for this maps provider. See Settings › Maps.</p>
     {/if}
 

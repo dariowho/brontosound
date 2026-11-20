@@ -3,6 +3,7 @@
     import UsersSettings from "./UsersSettings.svelte";
     import SettingField from "./SettingField.svelte";
     import TestStorage from "./TestStorage.svelte";
+    import { can } from "$lib/permissions";
     import type { PageData } from "./$types";
 
     export let data: PageData;
@@ -28,7 +29,7 @@
                     <SettingField {entry} />
                 {/each}
             </div>
-            {#if section.title === "WebDAV"}
+            {#if section.title === "WebDAV" && can(data.brontoSession, 'bandSettings.write')}
                 <TestStorage />
             {/if}
             <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">Read-only. Edit <code>data/{data.settingsFilename}</code> and restart the app.</p>

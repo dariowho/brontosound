@@ -6,8 +6,12 @@
     import FileTile from './FileTile.svelte';
     import UploadTile from './UploadTile.svelte';
 
-    /** The song folder as icons, browsable into subfolders. Files dropped on it, or picked with Upload, go into the folder shown. */
-    let { rootName, folderPath, storagePath, files, uploads, error, isInViewer, isInPlayer, isPinned, onBrowse, onOpen, onUpload, onDismissUpload }: {
+    /**
+     * The song folder as icons, browsable into subfolders. When `editable`, files dropped on it, or picked with Upload,
+     * go into the folder shown.
+     */
+    let { editable, rootName, folderPath, storagePath, files, uploads, error, isInViewer, isInPlayer, isPinned, onBrowse, onOpen, onUpload, onDismissUpload }: {
+        editable: boolean,
         rootName: string, // the song folder's name
         folderPath: string, // relative to the song folder, "" for the song folder
         storagePath: string, // the folder's path in storage, to say where uploads go
@@ -33,7 +37,7 @@
     let dragged = $state(0); // files being dragged over the folder; 0 when none
     let depth = 0; // dragenter and dragleave fire for every child element
 
-    const hasFiles = (event: DragEvent) => !!event.dataTransfer?.types.includes('Files');
+    const hasFiles = (event: DragEvent) => editable && !!event.dataTransfer?.types.includes('Files');
 
     function dragEnter(event: DragEvent) {
         if (!hasFiles(event)) return;
@@ -73,18 +77,20 @@
         </nav>
         <div class="flex items-center gap-3 sm:gap-4">
             <span class="text-[13px] text-gray-500">{files.length} {files.length == 1 ? 'item' : 'items'}</span>
-            <button type="button" onclick={() => picker.click()}
-                class="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-medium text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-primary-300 sm:h-9">
-                <Fa icon={faUpload} size="sm" />Upload
-            </button>
-            <input bind:this={picker} type="file" multiple hidden onchange={picked} />
+            {#if editable}
+                <button type="button" onclick={() => picker.click()}
+                    class="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-medium text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-primary-300 sm:h-9">
+                    <Fa icon={faUpload} size="sm" />Upload
+                </button>
+                <input bind:this={picker} type="file" multiple hidden onchange={picked} />
+            {/if}
         </div>
     </div>
 
     {#if error}
         <p class="px-5 py-8 text-sm text-gray-600">Brontosound can't read this folder: {error}</p>
     {:else if files.length == 0 && uploads.length == 0}
-        <p class="px-5 py-8 text-sm text-gray-600">This folder is empty. Drop files here or upload them.</p>
+        <p class="px-5 py-8 text-sm text-gray-600">This folder is empty.{editable ? ' Drop files here or upload them.' : ''}</p>
     {:else}
         <div class="grid grid-cols-3 gap-2 p-3 sm:grid-cols-[repeat(auto-fill,minmax(112px,1fr))] sm:p-4">
             {#each files as file (file.path)}

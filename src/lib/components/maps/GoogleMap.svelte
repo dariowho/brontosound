@@ -7,7 +7,7 @@
 
     export let token: string;
     export let lat: number | undefined, lng: number | undefined;
-    export let onSave: (place: Place) => Promise<unknown>;
+    export let onSave: ((place: Place) => Promise<unknown>) | undefined = undefined; // without it, the map only shows the location
 
     let latLng;
     $: latLng = {lat: lat, lng: lng};
@@ -60,11 +60,17 @@
             zoom: zoom,
             options: {mapTypeControl: false}
         })
-        placesService = new google.maps.places.PlacesService(map);
-        let autocomplete = new google.maps.places.Autocomplete(autocompleteInputElement)
-        // console.log("map:", map)
         map.center = latLng;
         mapMarker = new google.maps.Marker();
+        if (onSave) {
+            initPlaceSearch();
+        }
+    }
+
+    // Finding a new place: in the search box, or by clicking one on the map
+    function initPlaceSearch() {
+        placesService = new google.maps.places.PlacesService(map);
+        let autocomplete = new google.maps.places.Autocomplete(autocompleteInputElement)
 
         map.addListener("click", (e) => {
             e.stop();
@@ -133,7 +139,7 @@
 
     async function handleSave() {
         const place = googlePlaceToPlace(newPlace);
-        await onSave(place);
+        await onSave!(place);
         lat = place.location.latitude;
         lng = place.location.longitude;
         newPlace = null;
@@ -147,9 +153,11 @@
     <div class="map" style="width:100%; height: 100%;" bind:this={mapComponent}></div>
 
     <div class="buttonOverlay">
-        <div class="search">
-            <input type="text" bind:this={autocompleteInputElement}/>
-        </div>
+        {#if onSave}
+            <div class="search">
+                <input type="text" bind:this={autocompleteInputElement}/>
+            </div>
+        {/if}
         {#if newPlace}
             <div class="buttonsContainer">
                 <SelectedPlace place={googlePlaceToPlace(newPlace)} onSave={handleSave} onCancel={cancelNewPlace} />

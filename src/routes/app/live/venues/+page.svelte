@@ -2,12 +2,14 @@
     import { saveEntityViaApi } from '$lib/db';
     import { LiveVenue } from '$lib/dbEntities/live';
     import { buildVenueUrl } from '$lib/misc.js';
+    import { can } from '$lib/permissions';
     import { Button, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Input, Spinner } from 'flowbite-svelte';
     import { CirclePlusOutline } from 'flowbite-svelte-icons';
     import type { DeepPartial } from 'typeorm';
 
     export let data;
     export let venues = data.venues as LiveVenue[];
+    const canEdit = can(data.brontoSession, 'live.write');
     // console.log('Venues', venues);
 
     let busy = false;
@@ -78,12 +80,14 @@
   </TableBody>
 </Table>
 
+{#if canEdit}
 <div>
   <form on:submit={addNewVenue} class="newVenueForm">
     <Input class="mt-2" placeholder={getRandomVenue()} bind:value={newVenueName} />
     <span class="newVenueButton" title="Add new venue"><Button class="mt-2" color="primary" disabled={newVenueName.length == 0} on:click={addNewVenue}><CirclePlusOutline /></Button></span>
   </form>
 </div>
+{/if}
 
 <style>
   .busyContainer {
