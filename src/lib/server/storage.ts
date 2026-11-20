@@ -1,9 +1,23 @@
 import fs from 'fs'
 import path, { basename, dirname } from 'path'
+import { Readable } from 'stream';
 import { createClient, type FileStat, type ResponseDataDetailed, type WebDAVClient } from 'webdav';
 import pLimit from 'p-limit';
 
 import { StoredDirectory, StoredFile } from '$lib/dbEntities/storage';
+
+/** A file or folder in a folder listing. Hidden entries (starting with ".") are left out. */
+export interface StorageEntry {
+    name: string;
+    isFolder: boolean;
+    size?: number; // bytes, files only
+}
+
+/** A file's content, streamed as is */
+export interface FileStream {
+    stream: ReadableStream<Uint8Array>;
+    size: number; // bytes
+}
 
 export interface PersistedStorage {
     readTextFile(...pathSegments: string[]): Promise<StoredFile>;
@@ -12,11 +26,15 @@ export interface PersistedStorage {
     readJsonFileContent(...pathSegments: string[]): Promise<any>;
     writeJSONFile(content: any, filePath: string): Promise<void>;
     deleteFile(filePath: string): Promise<void>;
+    readFileStream(filePath: string): Promise<FileStream>;
 
     storedDirectory(dirPath: string): Promise<StoredDirectory>;
     createDirectory(dirPath: string): Promise<void>;
     listSubfolders(...pathSegments: string[]): Promise<StoredDirectory[]>;
+    listFolder(dirPath: string): Promise<StorageEntry[]>;
 }
+
+const isHidden = (name: string) => name.startsWith('.');
 
 export class FilesystemStorage implements PersistedStorage {
     basePath: string;
@@ -64,6 +82,15 @@ export class FilesystemStorage implements PersistedStorage {
         fs.rmSync(path.join(this.basePath, filePath));
     }
 
+    async readFileStream(filePath: string): Promise<FileStream> {
+        const fullPath = path.join(this.basePath, filePath);
+        const stats = await fs.promises.stat(fullPath).catch(() => { throw new FileNotFoundError(filePath); });
+        return {
+            stream: Readable.toWeb(fs.createReadStream(fullPath)) as ReadableStream<Uint8Array>,
+            size: stats.size,
+        };
+    }
+
     async storedDirectory(dirPath: string): Promise<StoredDirectory> {
         const r = new StoredDirectory();
         r.parentPath = path.dirname(dirPath);
@@ -78,6 +105,19 @@ export class FilesystemStorage implements PersistedStorage {
 
     async createDirectory(dirPath: string): Promise<void> {
         fs.mkdirSync(path.join(this.basePath, dirPath), { recursive: true });
+    }
+
+    async listFolder(dirPath: string): Promise<StorageEntry[]> {
+        const fullPath = path.join(this.basePath, dirPath);
+        const dirents = await fs.promises.readdir(fullPath, { withFileTypes: true })
+            .catch(() => { throw new FileNotFoundError(dirPath); });
+        return dirents
+            .filter(dirent => !isHidden(dirent.name))
+            .map(dirent => ({
+                name: dirent.name,
+                isFolder: dirent.isDirectory(),
+                size: dirent.isDirectory() ? undefined : fs.statSync(path.join(fullPath, dirent.name)).size,
+            }));
     }
 
     async listSubfolders(...pathSegments: string[]): Promise<StoredDirectory[]> {
@@ -156,6 +196,25 @@ export class WebdavStorage implements PersistedStorage {
 
     async deleteFile(filePath: string): Promise<void> {
         await this.client.deleteFile(filePath);
+    }
+
+    async readFileStream(filePath: string): Promise<FileStream> {
+        const stats = await this.client.stat(filePath).catch(webdavNotFound(filePath)) as FileStat;
+        return {
+            stream: Readable.toWeb(this.client.createReadStream(filePath) as Readable) as ReadableStream<Uint8Array>,
+            size: stats.size,
+        };
+    }
+
+    async listFolder(dirPath: string): Promise<StorageEntry[]> {
+        const contents = await this.client.getDirectoryContents(dirPath).catch(webdavNotFound(dirPath)) as FileStat[];
+        return contents
+            .filter(element => !isHidden(element.basename))
+            .map(element => ({
+                name: element.basename,
+                isFolder: element.type == "directory",
+                size: element.type == "file" ? element.size : undefined,
+            }));
     }
 
     async readJsonFileContent(...pathSegments: string[]): Promise<any> {
@@ -255,6 +314,15 @@ function makeStoredFileObject(fullPath: string, content: string, modificationDat
     result.modificationDate = modificationDate;
     result.lastVisited = new Date();
     return result;
+}
+
+/** A WebDAV error handler that turns 404s into FileNotFoundError */
+function webdavNotFound(filePath: string) {
+    return (err: any): never => {
+        if (err.response?.status == 404)
+            throw new FileNotFoundError(filePath);
+        throw Error("WebDAV error: " + err.toString());
+    };
 }
 
 export class FileNotFoundError extends Error {};

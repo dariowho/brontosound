@@ -25,6 +25,13 @@ export class Song {
     @ManyToMany(() => SongTag, songTag => songTag.songs)
     @JoinTable()
     tags: SongTag[]
+
+    /** Files the song page opens with, as paths relative to the song folder */
+    @Column({type: 'varchar', nullable: true})
+    pinnedDocument: string | null
+
+    @Column({type: 'varchar', nullable: true})
+    pinnedAudio: string | null
 }
 
 @Entity()

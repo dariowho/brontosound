@@ -48,6 +48,7 @@ Conventional Commits (`feat:`, `fix:`, `refactor:`, …) — `standard-version` 
 - Band settings: `data/bandSettings.json`, read/cached by [src/lib/server/bandSettings.ts](src/lib/server/bandSettings.ts). Never send it raw to the client — use `safeBandSettings()`.
 - Backline (the band's companion app for playing live) integrates here: links to user accounts, and its Live page at `/backline`. See [docs/backline.md](docs/backline.md); code in `src/lib/server/backline/` and `src/routes/backline/` (a public route: it checks access itself).
 - Song files (readme, chordpro) live in file storage, not the DB: `PersistedStorage` in [src/lib/server/storage.ts](src/lib/server/storage.ts) with a filesystem (`data/`) or WebDAV backend, selected by settings via `getUserStorage()`.
+- Song page: folder browser, viewer (chord chart formats, PDF…) and practice player, see [docs/songPage.md](docs/songPage.md).
 - Venue maps: the provider (OpenStreetMap, Mapbox, HERE, Google) is chosen by `mapsProvider` in band settings, see [docs/maps.md](docs/maps.md); code in `src/lib/maps/` and `src/lib/components/maps/`.
 - `+page.server.ts` loads conventionally return `pageTitle` and `breadcrumb` alongside data.
 - URLs are `/<id>/<slug>`; build them with `buildVenueUrl`/`buildGigUrl` in [src/lib/misc.ts](src/lib/misc.ts).
