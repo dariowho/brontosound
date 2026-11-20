@@ -1,21 +1,28 @@
 <script lang="ts">
-    import { LIVE_GIG_STATUS_NAME_FROM_ENUM, LIVE_GIG_STATUS_NAMES, LiveGig, LiveGigStatus } from '$lib/dbEntities/live';
-    import { Card, Button, Heading } from 'flowbite-svelte';
-    import { ArrowRightOutline, FireOutline, StoreOutline, TableColumnOutline } from 'flowbite-svelte-icons';
+    import { LIVE_GIG_STATUS_NAME_FROM_ENUM, LiveGig, LiveGigStatus } from '$lib/dbEntities/live';
     import GigPursuitColumn from './GigPursuitColumn.svelte';
 
-    export let data;
+    let { data } = $props();
 
-    function filteredGigs(statusValues: LiveGigStatus[]): LiveGig[] {
-      return data.pursuitGigs.filter((gig) => statusValues.includes(gig.status)) as LiveGig[]
+    /** Board columns in pipeline order; each shows the gigs in any of its statuses. */
+    const COLUMNS: { status: LiveGigStatus, alsoShows?: LiveGigStatus[], needsUs?: boolean }[] = [
+        { status: LiveGigStatus.NEW },
+        { status: LiveGigStatus.WAITING_VENUE },
+        { status: LiveGigStatus.WAITING_BAND, needsUs: true },
+        { status: LiveGigStatus.CONFIRMED, alsoShows: [LiveGigStatus.WAITING_PAYMENT] },
+    ];
+
+    function gigsWithStatus(statuses: LiveGigStatus[]): LiveGig[] {
+        return data.pursuitGigs.filter((gig) => statuses.includes(gig.status)) as LiveGig[];
     }
-    let newGigs = data.pursuitGigs.filter((gig) => gig.status == LiveGigStatus.NEW)
-    let inProgressGigs = data.pursuitGigs.filter((gig) => gig.status == LiveGigStatus.WAITING_BAND || gig.status == LiveGigStatus.WAITING_VENUE)
-  </script>
-  
-<div class="grid md:grid-cols-4 gap-3 overflow-x-scroll">
-    <GigPursuitColumn columnName={LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.NEW]} gigs={filteredGigs([LiveGigStatus.NEW])} />
-    <GigPursuitColumn columnName={LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.WAITING_VENUE]} gigs={filteredGigs([LiveGigStatus.WAITING_VENUE])} />
-    <GigPursuitColumn columnName={LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.WAITING_BAND]} gigs={filteredGigs([LiveGigStatus.WAITING_BAND])} />
-    <GigPursuitColumn columnName={LIVE_GIG_STATUS_NAME_FROM_ENUM[LiveGigStatus.CONFIRMED]} gigs={filteredGigs([LiveGigStatus.CONFIRMED, LiveGigStatus.WAITING_PAYMENT])} />
+</script>
+
+<div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    {#each COLUMNS as column}
+        <GigPursuitColumn
+            title={LIVE_GIG_STATUS_NAME_FROM_ENUM[column.status]}
+            gigs={gigsWithStatus([column.status, ...(column.alsoShows ?? [])])}
+            needsUs={column.needsUs}
+        />
+    {/each}
 </div>
