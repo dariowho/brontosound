@@ -23,7 +23,7 @@ Both sides talk in plain HTTP requests ([mailbox.ts](../src/lib/server/backline/
 | Route | For | Signs in with |
 |---|---|---|
 | `/backline/host` | Backline: `PUT` announce, `GET` messages from browsers, `POST` messages to them | `Authorization: Bearer <token>` |
-| `/backline/client` | A browser: `GET` take a seat or fetch messages, `POST` messages to Backline | session, or the PIN cookie |
+| `/backline/client` | A browser: `GET` take a seat or fetch messages, `POST` messages to Backline | session, or the guest cookie (a token given for the PIN, dropped when the PIN changes) |
 
 ## Settings
 

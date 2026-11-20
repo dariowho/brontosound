@@ -1,12 +1,12 @@
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { clientFor, join, mayEnter, toHost } from '$lib/server/backline/liveSession';
-import { PIN_COOKIE } from '../pinCookie';
+import { GUEST_COOKIE } from '../guestCookie';
 
 // A browser's end of the live session (docs/backline.md): its mailbox to and from Backline.
 
 // Pull: without `id`, takes a seat; with it, waits for Backline's messages after number `after`
 export const GET: RequestHandler = async ({ url, locals, cookies }) => {
-    if (!mayEnter(locals, cookies.get(PIN_COOKIE))) {
+    if (!mayEnter(locals, cookies.get(GUEST_COOKIE))) {
         error(403, 'Not allowed');
     }
     const id = url.searchParams.get('id');
@@ -18,7 +18,7 @@ export const GET: RequestHandler = async ({ url, locals, cookies }) => {
 
 // Push: messages for Backline
 export const POST: RequestHandler = async ({ url, request, locals, cookies }) => {
-    if (!mayEnter(locals, cookies.get(PIN_COOKIE))) {
+    if (!mayEnter(locals, cookies.get(GUEST_COOKIE))) {
         error(403, 'Not allowed');
     }
     const id = url.searchParams.get('id') ?? '';

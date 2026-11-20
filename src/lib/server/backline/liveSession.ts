@@ -19,6 +19,7 @@ interface Host {
     pin: string;
     page: string;      // the HTML of its remote
     inbox: Mailbox<HostItem>;
+    guests: Set<string>; // tokens of visitors who gave the PIN: they hold these, never the PIN
 }
 
 interface Client {
@@ -65,8 +66,11 @@ export function announce(a: Announcement): { next: number, ice: string[] } {
     if (host?.instance !== a.instance) {
         host?.inbox.release();
         dropClients();
-        host = { ...a, inbox: new Mailbox() };
+        host = { ...a, inbox: new Mailbox(), guests: new Set() };
     } else {
+        if (a.pin !== host.pin) {
+            host.guests.clear(); // a new PIN lets in only who knows it
+        }
         Object.assign(host, a);
     }
     return { next: host.inbox.next, ice: readSettings().backlineStunServers };
@@ -111,15 +115,25 @@ export function liveBackline(): { public: boolean, page: string } | null {
     return host && { public: host.public, page: host.page };
 }
 
-/** Band members always get in; others with the PIN, when Backline shares publicly */
-export function mayEnter(locals: App.Locals, pin: string | undefined): boolean {
+/** Band members always get in; others with a guest token, when Backline shares publicly */
+export function mayEnter(locals: App.Locals, guestToken: string | undefined): boolean {
     if (!host) {
         return false;
     }
-    return !!locals.brontoSession || (host.public && isPin(pin));
+    return !!locals.brontoSession || (host.public && !!guestToken && host.guests.has(guestToken));
 }
 
-export function isPin(pin: string | undefined): boolean {
+/** A guest token for a visitor who gave the right PIN, when Backline shares publicly; else null */
+export function admitGuest(pin: string): string | null {
+    if (!host?.public || !isPin(pin)) {
+        return null;
+    }
+    const token = randomBytes(24).toString('base64url');
+    host.guests.add(token);
+    return token;
+}
+
+function isPin(pin: string | undefined): boolean {
     const [given, expected] = [Buffer.from(pin ?? ''), Buffer.from(host?.pin ?? '')];
     return expected.length > 0 && given.length === expected.length && timingSafeEqual(given, expected);
 }

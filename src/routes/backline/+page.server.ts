@@ -1,12 +1,12 @@
 import { fail } from '@sveltejs/kit';
-import { isPin, liveBackline, mayEnter } from '$lib/server/backline/liveSession';
+import { admitGuest, liveBackline, mayEnter } from '$lib/server/backline/liveSession';
 import { countLoginAttempt, MAX_LOGIN_ATTEMPTS } from '$lib/server/users';
-import { PIN_COOKIE } from './pinCookie';
+import { GUEST_COOKIE } from './guestCookie';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (({ locals, cookies }) => {
     const live = liveBackline();
-    const allowed = mayEnter(locals, cookies.get(PIN_COOKIE));
+    const allowed = mayEnter(locals, cookies.get(GUEST_COOKIE));
     return {
         live: !!live,
         // The remote, as the live Backline sent it
@@ -21,9 +21,10 @@ export const actions = {
         if (countLoginAttempt(`backline|${getClientAddress()}`) > MAX_LOGIN_ATTEMPTS) {
             return fail(429, { pinError: 'Too many attempts. Try again in 15 minutes.' });
         }
-        if (!liveBackline()?.public || !isPin(pin)) {
+        const guestToken = admitGuest(pin);
+        if (!guestToken) {
             return fail(400, { pinError: 'Wrong PIN' });
         }
-        cookies.set(PIN_COOKIE, pin, { path: '/backline', maxAge: 12 * 60 * 60 });
+        cookies.set(GUEST_COOKIE, guestToken, { path: '/backline', maxAge: 12 * 60 * 60 });
     },
 } satisfies Actions;

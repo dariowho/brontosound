@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../bandSettings', () => ({ readSettings: () => ({ backlineStunServers: ['stun:stun.example:3478'] }) }));
 
-import { announce, clientFor, dropHost, hostFor, isPin, join, liveBackline, mayEnter, toClients, toHost } from './liveSession';
+import { admitGuest, announce, clientFor, dropHost, hostFor, join, liveBackline, mayEnter, toClients, toHost } from './liveSession';
 import { Mailbox } from './mailbox';
 
 const backline = { instance: 'a', tokenHash: 'hash', public: true, pin: '123456', page: '<p>remote</p>' };
@@ -35,15 +35,31 @@ describe('live session', () => {
         expect(liveBackline()).toEqual({ public: true, page: '<p>remote</p>' });
     });
 
-    it('lets members in, and others only with the PIN when shared publicly', () => {
+    it('lets members in, and others with a guest token for the PIN when shared publicly', () => {
         expect(mayEnter(member, undefined)).toBe(false); // nothing is live
         announce(backline);
         expect(mayEnter(member, undefined)).toBe(true);
-        expect(mayEnter(visitor, '123456')).toBe(true);
-        expect(mayEnter(visitor, '000000')).toBe(false);
+        expect(admitGuest('000000')).toBeNull();
+        expect(admitGuest('')).toBeNull();
+        const token = admitGuest('123456')!;
+        expect(mayEnter(visitor, token)).toBe(true);
+        expect(mayEnter(visitor, '123456')).toBe(false); // the PIN itself is no pass
+        expect(mayEnter(visitor, 'made-up')).toBe(false);
         announce({ ...backline, public: false });
-        expect(mayEnter(visitor, '123456')).toBe(false);
-        expect(isPin('')).toBe(false);
+        expect(mayEnter(visitor, token)).toBe(false);
+        expect(admitGuest('123456')).toBeNull();
+    });
+
+    it('drops guests when the PIN changes or another Backline announces', () => {
+        announce(backline);
+        const token = admitGuest('123456')!;
+        announce({ ...backline, page: '<p>new page</p>' });
+        expect(mayEnter(visitor, token)).toBe(true);
+        announce({ ...backline, pin: '654321' });
+        expect(mayEnter(visitor, token)).toBe(false);
+        const next = admitGuest('654321')!;
+        announce({ ...backline, pin: '654321', instance: 'b' });
+        expect(mayEnter(visitor, next)).toBe(false);
     });
 
     it('passes messages both ways', async () => {
