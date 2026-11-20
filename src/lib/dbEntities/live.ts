@@ -26,6 +26,9 @@ export class LiveVenue extends UserCreatedEntity {
 export enum LiveVenueLinkSource {
     MANUAL = 'MANUAL',
     README = 'README',
+    /** Found with the venue's map location; replaced when the location changes */
+    MAPS_PROVIDER = 'MAPS_PROVIDER',
+    /** @deprecated Links found by Google Maps before other maps providers: treated like MAPS_PROVIDER */
     GOOGLE_MAPS = 'GOOGLE_MAPS',
 }
 

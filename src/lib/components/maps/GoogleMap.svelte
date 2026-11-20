@@ -1,13 +1,13 @@
 <script lang="ts">
-    import { LocationLink, LocationLinkType, parseGooglemapsPlace } from "$lib/dbEntities/location";
-    import { Button } from "flowbite-svelte";
     import { GoogleSdk } from '@beyonk/svelte-googlemaps'
     import { onMount } from "svelte";
-    import type { DeepPartial } from "typeorm";
+    import { googlePlaceToPlace } from "$lib/maps/google";
+    import type { Place } from "$lib/maps/place";
+    import SelectedPlace from "./SelectedPlace.svelte";
 
-    export let googlemapsToken: string;
-    export let lat: number, lng: number;
-    export let handleUpdateLocation: CallableFunction;
+    export let token: string;
+    export let lat: number | undefined, lng: number | undefined;
+    export let onSave: (place: Place) => Promise<unknown>;
 
     let latLng;
     $: latLng = {lat: lat, lng: lng};
@@ -132,43 +132,15 @@
     }
 
     async function handleSave() {
-        if (! newPlace) {
-            throw Error("Save action called but no place is selected. newPlace:", newPlace);
-        }
-
-        // console.debug("handleSave:", newPlace);
-        const newLocation = parseGooglemapsPlace(newPlace);
-        const locationLinks = locationLinksFromPlace(newPlace);
-        // console.log("handleSave, links:", locationLinks);
-
-        console.log("Saving location:", newLocation);
-
-        const result = await handleUpdateLocation(newLocation, locationLinks);
-        lat = newLocation.latitude;
-        lng = newLocation.longitude;
+        const place = googlePlaceToPlace(newPlace);
+        await onSave(place);
+        lat = place.location.latitude;
+        lng = place.location.longitude;
         newPlace = null;
-        return result
-    }
-
-    function locationLinksFromPlace(place) : DeepPartial<LocationLink>[] {
-        if (! place) {
-            throw Error("linksFromPlace called but no place is selected. place:", place);
-        }
-        const links: DeepPartial<LocationLink>[] = [];
-        if (place.url) {
-            links.push({type: LocationLinkType.GOOGLE_MAPS_URL, value: place.url});
-        }
-        if (place.website) {
-            links.push({type: LocationLinkType.WEBSITE, value: place.website});
-        }
-        if (place.international_phone_number) {
-            links.push({type: LocationLinkType.PHONE_NUMBER, value: place.international_phone_number});
-        }
-        return links;
     }
 </script>
 
-<GoogleSdk apiKey={googlemapsToken} on:ready={googlemapsReady} />
+<GoogleSdk apiKey={token} on:ready={googlemapsReady} />
 
 
 <div class="mapWrapper">
@@ -179,36 +151,14 @@
             <input type="text" bind:this={autocompleteInputElement}/>
         </div>
         {#if newPlace}
-    
             <div class="buttonsContainer">
-                <span class="placeDetails">
-                    <span class="placeName">{newPlace.name}</span>
-                    <span class="placeAddress">{newPlace.formatted_address}</span>
-                </span>
-                <div class="buttonsWrapper" >
-                    <Button on:click={handleSave}>Save</Button>
-                    <Button color="light" on:click={cancelNewPlace}>Cancel</Button>
-                </div>
-                
+                <SelectedPlace place={googlePlaceToPlace(newPlace)} onSave={handleSave} onCancel={cancelNewPlace} />
             </div>
         {/if}
     </div>
 </div>
 
 <style>
-    .placeDetails {
-        display: inline-block;
-    }
-
-    .placeName {
-        display: block;
-        font-weight: bold;
-    }
-    .placeAddress {
-        display: block;
-        font-size: small;
-    }
-
     .mapWrapper {
         width: 100%;
         height: 100%;
@@ -237,8 +187,6 @@
         z-index: 5;
         pointer-events: all;
         width: 100%;
-        background: #fff9;
-        padding: 1em 0;
-        text-align: center;
+        padding: 0.5rem;
     }
 </style>

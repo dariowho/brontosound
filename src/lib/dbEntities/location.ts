@@ -37,7 +37,11 @@ export class Location {
 }
 
 export enum LocationLinkType {
+    // A place's page on a maps provider (PLACE_PAGE_LABELS in $lib/maps/place.ts)
     GOOGLE_MAPS_URL = 'GOOGLE_MAPS_URL',
+    OPENSTREETMAP_URL = 'OPENSTREETMAP_URL',
+    HERE_WEGO_URL = 'HERE_WEGO_URL',
+
     WEBSITE = 'WEBSITE',
     FACEBOOK = 'FACEBOOK',
     INSTAGRAM = 'INSTAGRAM',
@@ -59,43 +63,3 @@ export class LocationLink extends UserCreatedEntity{
     @Column({ type: 'varchar', nullable: true})
     note?: string = null
 }
-
-type GoogleAddressComponent = {
-    long_name: string;
-    short_name: string;
-    types: string[];
-};
-
-type GooglePlace = {
-    place_id: string,
-    geometry: any,
-    formatted_address: string,
-    name: string,
-    address_components: GoogleAddressComponent[],
-}
-
-export function parseGooglemapsPlace(place: GooglePlace): Location {
-    let result: Location = new Location();
-  
-    place.address_components.forEach(component => {
-      if (component.types.includes("street_number")) {
-        result.streetNumber = component.long_name;
-      } else if (component.types.includes("route")) {
-        result.street = component.long_name;
-      } else if (component.types.includes("locality")) {
-        result.city = component.long_name;
-      } else if (component.types.includes("postal_code")) {
-        result.postalCode = component.long_name;
-      } else if (component.types.includes("country")) {
-        result.country = component.long_name;
-      }
-    });
-
-    result.latitude = place.geometry.location.lat();
-    result.longitude = place.geometry.location.lng();
-    result.formattedAddress = place.formatted_address;
-    result.poiName = place.name;
-    result.googlemapsPlaceId = place.place_id;
-  
-    return result;
-  }

@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { Accordion, AccordionItem, Input, Label, Toggle } from "flowbite-svelte";
+    import { Accordion, AccordionItem } from "flowbite-svelte";
     import UsersSettings from "./UsersSettings.svelte";
+    import SettingField from "./SettingField.svelte";
     import TestStorage from "./TestStorage.svelte";
     import type { PageData } from "./$types";
 
@@ -19,13 +20,12 @@
     {#each data.settings as section}
         <AccordionItem>
             <span slot="header">{section.title}</span>
+            {#if section.hint}
+                <p class="mb-4 text-sm text-gray-500">{section.hint}</p>
+            {/if}
             <div class="space-y-4">
-                {#each Object.entries(section.entries) as [label, value]}
-                    {#if typeof value === 'boolean'}
-                        <Toggle checked={value} disabled>{label}</Toggle>
-                    {:else}
-                        <Label>{label}<Input class="mt-1" value={value ?? ''} disabled /></Label>
-                    {/if}
+                {#each section.entries as entry}
+                    <SettingField {entry} />
                 {/each}
             </div>
             {#if section.title === "WebDAV"}

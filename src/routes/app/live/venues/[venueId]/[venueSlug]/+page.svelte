@@ -8,23 +8,19 @@
     import ToastMessages from '$lib/components/ToastMessages.svelte';
     import type { DeepPartial } from 'typeorm';
     import { saveEntityViaApi } from '$lib/db.js';
-    import { LocationLinkType, type Location, type LocationLink } from '$lib/dbEntities/location';
-    import GoogleMapAndSearch from '$lib/components/GoogleMapAndSearch.svelte';
+    import { LocationLinkType } from '$lib/dbEntities/location';
+    import VenueMap from '$lib/components/maps/VenueMap.svelte';
+    import { locationLatLng, PLACE_PAGE_LABELS, type Place, type PlaceLink } from '$lib/maps/place';
     import { buildGigUrl } from '$lib/misc.js';
     import EditableTextBox from '$lib/components/EditableTextBox.svelte';
-    import { GlobeOutline, LinkOutline, MapPinOutline, PhoneOutline, ProfileCardOutline } from 'flowbite-svelte-icons';
+    import { EnvelopeOutline, GlobeOutline, LinkOutline, MapPinOutline, PhoneOutline, ProfileCardOutline } from 'flowbite-svelte-icons';
   
   export let form: ActionData;
   export let data;
   export let venue = data.venue as LiveVenue;
   // console.log('Venue', venue);
   
-  const googlemapsToken = data.safeBandSettings.googlemapsToken;
-  let lng, lat;
-  lat = (venue.location) ? venue.location.latitude : null;
-  lng = (venue.location) ? venue.location.longitude : null;
-  let addingNewLocation = false;
-  // $: if (venue.location) { [lat, lng] = [venue.location.latitude, venue.location.longitude] }
+  $: venueLatLng = venue.location ? locationLatLng(venue.location) : null;
 
   let venueLinkProperies = []
   $: venueLinkProperies = venue.links.map(link => {
@@ -49,7 +45,8 @@
       };
     } else if (link.type === LocationLinkType.EMAIL) {
       result = {
-        type: LocationLinkType.EMAIL,
+        id: link.id,
+        icon: EnvelopeOutline,
         text: link.value,
         href: `mailto:${link.value}`,
       };
@@ -67,12 +64,12 @@
         href: `https://facebook.com/${link.value}`,
         text: `@${link.value}`,
       };
-    } else if (link.type === LocationLinkType.GOOGLE_MAPS_URL) {
+    } else if (PLACE_PAGE_LABELS[link.type]) {
       result = {
         id: link.id,
         icon: MapPinOutline,
         href: link.value,
-        text: "Google Maps",
+        text: PLACE_PAGE_LABELS[link.type],
       };
     } else {
       result = {
@@ -99,17 +96,18 @@
     busy = false;
   }
 
-  function mergeLocationLinks(locationLinks: LocationLink[]) : Partial<LiveVenueLink>[] {
+  const MAP_LINK_SOURCES = [LiveVenueLinkSource.MAPS_PROVIDER, LiveVenueLinkSource.GOOGLE_MAPS];
+
+  function mergeLocationLinks(locationLinks: PlaceLink[]) : Partial<LiveVenueLink>[] {
     if (! venue.links) {
       venue.links = [];
     }
-    let newLinks: Partial<LiveVenueLink>[] = structuredClone(venue.links).filter(link => link.source !== LiveVenueLinkSource.GOOGLE_MAPS);
+    let newLinks: Partial<LiveVenueLink>[] = structuredClone(venue.links).filter(link => !MAP_LINK_SOURCES.includes(link.source));
     for (let i = 0; i < locationLinks.length; i++) {
       let newLink = {
-        id: locationLinks[i].id,
         type: locationLinks[i].type,
         value: locationLinks[i].value,
-        source: LiveVenueLinkSource.GOOGLE_MAPS,
+        source: LiveVenueLinkSource.MAPS_PROVIDER,
         venue: venue
       };
       
@@ -121,15 +119,14 @@
     return newLinks;
   }
 
-  async function updateVenueLocation(newLocation: Location, newLocationLinks: LocationLink[]) {
-    // let newVenueLocation = {...newLocation, venue: venue};
+  async function updateVenueLocation(place: Place) {
+    const newLocation = place.location;
     if (venue.location) {
       newLocation.id = venue.location.id;
     }
     return updateVenue({
       location: newLocation,
-      links: mergeLocationLinks(newLocationLinks),
-      // location: newVenueLocation
+      links: mergeLocationLinks(place.links),
     });
   }
 
@@ -162,20 +159,9 @@
 </div> -->
 
 <div class="grid md:grid-cols-2 gap-2 mb-5" style="min-height:300px;">
-  {#if googlemapsToken}
   <div class="map mb-5" style="width:100%; height: 100%; min-height:300px;">
-     <GoogleMapAndSearch {googlemapsToken} {lat} {lng} handleUpdateLocation={updateVenueLocation} />
+    <VenueMap config={data.safeBandSettings.maps} location={venueLatLng} onSave={updateVenueLocation} />
   </div>
-  <!-- {#if ((lat && lng) || addingNewLocation)}
-    <div class="map mb-5" style="width:100%; height: 300px;">
-      <GoogleMapsMap {googlemapsToken} {lat} {lng} handleUpdateLocation={updateVenueLocation}/>
-    </div>
-  {:else}
-    <PlaceholderBox>
-        <Button on:click={()=>{addingNewLocation = true}}>Add Location</Button>
-    </PlaceholderBox>
-  {/if} -->
-  {/if}
   <div class="venueNote" style="min-height:200px;">
     <EditableTextBox bind:content={venue.note} bind:editingDisabled={busy} handleSave={handleSaveNote} height="100%"/>
   </div>

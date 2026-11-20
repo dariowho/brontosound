@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 
 import { localDataRoot, settingsFilename } from "$lib/server/config";
 import { WebdavStorage, FilesystemStorage, type PersistedStorage } from './storage';
-import type { DeepPartial } from 'typeorm';
+import { MAPS_PROVIDERS, type MapsConfig, type MapsProviderId } from '$lib/maps/providers';
 
 export interface SettingsData {
     bandName: string;
@@ -19,7 +19,12 @@ export interface SettingsData {
     webdavConcurrentConnections: number;
     ytInvidiousEnabled: boolean;
     ytInvidiousServer: string,
-    googlemapsToken?: string
+    mapsProvider: MapsProviderId; // docs/maps.md
+    mapboxToken?: string;
+    hereApiKey?: string;
+    googlemapsToken?: string;
+    osmTileServer: string;
+    osmNominatimServer?: string; // no default: check the public server's usage policy first (docs/maps.md)
     backlineStunServers: string[]; // tell Backline and the browsers on /backline their public addresses (docs/backline.md)
 }
 
@@ -35,6 +40,8 @@ export const defaultSettings: SettingsData = {
     webdavConcurrentConnections: 5,
     ytInvidiousEnabled: true,
     ytInvidiousServer: "https://yewtu.be/",
+    mapsProvider: "openstreetmap",
+    osmTileServer: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     backlineStunServers: ["stun:stun.l.google.com:19302"],
 }
 
@@ -83,10 +90,24 @@ export async function getUserStorage(): Promise<PersistedStorage> {
     }
 }
 
-export function safeBandSettings(): DeepPartial<SettingsData> {
+export function safeBandSettings() {
     const bandSettings = readSettings();
     return {
         locale: bandSettings.locale,
-        googlemapsToken: bandSettings.googlemapsToken,
+        maps: mapsConfig(bandSettings),
     }
+}
+
+/** The selected maps provider, with only its own browser key */
+function mapsConfig(settings: SettingsData): MapsConfig {
+    const provider = MAPS_PROVIDERS[settings.mapsProvider];
+    if (!provider) {
+        throw new Error(`${settingsFilename}: "mapsProvider" must be one of: ${Object.keys(MAPS_PROVIDERS).join(", ")}`);
+    }
+    return {
+        provider: settings.mapsProvider,
+        key: provider.keySetting ? settings[provider.keySetting] : undefined,
+        tileServer: settings.osmTileServer,
+        nominatimServer: settings.osmNominatimServer,
+    };
 }
