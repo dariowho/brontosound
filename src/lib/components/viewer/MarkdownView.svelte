@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Markdown from '@magidoc/plugin-svelte-marked';
+    import Markdown from '$lib/components/Markdown.svelte';
 
     let { text }: { text: string } = $props();
 </script>

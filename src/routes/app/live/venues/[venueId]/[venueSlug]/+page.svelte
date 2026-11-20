@@ -12,6 +12,7 @@
     import VenueMap from '$lib/components/maps/VenueMap.svelte';
     import { locationLatLng, PLACE_PAGE_LABELS, type Place, type PlaceLink } from '$lib/maps/place';
     import { buildGigUrl } from '$lib/misc.js';
+    import { safeUrl } from '$lib/safeUrl';
     import EditableTextBox from '$lib/components/EditableTextBox.svelte';
     import { EnvelopeOutline, GlobeOutline, LinkOutline, MapPinOutline, PhoneOutline, ProfileCardOutline } from 'flowbite-svelte-icons';
   
@@ -34,7 +35,7 @@
         id: link.id,
         icon: GlobeOutline,
         text: link.value,
-        href: link.value
+        href: safeUrl(link.value)
       };
     } else if (link.type === LocationLinkType.PHONE_NUMBER) {
       result = {
@@ -68,7 +69,7 @@
       result = {
         id: link.id,
         icon: MapPinOutline,
-        href: link.value,
+        href: safeUrl(link.value),
         text: PLACE_PAGE_LABELS[link.type],
       };
     } else {

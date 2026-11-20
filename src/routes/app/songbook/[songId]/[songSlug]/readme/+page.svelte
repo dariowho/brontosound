@@ -2,7 +2,7 @@
     import { page } from '$app/stores';
     import PlaceholderBox from '$lib/components/PlaceholderBox.svelte';
     import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-    import Markdown from '@magidoc/plugin-svelte-marked'
+    import Markdown from '$lib/components/Markdown.svelte'
     import { Button } from 'flowbite-svelte';
     import { Fa } from "svelte-fa";
 

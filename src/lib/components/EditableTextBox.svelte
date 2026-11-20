@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Button, Textarea } from "flowbite-svelte";
     import PlaceholderBox from "./PlaceholderBox.svelte";
-    import Markdown from "@magidoc/plugin-svelte-marked";
+    import Markdown from "./Markdown.svelte";
     import Fa from "svelte-fa";
     import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 
