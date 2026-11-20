@@ -5,9 +5,11 @@ import { getUserStorage, readSettings } from '$lib/server/bandSettings';
 import { isFolderName } from '$lib/server/storage';
 import { error, type RequestHandler } from '@sveltejs/kit';
 import { instanceToPlain, plainToClass } from 'class-transformer';
+import { requirePermission } from '$lib/server/session';
 
 /** Save a song and make sure its folder exists in storage (creating or re-creating it if needed) */
-export const POST = (async ({ request }) => {
+export const POST = (async ({ request, locals }) => {
+    requirePermission(locals, 'songbook.write');
     const [postSongRequest, db, storage] = await Promise.all([
         await request.json(),
         await TypeOrm.getDb(),

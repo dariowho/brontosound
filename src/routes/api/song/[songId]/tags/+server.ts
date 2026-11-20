@@ -1,6 +1,6 @@
 import TypeOrm from '$lib/db';
 import { Song, SongTag } from '$lib/dbEntities/song';
-import { isValidId } from '$lib/server/session';
+import { isValidId, requirePermission } from '$lib/server/session';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 
@@ -15,7 +15,8 @@ export interface PostTagsRequest {
 /**
  * Create a new prompt record in database
  */
-export const POST = (async ({ request, params }) => {
+export const POST = (async ({ request, params, locals }) => {
+    requirePermission(locals, 'songbook.write');
     if (! params.songId || ! isValidId(params.songId)) {
         error(400, "Invalid songId");
     }

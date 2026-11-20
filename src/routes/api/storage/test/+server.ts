@@ -1,6 +1,7 @@
 import { getUserStorage, readSettings } from '$lib/server/bandSettings';
 import { pathJoin } from '$lib/misc';
 import type { RequestHandler } from '@sveltejs/kit';
+import { requirePermission } from '$lib/server/session';
 
 const TEMP_FILE = 'brontosound-connection-test.tmp'; // safe to delete
 
@@ -10,7 +11,8 @@ const errorOf = (e: any) => String(e?.message ?? e);
  * Test read (list songs folder) and write (create + delete a temp file in it).
  * Responds with an error message per check, or null if it passed.
  */
-export const POST = (async () => {
+export const POST = (async ({ locals }) => {
+    requirePermission(locals, 'bandSettings.write');
     const storage = await getUserStorage();
     const result: { read: string | null, write: string | null } = { read: null, write: null };
 

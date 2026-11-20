@@ -1,9 +1,11 @@
 import TypeOrm from '$lib/db';
 import { Song } from '$lib/dbEntities/song';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
+import { requirePermission } from '$lib/server/session';
 
 /** Change the song's title and artist. Its folder in storage keeps its name. */
-export const PATCH = (async ({ params, request }) => {
+export const PATCH = (async ({ params, request, locals }) => {
+    requirePermission(locals, 'songbook.write');
     const songs = (await TypeOrm.getDb()).getRepository(Song);
     const song = await songs.findOneBy({ id: Number(params.songId) });
     if (!song) error(404, 'Song not found');
@@ -17,7 +19,8 @@ export const PATCH = (async ({ params, request }) => {
 }) satisfies RequestHandler;
 
 /** Permanently delete a song from the Songbook. Its folder in storage, if any, is left untouched. */
-export const DELETE = (async ({ params }) => {
+export const DELETE = (async ({ params, locals }) => {
+    requirePermission(locals, 'songbook.write');
     const songs = (await TypeOrm.getDb()).getRepository(Song);
     const song = await songs.findOneBy({ id: Number(params.songId) });
     if (!song) error(404, 'Song not found');

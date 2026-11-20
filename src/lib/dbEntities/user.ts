@@ -7,7 +7,7 @@ export enum UserRole {
     ADMIN = 'admin',
 }
 
-// TODO: enforce in API endpoints (only `users.manage` is enforced so far)
+// Checked with `requirePermission()` by every endpoint and action that changes data
 export const permissionsFromRole = {
     [UserRole.VIEWER]: ['songbook.read', 'live.read', 'contacts.read', 'bandSettings.read'],
     [UserRole.EDITOR]: ['songbook.read', 'live.read', 'contacts.read', 'songbook.write', 'live.write', 'contacts.write', 'bandSettings.read'],

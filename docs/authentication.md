@@ -15,7 +15,7 @@ User `admin` (no email) is created at startup. Its password hash is `adminPasswo
 
 ## Roles
 
-`viewer`, `editor`, `admin` ([user.ts](../src/lib/dbEntities/user.ts)). Admins add and remove users in **Settings → Users**. Only `users.manage` is enforced so far.
+`viewer`, `editor`, `admin` ([user.ts](../src/lib/dbEntities/user.ts)). Admins add and remove users in **Settings → Users**. Every endpoint and form action that changes data calls `requirePermission()`: viewers can only read. Profile, player preferences and Backline links are the user's own.
 
 Removing a user deletes their password and linked accounts, signs them out everywhere, and sets `removedDate`. The row is kept so their content keeps its author; adding the same email again restores it.
 

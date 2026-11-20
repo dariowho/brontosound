@@ -29,9 +29,11 @@ export async function load({ params }: ServerLoadEvent) {
 
 import type { Actions } from './$types';
 import { error } from "console";
+import { requirePermission } from '$lib/server/session';
 
 export const actions = {
     saveNewInteraction: async ({request, locals}) => {
+        requirePermission(locals, 'live.write');
         const data = await request.formData();
         console.log("data:", data);
 

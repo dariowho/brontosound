@@ -3,6 +3,7 @@ import TypeOrm from '$lib/db';
 import { Song } from '$lib/dbEntities/song';
 import { deleteSongFile, findStoredSong, readSongFile, writeSongFile } from '$lib/server/songFolder';
 import type { SongPins } from '$lib/songFiles/songFile';
+import { requirePermission } from '$lib/server/session';
 
 /** Files of the song's folder, addressed by `path` relative to it */
 function pathParam(url: URL): string {
@@ -27,19 +28,22 @@ export const GET = (async ({ params, url }) => {
 }) satisfies RequestHandler;
 
 /** Upload a new file, the request body as is: a file already there is a 409 */
-export const POST = (async ({ params, url, request }) => {
+export const POST = (async ({ params, url, request, locals }) => {
+    requirePermission(locals, 'songbook.write');
     await writeSongFile(await findStoredSong(params.songId), pathParam(url), new Uint8Array(await request.arrayBuffer()), false);
     return json({ ok: true });
 }) satisfies RequestHandler;
 
 /** Save a file, replacing it */
-export const PUT = (async ({ params, url, request }) => {
+export const PUT = (async ({ params, url, request, locals }) => {
+    requirePermission(locals, 'songbook.write');
     await writeSongFile(await findStoredSong(params.songId), pathParam(url), new Uint8Array(await request.arrayBuffer()), true);
     return json({ ok: true });
 }) satisfies RequestHandler;
 
 /** Delete a file, and unpin it. Returns the pins. */
-export const DELETE = (async ({ params, url }) => {
+export const DELETE = (async ({ params, url, locals }) => {
+    requirePermission(locals, 'songbook.write');
     const path = pathParam(url);
     const song = await findStoredSong(params.songId);
     await deleteSongFile(song, path);
