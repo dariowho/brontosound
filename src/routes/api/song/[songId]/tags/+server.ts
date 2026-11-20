@@ -42,7 +42,6 @@ export const POST = (async ({ request, params, locals }) => {
         id: songId,
         tags: tags
     })
-    console.log(updatedSong);
 
     return new Response(JSON.stringify(updatedSong));
 }) satisfies RequestHandler;

@@ -35,7 +35,6 @@ export const actions = {
     saveNewInteraction: async ({request, locals}) => {
         requirePermission(locals, 'live.write');
         const data = await request.formData();
-        console.log("data:", data);
 
         const savedInteraction = await TypeOrm.saveEntity(LiveGigInteraction, data.get("newInteractionJson"), {"createdBy": locals['brontoSession'].user});
         return {

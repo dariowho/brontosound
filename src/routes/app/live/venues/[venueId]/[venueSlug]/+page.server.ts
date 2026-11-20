@@ -25,7 +25,6 @@ export const actions = {
     saveNewGig: async ({request, locals}) => {
         requirePermission(locals, 'live.write');
         const data = await request.formData();
-        console.log("data:", data);
         const savedGig = await TypeOrm.saveEntity(LiveGig, data.get("newGigJson"), {"createdBy": locals['brontoSession'].user});
         return {
             success: true,

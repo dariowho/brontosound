@@ -10,7 +10,6 @@ export const POST = (async ({ request, locals }) => {
     const saveResult = await TypeOrm.saveEntity(LiveGig, request.json(), {"lastModifiedBy": locals['brontoSession'].user});
 
     const newGig = await (await TypeOrm.getRepository(LiveGig)).findOneOrFail({where: {id: saveResult.id}, relations: ["venue", "interactions"]});
-    console.log("saving gig: ", newGig);
 
     return new Response(JSON.stringify(instanceToPlain(newGig)));    
 }) satisfies RequestHandler;
