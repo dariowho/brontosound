@@ -1,10 +1,10 @@
 import { randomBytes, scrypt, timingSafeEqual, type ScryptOptions } from 'node:crypto';
+import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '../passwordPolicy'; // relative: scripts/hash-password.js runs this outside SvelteKit
 
 // Stored as `scrypt$N$r$p$<salt>$<hash>` (base64), so parameters can be raised later
 const N = 32768, R = 8, P = 1, KEY_LENGTH = 64;
 
-export const MIN_PASSWORD_LENGTH = 8;
-export const MAX_PASSWORD_LENGTH = 1024;
+export { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH };
 
 export function passwordProblem(password: string): string | null {
     return password.length < MIN_PASSWORD_LENGTH || password.length > MAX_PASSWORD_LENGTH

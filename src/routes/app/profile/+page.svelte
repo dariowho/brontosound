@@ -4,6 +4,7 @@
     import SignOut from "../../signin/SignOut.svelte";
     import BacklineLinks from "./BacklineLinks.svelte";
     import type { ActionData, PageData } from "./$types";
+    import { MIN_PASSWORD_LENGTH } from "$lib/passwordPolicy";
 
     export let data: PageData;
     export let form: ActionData;
@@ -42,11 +43,11 @@
                 {/if}
                 <div>
                     <Label for="newPassword" class="mb-2">New password</Label>
-                    <Input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength={8} required />
+                    <Input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength={MIN_PASSWORD_LENGTH} required />
                 </div>
                 <div>
                     <Label for="confirmPassword" class="mb-2">Repeat new password</Label>
-                    <Input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength={8} required />
+                    <Input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength={MIN_PASSWORD_LENGTH} required />
                 </div>
                 <P class="text-sm text-gray-500">You will be signed out on all devices.</P>
                 <Button type="submit">{data.profile.hasPassword ? 'Change password' : 'Set password'}</Button>

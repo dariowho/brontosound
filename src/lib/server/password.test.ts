@@ -31,6 +31,7 @@ describe('password', () => {
 
     it('enforces password length', () => {
         expect(passwordProblem('short')).not.toBeNull();
-        expect(passwordProblem('long enough')).toBeNull();
+        expect(passwordProblem('eleven char')).not.toBeNull();
+        expect(passwordProblem('twelve chars')).toBeNull();
     });
 });

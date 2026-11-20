@@ -3,6 +3,7 @@
     import { Alert, Badge, Button, Input, Label, Select, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
     import { UserRole } from "$lib/dbEntities/user";
     import type { PageData } from "./$types";
+    import { MIN_PASSWORD_LENGTH } from "$lib/passwordPolicy";
 
     export let users: NonNullable<PageData['users']>;
     export let currentUserId: number;
@@ -97,7 +98,7 @@
     </div>
     <div>
         <Label for="newUserPassword" class="mb-2">Password</Label>
-        <Input id="newUserPassword" type="password" bind:value={password} minlength={8} autocomplete="new-password" required />
+        <Input id="newUserPassword" type="password" bind:value={password} minlength={MIN_PASSWORD_LENGTH} autocomplete="new-password" required />
     </div>
     <div>
         <Label for="newUserRole" class="mb-2">Role</Label>
