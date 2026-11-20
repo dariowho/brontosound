@@ -66,6 +66,8 @@ Run:
 docker run --env-file .env -p 3888:3000 -e ORIGIN="http://localhost:3888" -v ./data:/app/data brontosound:latest
 ```
 
+Online, behind a proxy: see [docs/deployment.md](docs/deployment.md).
+
 Debug:
 
 ```bash
