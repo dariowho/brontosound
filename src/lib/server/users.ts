@@ -284,6 +284,11 @@ export async function updateName(id: number, name: string): Promise<void> {
     await (await TypeOrm.getRepository(User)).update(id, { name });
 }
 
+// Ends all the user's sessions, current one included: they carry the old `sessionVersion`
+export async function signOutEverywhere(id: number): Promise<void> {
+    await (await TypeOrm.getRepository(User)).increment({ id }, 'sessionVersion', 1);
+}
+
 // Also signs the user out everywhere, current session included
 export async function changePassword(id: number, password: string): Promise<void> {
     const passwordHash = await hashPassword(password);

@@ -7,7 +7,7 @@ Auth.js, configured in [src/auth.ts](../src/auth.ts). Two ways in:
 
 The session JWT carries `userId` and `sessionVersion`, signed with `AUTH_SECRET`: the server won't start without it or with the `.env.template` placeholder, and warns when it is under 32 characters. The `jwt` callback drops the session when the user is removed or their `sessionVersion` has changed.
 
-Users change their display name and password at `/app/profile` (header avatar). Changing the password signs them out everywhere. Users who only have Google can set a password there.
+Users change their display name and password at `/app/profile` (header avatar). Changing the password signs them out everywhere, and so does **Sign out everywhere**. Users who only have Google can set a password there.
 
 ## Default admin
 

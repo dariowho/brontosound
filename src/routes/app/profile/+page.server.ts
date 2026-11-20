@@ -1,4 +1,4 @@
-import { changePassword, verifyCurrentPassword, getProfile, TooManyLoginAttempts, updateName } from '$lib/server/users';
+import { changePassword, verifyCurrentPassword, getProfile, signOutEverywhere, TooManyLoginAttempts, updateName } from '$lib/server/users';
 import { passwordProblem } from '$lib/server/password';
 import { listLinks, removeLink } from '$lib/server/backline/links';
 import { fail, redirect } from '@sveltejs/kit';
@@ -53,6 +53,11 @@ export const actions = {
         }
         await changePassword(user.id, newPassword);
         redirect(303, '/signin?passwordChanged');
+    },
+
+    signOutEverywhere: async ({ locals }) => {
+        await signOutEverywhere(locals.brontoSession!.user.id);
+        redirect(303, '/signin');
     },
 
     unlinkBackline: async ({ request, locals }) => {

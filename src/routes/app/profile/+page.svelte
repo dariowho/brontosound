@@ -57,5 +57,10 @@
 
     <BacklineLinks links={data.backlineLinks} />
 
-    <SignOut options={{ redirectTo: '/signin' }} />
+    <div class="flex flex-wrap gap-3">
+        <SignOut options={{ redirectTo: '/signin' }} />
+        <form method="POST" action="?/signOutEverywhere">
+            <Button color="light" type="submit">Sign out everywhere</Button>
+        </form>
+    </div>
 </div>
