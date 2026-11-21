@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci
+      # Production dependencies only. Raise to `high` once on SvelteKit 3, which fixes the last high advisory
+      - run: npm audit --omit=dev --audit-level=critical
+      - run: npx vitest run
+      - run: npm run build

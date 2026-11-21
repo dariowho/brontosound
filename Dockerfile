@@ -4,7 +4,7 @@
 # RUN npm install
 # RUN npm run build
 
-FROM node:20.15.0
+FROM node:26
 WORKDIR /app
 COPY ./build/ ./dist
 COPY package.json ./

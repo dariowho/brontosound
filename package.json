@@ -46,6 +46,9 @@
     "vitest": "^5.1.1"
   },
   "type": "module",
+  "engines": {
+    "node": "^22.13.0 || >=24.11.0"
+  },
   "dependencies": {
     "@auth/core": "^0.41.3",
     "@auth/sveltekit": "^1.8.0",
