@@ -7,4 +7,4 @@ Serve Brontosound only behind an HTTPS reverse proxy, with the app's port not re
 - **`AUTH_SECRET`**: `openssl rand -base64 32`. The server won't start with the `.env.template` placeholder.
 - **Map keys** reach browsers by design: restrict each to your domain (HTTP referrer) in its provider's console. See [maps.md](maps.md).
 - **Uploads**: `BODY_SIZE_LIMIT` caps request bodies (the Dockerfile sets 200M). Cap request size and connections at the proxy too.
-- **Back up `data/`**: database, band settings and, with the filesystem backend, song files.
+- **`data/`**: back it up. `data/files/` holds the band's files with the filesystem backend; mount it from elsewhere if you like. The rest is Brontosound's own (database, settings, soundfonts) and shouldn't be shared. Song folders that sat in `data/` itself are moved to `data/files/` at startup.

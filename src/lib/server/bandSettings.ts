@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import { readFileSync } from 'fs';
 
-import { localDataRoot, settingsFilename } from "$lib/server/config";
+import { filesRoot, localDataRoot, settingsFilename } from "$lib/server/config";
 import { WebdavStorage, FilesystemStorage, type PersistedStorage } from './storage';
 import type { Soundfont } from '$lib/soundfonts';
 import { MAPS_PROVIDERS, type MapsConfig, type MapsProviderId } from '$lib/maps/providers';
@@ -92,7 +92,7 @@ export async function getUserStorage(): Promise<PersistedStorage> {
             settings.webdavConcurrentConnections
         );
     } else {
-        return new FilesystemStorage("data/", settings.songsFolder!);
+        return new FilesystemStorage(filesRoot, settings.songsFolder!);
     }
 }
 

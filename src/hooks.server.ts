@@ -9,10 +9,14 @@ import { permissionsFromRole } from "$lib/dbEntities/user";
 import { error, redirect } from "@sveltejs/kit";
 import { ensureDefaultAdmin, findActiveUser } from "$lib/server/users";
 import { checkAuthSecret } from "$lib/server/authSecret";
+import { moveSongsFolderToFiles } from "$lib/server/filesFolder";
+import { readSettings } from "$lib/server/bandSettings";
 import { env } from "$env/dynamic/private";
 
 export const init: ServerInit = async () => {
     checkAuthSecret(env.AUTH_SECRET);
+    const { songsFolder, webdavEnabled } = readSettings();
+    moveSongsFolderToFiles(songsFolder ?? '', !webdavEnabled);
     await ensureDefaultAdmin();
 }
 
