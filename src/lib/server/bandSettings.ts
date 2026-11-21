@@ -12,6 +12,7 @@ export interface SettingsData {
     locale?: string;
     authorizedGoogleSSOUsers: string[];
     adminPasswordHash?: string; // required, checked at startup; generate with `npm run hash-password`
+    adminPasswordSignIn: boolean; // false: the built-in admin can't sign in (once other admins exist)
     songsFolder?: string;
     webdavEnabled: boolean;
     webdavServer: string;
@@ -49,6 +50,7 @@ export const defaultSettings: SettingsData = {
     soundfonts: [],
     backlineStunServers: ["stun:stun.l.google.com:19302"],
     breachedPasswordCheck: true,
+    adminPasswordSignIn: true,
 }
 
 let cachedSettings: SettingsData | null = null;

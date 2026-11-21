@@ -1,7 +1,7 @@
 import { CredentialsSignin } from '@auth/sveltekit';
 import { error } from '@sveltejs/kit';
 import { getRequestEvent } from '$app/server';
-import { IsNull, QueryFailedError } from 'typeorm';
+import { IsNull, Not, QueryFailedError } from 'typeorm';
 import TypeOrm from '$lib/db';
 import { User, UserAccount, UserRole } from '$lib/dbEntities/user';
 import { readSettings } from '$lib/server/bandSettings';
@@ -51,7 +51,13 @@ async function findUserByLogin(login: string, withPasswordHash = false): Promise
 }
 
 export async function findActiveUser(id: number): Promise<User | null> {
-    return (await TypeOrm.getRepository(User)).findOneBy({ id, removedDate: IsNull() });
+    const user = await (await TypeOrm.getRepository(User)).findOneBy({ id, removedDate: IsNull() });
+    return user && mayUseAccount(user) ? user : null;
+}
+
+// The built-in admin signs in only with its password: turning that off (`adminPasswordSignIn`) disables the account
+function mayUseAccount(user: User): boolean {
+    return user.username !== DEFAULT_ADMIN_USERNAME || readSettings().adminPasswordSignIn;
 }
 
 // Compared against when the login matches no user, so response time doesn't reveal which emails exist
@@ -99,7 +105,7 @@ export async function authenticateWithPassword(login: string, password: string):
     }
     const user = await findUserByLogin(login, true);
     let valid = false;
-    if (user && !user.removedDate && user.passwordHash) {
+    if (user && !user.removedDate && user.passwordHash && mayUseAccount(user)) {
         valid = await verifyPassword(password, user.passwordHash);
     } else {
         await verifyPassword(password, await (dummyHash ??= hashPassword('dummy'))); // takes as long as a real check
@@ -179,13 +185,18 @@ export async function ensureBootstrapAdmin(email: string, name: string): Promise
     }
 }
 
-// Creates or updates the default admin from band settings; called at startup, fails if the hash is missing
+// Creates or updates the default admin from band settings; called at startup. Fails if the hash is missing, unless
+// `adminPasswordSignIn` is off
 export async function ensureDefaultAdmin(): Promise<void> {
-    const passwordHash = readSettings().adminPasswordHash;
-    if (!isPasswordHash(passwordHash)) {
+    const { adminPasswordHash, adminPasswordSignIn } = readSettings();
+    if (adminPasswordSignIn && !isPasswordHash(adminPasswordHash)) {
         throw new Error(`${localDataRoot}/${settingsFilename}: "adminPasswordHash" is missing or invalid. Generate it with: npm run hash-password`);
     }
+    const passwordHash = isPasswordHash(adminPasswordHash) ? adminPasswordHash : null;
     const users = await TypeOrm.getRepository(User);
+    if (!adminPasswordSignIn && !await users.existsBy({ role: UserRole.ADMIN, removedDate: IsNull(), username: Not(DEFAULT_ADMIN_USERNAME) })) {
+        console.warn(`"adminPasswordSignIn" is off and there is no other admin: nobody can manage users or settings`);
+    }
     const admin = await findUserByLogin(DEFAULT_ADMIN_USERNAME, true)
         ?? users.create({ username: DEFAULT_ADMIN_USERNAME, name: 'Admin', email: null, sessionVersion: 0 });
     if (admin.id && admin.passwordHash === passwordHash && admin.role === UserRole.ADMIN && !admin.removedDate) {

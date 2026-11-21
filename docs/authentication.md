@@ -11,7 +11,7 @@ Users change their display name and password at `/app/profile` (header avatar). 
 
 ## Default admin
 
-User `admin` (no email) is created at startup. Its password hash is `adminPasswordHash` in band settings, required: the server won't start without it (`npm run hash-password`). Changing it takes effect on restart and signs admin out everywhere.
+User `admin` (no email) is created at startup. Its password hash is `adminPasswordHash` in band settings, required: the server won't start without it (`npm run hash-password`). Changing it takes effect on restart and signs admin out everywhere. Once other admins exist, set `adminPasswordSignIn` to `false`: the built-in admin then can't sign in (it has no other way in), its sessions end, and the hash is no longer required.
 
 ## Roles
 
