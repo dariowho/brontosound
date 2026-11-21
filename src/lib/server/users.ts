@@ -9,6 +9,7 @@ import { hashPassword, isPasswordHash, MAX_PASSWORD_LENGTH, passwordProblem, ver
 import { localDataRoot, settingsFilename } from '$lib/server/config';
 import { removeLinksOf } from '$lib/server/backline/links';
 import { addressBlocked, loginWait, recordFailure, recordSuccess } from '$lib/server/loginThrottle';
+import { breachCount } from '$lib/server/breachedPasswords';
 
 // Built-in admin, whose password hash lives in band settings (`adminPasswordHash`)
 export const DEFAULT_ADMIN_USERNAME = 'admin';
@@ -226,6 +227,15 @@ export async function listUsers(): Promise<UserListItem[]> {
     }));
 }
 
+/** What's wrong with a new password, or null: its length, or being found in data breaches (`breachedPasswordCheck`) */
+export async function newPasswordProblem(password: string): Promise<string | null> {
+    const problem = passwordProblem(password);
+    if (problem || !readSettings().breachedPasswordCheck) return problem;
+    const count = await breachCount(password);
+    if (count === null) console.warn("Couldn't check a new password against known breaches: allowed");
+    return count ? 'This password has appeared in data breaches. Choose another one.' : null;
+}
+
 // Re-adding the email of a removed user restores it with the new password and role
 export async function createUser(input: { email: unknown, name?: unknown, password: unknown, role?: unknown }): Promise<User> {
     const email = normalizeEmail(String(input.email ?? ''));
@@ -236,7 +246,7 @@ export async function createUser(input: { email: unknown, name?: unknown, passwo
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         error(400, 'Invalid email address');
     }
-    const problem = passwordProblem(password);
+    const problem = await newPasswordProblem(password);
     if (problem) {
         error(400, problem);
     }

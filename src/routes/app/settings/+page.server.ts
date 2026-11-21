@@ -43,6 +43,7 @@ export const load = (async ({ locals }) => {
         ] },
         { title: "Backline", entries: [list("STUN servers", "backlineStunServers")] },
         { title: "YouTube", entries: [toggle("Use Invidious", "ytInvidiousEnabled"), text("Invidious server", "ytInvidiousServer")] },
+        { title: "Security", entries: [toggle("Refuse passwords found in data breaches", "breachedPasswordCheck")] },
     ];
 
     return {

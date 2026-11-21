@@ -1,5 +1,4 @@
-import { changePassword, verifyCurrentPassword, getProfile, signOutEverywhere, TooManyLoginAttempts, updateName } from '$lib/server/users';
-import { passwordProblem } from '$lib/server/password';
+import { changePassword, verifyCurrentPassword, getProfile, newPasswordProblem, signOutEverywhere, TooManyLoginAttempts, updateName } from '$lib/server/users';
 import { listLinks, removeLink } from '$lib/server/backline/links';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -47,7 +46,7 @@ export const actions = {
         if (newPassword !== data.get('confirmPassword')) {
             return fail(400, { passwordError: "New passwords don't match" });
         }
-        const problem = passwordProblem(newPassword);
+        const problem = await newPasswordProblem(newPassword);
         if (problem) {
             return fail(400, { passwordError: problem });
         }
