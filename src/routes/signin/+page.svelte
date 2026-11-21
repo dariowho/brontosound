@@ -13,6 +13,7 @@
   let infoMessage = $derived(page.url.searchParams.has('passwordChanged') ? "Password changed. Sign in with your new password." : null);
   let errorMessage = $derived(
     page.form?.credentialsError === 'too_many_attempts' ? "Too many attempts. Try again in 15 minutes."
+    : page.form?.credentialsError === 'slow_down' ? "Too many failed attempts for this account. Wait a minute and try again."
     : page.form?.credentialsError ? "Invalid credentials."
     : page.url.searchParams.has('error') ? (authErrors[page.url.searchParams.get('error') ?? ''] ?? "Sign-in failed.")
     : null

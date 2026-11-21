@@ -8,12 +8,18 @@ import { readSettings } from '$lib/server/bandSettings';
 import { hashPassword, isPasswordHash, MAX_PASSWORD_LENGTH, passwordProblem, verifyPassword } from '$lib/server/password';
 import { localDataRoot, settingsFilename } from '$lib/server/config';
 import { removeLinksOf } from '$lib/server/backline/links';
+import { addressBlocked, loginWait, recordFailure, recordSuccess } from '$lib/server/loginThrottle';
 
 // Built-in admin, whose password hash lives in band settings (`adminPasswordHash`)
 export const DEFAULT_ADMIN_USERNAME = 'admin';
 
 export class TooManyLoginAttempts extends CredentialsSignin {
     code = 'too_many_attempts';
+}
+
+// This login failed repeatedly: it may try again in a minute at most (see loginThrottle.ts)
+export class LoginCoolingDown extends CredentialsSignin {
+    code = 'slow_down';
 }
 
 export function normalizeEmail(email: string): string {
@@ -82,19 +88,27 @@ export async function authenticateWithPassword(login: string, password: string):
         return null;
     }
     login = normalizeEmail(login);
-    const attemptKey = `${clientAddress()}|${login}`;
-    if (countLoginAttempt(attemptKey) > MAX_LOGIN_ATTEMPTS) {
+    const address = clientAddress();
+    const attemptKey = `${address}|${login}`;
+    if (countLoginAttempt(attemptKey) > MAX_LOGIN_ATTEMPTS || addressBlocked(address)) {
         throw new TooManyLoginAttempts();
     }
-    const user = await findUserByLogin(login, true);
-    if (!user || user.removedDate || !user.passwordHash) {
-        await verifyPassword(password, await (dummyHash ??= hashPassword('dummy')));
-        return null;
+    if (loginWait(login) > 0) {
+        throw new LoginCoolingDown();
     }
-    if (!await verifyPassword(password, user.passwordHash)) {
+    const user = await findUserByLogin(login, true);
+    let valid = false;
+    if (user && !user.removedDate && user.passwordHash) {
+        valid = await verifyPassword(password, user.passwordHash);
+    } else {
+        await verifyPassword(password, await (dummyHash ??= hashPassword('dummy'))); // takes as long as a real check
+    }
+    if (!valid) {
+        recordFailure(login, address);
         return null;
     }
     loginAttempts.delete(attemptKey);
+    recordSuccess(login);
     return user;
 }
 
