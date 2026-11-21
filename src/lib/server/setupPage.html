@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!-- Served for every request until `npm run init` has set Brontosound up (setup.ts). Static: no app, no settings yet -->
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width" />
+	<title>Set up Brontosound</title>
+	<link rel="icon" href="/favicon.png" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Ubuntu+Mono&display=swap" />
+	<style>
+		/* Design system tokens (docs/design-system) */
+		:root { --ink: #111827; --ink-secondary: #4B5563; --ink-muted: #6B7280; --border: #E5E7EB; --surface-muted: #F9FAFB;
+			--accent: #EB4F27; --primary-800: #CC4522; --primary-300: #FFD5CC; --charcoal: #33302D; }
+		body { margin: 0; background: #fff; color: var(--ink); font: 16px/1.5 "Ubuntu", system-ui, sans-serif; }
+		header { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 24px; background: var(--charcoal);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18); color: #fff; font-size: 20px; font-weight: 500; }
+		header img { width: 36px; height: 36px; filter: invert(1); }
+		main { max-width: 640px; padding: 48px 24px; }
+		h1 { margin: 0 0 16px; font-size: 48px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
+		p { margin: 0 0 16px; color: var(--ink-secondary); }
+		code { font-family: "Ubuntu Mono", ui-monospace, monospace; color: var(--ink); }
+		p code { white-space: nowrap; }
+		pre { margin: 0 0 16px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-muted);
+			font-size: 16px; overflow-x: auto; }
+		.button { display: inline-flex; align-items: center; height: 42px; margin: 8px 0 32px; padding: 0 18px; border-radius: 8px;
+			background: var(--accent); color: #fff; font-size: 14px; font-weight: 500; text-decoration: none; }
+		.button:hover { background: var(--primary-800); }
+		.button:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--primary-300); }
+		.caption { padding-top: 16px; border-top: 1px solid var(--border); color: var(--ink-muted); font-size: 13px; }
+		@media (max-width: 640px) { h1 { font-size: 36px; } }
+	</style>
+</head>
+<body>
+	<header><img src="/bronto.png" alt="" />Brontosound</header>
+	<main>
+		<h1>Set up Brontosound</h1>
+		<p>Brontosound needs a <code>.env</code> file with the secret that signs people in, and a <code>data/</code> folder for your
+			band's settings, database and files. To create what's missing, run this in the Brontosound folder:</p>
+		<pre><code>npm run init</code></pre>
+		<p>It asks for your band's name and a password for the <code>admin</code> user. Then reload this page and sign in as <code>admin</code>.</p>
+		<a class="button" href="">Reload this page</a>
+		<p class="caption">With Docker, run it in your Brontosound checkout, then pass what it creates:
+			<code>--env-file .env -v ./data:/app/data</code>.</p>
+	</main>
+</body>
+</html>

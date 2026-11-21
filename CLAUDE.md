@@ -13,6 +13,7 @@ npm run test:unit    # vitest
 npm run test:integration  # playwright
 npm run release      # standard-version: bump, changelog, tag
 npm run release:dry  # preview the release
+npm run init         # create .env (AUTH_SECRET) and data/ (band name, admin password); until then pages show how
 npm run -s hash-password  # hash for adminPasswordHash in bandSettings.json
 npm run fetch-soundfont   # download FluidR3_GM into data/soundfonts (MIDI playback)
 ```
@@ -58,5 +59,5 @@ Conventional Commits (`feat:`, `fix:`, `refactor:`, …) — `standard-version` 
 
 ## Notes
 
-- Secrets in `.env` (`AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET`); see `.env.template`.
+- Secrets in `.env` (`AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET`); see `.env.template`, created by `npm run init`.
 - Test suites are still the create-svelte placeholders.

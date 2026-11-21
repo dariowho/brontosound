@@ -4,7 +4,13 @@ Brontosound is a band management web app for record labels, powered by [`create-
 
 ## Developing
 
-Once you've cloned this repo and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Once you've cloned this repo and installed dependencies with `npm install` (or `pnpm install` or `yarn`), create `.env` and the `data/` folder (it asks for your band's name and an admin password):
+
+```bash
+npm run init
+```
+
+Then start a development server:
 
 ```bash
 npm run dev
@@ -15,7 +21,7 @@ npm run dev -- --open
 
 ## Admin password
 
-The built-in `admin` user's password hash must be set as `adminPasswordHash` in `data/bandSettings.json`. Generate it with (then restart the server):
+`npm run init` sets the built-in `admin` user's password. To change it, set a new hash as `adminPasswordHash` in `data/bandSettings.json`, then restart the server:
 
 ```bash
 npm run -s hash-password

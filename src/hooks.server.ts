@@ -7,18 +7,18 @@ import { User } from "$lib/dbEntities/user";
 import { instanceToPlain } from "class-transformer";
 import { permissionsFromRole } from "$lib/dbEntities/user";
 import { error, redirect } from "@sveltejs/kit";
-import { ensureDefaultAdmin, findActiveUser } from "$lib/server/users";
-import { checkAuthSecret } from "$lib/server/authSecret";
-import { moveSongsFolderToFiles } from "$lib/server/filesFolder";
-import { readSettings } from "$lib/server/bandSettings";
-import { env } from "$env/dynamic/private";
+import { findActiveUser } from "$lib/server/users";
+import { isSetUp, setupPage } from "$lib/server/setup";
+import { settingsPath } from "$lib/server/config";
 
 export const init: ServerInit = async () => {
-    checkAuthSecret(env.AUTH_SECRET);
-    const { songsFolder, webdavEnabled } = readSettings();
-    moveSongsFolderToFiles(songsFolder ?? '', !webdavEnabled);
-    await ensureDefaultAdmin();
+    if (!await isSetUp()) {
+        console.warn(`AUTH_SECRET or ${settingsPath} is missing: pages show how to set up, with npm run init`);
+    }
 }
+
+// Every request gets the setup instructions until `npm run init` has run: the first one after starts the app
+export const setupHandle: Handle = async ({ event, resolve }) => await isSetUp() ? resolve(event) : setupPage();
 
 export const debugHandle: Handle = async ({ event, resolve }) => {
     // console.log("env:",env);
@@ -82,4 +82,4 @@ export const handleError: HandleServerError = ({ error, status, message }) => {
     return { message: `Something went wrong (error ${id})` };
 }
 
-export const handle: Handle = sequence(securityHeadersHandle, debugHandle, authenticationHandle, authorizationHandle)
+export const handle: Handle = sequence(securityHeadersHandle, setupHandle, debugHandle, authenticationHandle, authorizationHandle)
