@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hashPassword, isPasswordHash, passwordProblem, verifyPassword } from './password';
+import { hashPassword, isPasswordHash, PasswordCheckBusy, passwordProblem, verifyPassword } from './password';
 
 describe('password', () => {
     it('verifies the right password and rejects a wrong one', async () => {
@@ -33,5 +33,16 @@ describe('password', () => {
         expect(passwordProblem('short')).not.toBeNull();
         expect(passwordProblem('eleven char')).not.toBeNull();
         expect(passwordProblem('twelve chars')).toBeNull();
+    });
+});
+
+describe('password check queue', () => {
+    it('refuses checks past the queue, rather than letting them pile up', async () => {
+        const hash = await hashPassword('correct horse');
+        const results = await Promise.allSettled(Array.from({ length: 40 }, () => verifyPassword('correct horse', hash)));
+        const refused = results.filter(r => r.status == 'rejected');
+        expect(refused.length).toBe(40 - 2 - 32); // 2 running, 32 waiting
+        expect((refused[0] as PromiseRejectedResult).reason).toBeInstanceOf(PasswordCheckBusy);
+        expect(await verifyPassword('correct horse', hash)).toBe(true); // and it recovers
     });
 });

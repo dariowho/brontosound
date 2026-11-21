@@ -22,6 +22,7 @@
     page.form?.credentialsError === 'too_many_attempts' ? "Too many attempts. Try again in 15 minutes."
     : page.form?.credentialsError === 'slow_down' ? "Too many failed attempts for this account. Wait a minute and try again."
     : page.form?.credentialsError === 'two_step_invalid' ? "Wrong code. Enter the one your app shows now."
+    : page.form?.credentialsError === 'busy' ? "Too many sign-ins right now. Try again in a moment."
     : page.form?.credentialsError && !asksCode ? "Invalid credentials."
     : page.url.searchParams.has('error') ? (authErrors[page.url.searchParams.get('error') ?? ''] ?? "Sign-in failed.")
     : null

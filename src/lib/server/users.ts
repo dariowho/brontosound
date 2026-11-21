@@ -5,7 +5,7 @@ import { IsNull, Not, QueryFailedError } from 'typeorm';
 import TypeOrm from '$lib/db';
 import { User, UserAccount, UserRole } from '$lib/dbEntities/user';
 import { readSettings } from '$lib/server/bandSettings';
-import { hashPassword, isPasswordHash, MAX_PASSWORD_LENGTH, passwordProblem, verifyPassword } from '$lib/server/password';
+import { hashPassword, isPasswordHash, MAX_PASSWORD_LENGTH, PasswordCheckBusy, passwordProblem, verifyPassword } from '$lib/server/password';
 import { localDataRoot, settingsFilename } from '$lib/server/config';
 import { removeLinksOf } from '$lib/server/backline/links';
 import { addressBlocked, loginWait, recordFailure, recordSuccess } from '$lib/server/loginThrottle';
@@ -31,6 +31,11 @@ export class TwoStepRequired extends CredentialsSignin {
 
 export class TwoStepInvalid extends CredentialsSignin {
     code = 'two_step_invalid';
+}
+
+// Too many sign-ins at once (see MAX_QUEUED_SCRYPT): nothing was checked
+export class SignInBusy extends CredentialsSignin {
+    code = 'busy';
 }
 
 export function normalizeEmail(email: string): string {
@@ -116,10 +121,14 @@ export async function authenticateWithPassword(login: string, password: string, 
     }
     const user = await findUserByLogin(login, true);
     let valid = false;
-    if (user && !user.removedDate && user.passwordHash && mayUseAccount(user)) {
-        valid = await verifyPassword(password, user.passwordHash);
-    } else {
-        await verifyPassword(password, await (dummyHash ??= hashPassword('dummy'))); // takes as long as a real check
+    try {
+        if (user && !user.removedDate && user.passwordHash && mayUseAccount(user)) {
+            valid = await verifyPassword(password, user.passwordHash);
+        } else {
+            await verifyPassword(password, await (dummyHash ??= hashPassword('dummy'))); // takes as long as a real check
+        }
+    } catch (e) {
+        throw e instanceof PasswordCheckBusy ? new SignInBusy() : e;
     }
     if (!valid || !user) {
         recordFailure(login, address);

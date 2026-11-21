@@ -30,14 +30,20 @@ export function isPasswordHash(value: unknown): value is string {
     return typeof value === 'string' && parseHash(value) !== null;
 }
 
-// scrypt runs on the libuv threadpool (4 threads), which sqlite also uses: cap it so login floods can't starve the DB
+// scrypt runs on the libuv threadpool (4 threads), which sqlite also uses: cap it so login floods can't starve the DB.
+// Past MAX_QUEUED_SCRYPT waiting, checks are refused at once, so a flood can't pile up memory and delays
 const MAX_CONCURRENT_SCRYPT = 2;
+const MAX_QUEUED_SCRYPT = 32;
 let runningScrypt = 0;
 const scryptQueue: (() => void)[] = [];
+
+export class PasswordCheckBusy extends Error {}
 
 async function scryptAsync(password: string, salt: Buffer, keyLength: number, options: ScryptOptions): Promise<Buffer> {
     if (runningScrypt < MAX_CONCURRENT_SCRYPT) {
         runningScrypt++;
+    } else if (scryptQueue.length >= MAX_QUEUED_SCRYPT) {
+        throw new PasswordCheckBusy('Too many password checks at once');
     } else {
         await new Promise<void>(resolve => scryptQueue.push(resolve)); // the finishing call hands over its slot
     }
