@@ -18,7 +18,7 @@ export async function load() {
     db.getRepository(LiveGig).find({
       where: { status: LiveGigStatus.CONFIRMED, date: MoreThanOrEqual(new Date()) },
       order: { date: 'ASC' },
-      relations: ['venue'],
+      relations: { venue: true },
     }),
   ]);
 

@@ -13,7 +13,7 @@ export async function findStoredSong(songIdParam: string | undefined): Promise<S
     if (!songIdParam || !isValidId(songIdParam)) error(400, "Invalid songId");
 
     const songs = (await TypeOrm.getDb()).getRepository(Song);
-    const song = await songs.findOne({ where: { id: parseInt(songIdParam) }, relations: ["tags"] });
+    const song = await songs.findOne({ where: { id: parseInt(songIdParam) }, relations: { tags: true } });
     if (!song) error(404, "Song not found!");
 
     return new StoredSong(song, readSettings().songsFolder!);

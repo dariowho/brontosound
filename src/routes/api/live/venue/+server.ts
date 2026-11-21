@@ -9,7 +9,7 @@ export const POST = (async ({ request, locals }) => {
     requirePermission(locals, 'live.write');
     const saveResult = await TypeOrm.saveEntity(LiveVenue, request.json(), {"lastModifiedBy": locals['brontoSession'].user});
 
-    const newVenue = await (await TypeOrm.getRepository(LiveVenue)).findOneOrFail({where: {id: saveResult.id}, relations: ['gigs']});
+    const newVenue = await (await TypeOrm.getRepository(LiveVenue)).findOneOrFail({where: {id: saveResult.id}, relations: { gigs: true }});
 
     return new Response(JSON.stringify(instanceToPlain(newVenue)));    
 }) satisfies RequestHandler;

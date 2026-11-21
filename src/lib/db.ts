@@ -18,7 +18,7 @@ class TypeOrm {
   public static getDb(): Promise<DataSource> {
     if (!TypeOrm.instance) {
       TypeOrm.instance = new DataSource({
-          type: "sqlite",
+          type: "better-sqlite3",
           database: "data/database/database.sqlite", // TODO: use a config file
           entities: [
             User,

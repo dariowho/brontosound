@@ -8,7 +8,7 @@ import { Not } from "typeorm";
 export async function load({ }: ServerLoadEvent) {
   let db = await TypeOrm.getDb()
   const [pursuitGigs] = await Promise.all([
-    db.getRepository(LiveGig).find({where: {status: Not(LiveGigStatus.COMPLETE)}, relations: ['venue', 'interactions']}),
+    db.getRepository(LiveGig).find({where: {status: Not(LiveGigStatus.COMPLETE)}, relations: { venue: true, interactions: true }}),
   ]);
 
   return {
