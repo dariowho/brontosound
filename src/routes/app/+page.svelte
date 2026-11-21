@@ -6,7 +6,7 @@
     const formatDate = (date: Date | null) => date ? new Date(date).toLocaleDateString('it-IT') : '—';
 </script>
 
-<p class="mb-8 text-gray-700">Welcome back, <strong class="text-gray-900">{data.brontoSession.user.name}</strong>!</p>
+<p class="mb-8 text-gray-700">Welcome back, <strong class="text-gray-900">{data.brontoSession?.user.name}</strong>!</p>
 
 <div class="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(360px,1fr))]">
     <StatPanel title="Songbook" icon={faMusic} href="/app/songbook" stats={[

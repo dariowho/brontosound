@@ -14,7 +14,7 @@
     {#if data.users}
         <AccordionItem>
             <span slot="header">Users</span>
-            <UsersSettings users={data.users} currentUserId={data.brontoSession.user.id} />
+            <UsersSettings users={data.users} currentUserId={data.brontoSession!.user.id} />
         </AccordionItem>
     {/if}
 

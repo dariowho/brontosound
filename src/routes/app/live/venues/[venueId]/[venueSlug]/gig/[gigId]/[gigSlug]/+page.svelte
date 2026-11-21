@@ -116,7 +116,7 @@
 
   <div class="interactionCards">
     {#each gig.interactions.sort((a, b) => {return new Date(b.date).getTime() - new Date(a.date).getTime()}) as interaction}
-      <GigInteractionCard interaction={interaction} locale={data.safeBandSettings.locale}></GigInteractionCard>      
+      <GigInteractionCard interaction={interaction} locale={data.safeBandSettings.locale ?? 'it-IT'}></GigInteractionCard>      
     {/each}
   </div>
 
