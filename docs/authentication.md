@@ -9,6 +9,12 @@ The session JWT carries `userId` and `sessionVersion`, signed with `AUTH_SECRET`
 
 Users change their display name and password at `/app/profile` (header avatar). Changing the password signs them out everywhere, and so does **Sign out everywhere**. Users who only have Google can set a password there.
 
+## Two-step verification
+
+Users with a password can turn it on in their profile: password sign-in then also asks for a 6-digit code from an authenticator app (TOTP, [totp.ts](../src/lib/server/totp.ts), [twoStep.ts](../src/lib/server/twoStep.ts)). Each code works once; wrong codes count as failed sign-ins. Turning it on signs the user out everywhere. Google sign-in doesn't ask: Google has its own.
+
+Lost device: an admin resets it in **Settings → Users**. For the default admin, changing `adminPasswordHash` resets it.
+
 ## Default admin
 
 User `admin` (no email) is created at startup. Its password hash is `adminPasswordHash` in band settings, required: the server won't start without it (`npm run hash-password`). Changing it takes effect on restart and signs admin out everywhere. Once other admins exist, set `adminPasswordSignIn` to `false`: the built-in admin then can't sign in (it has no other way in), its sessions end, and the hash is no longer required.

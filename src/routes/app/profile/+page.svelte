@@ -3,6 +3,7 @@
     import { Alert, Button, Heading, Input, Label, P } from "flowbite-svelte";
     import SignOut from "../../signin/SignOut.svelte";
     import BacklineLinks from "./BacklineLinks.svelte";
+    import TwoStepSettings from "./TwoStepSettings.svelte";
     import type { ActionData, PageData } from "./$types";
     import { MIN_PASSWORD_LENGTH } from "$lib/passwordPolicy";
 
@@ -54,6 +55,8 @@
             </form>
         {/if}
     </section>
+
+    <TwoStepSettings enabled={data.profile.twoStepEnabled} setup={data.twoStepSetup} hasPassword={data.profile.hasPassword} error={form?.twoStepError} />
 
     <BacklineLinks links={data.backlineLinks} />
 

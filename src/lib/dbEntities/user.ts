@@ -45,6 +45,19 @@ export class User {
     @Column({ type: 'integer', default: 0 })
     sessionVersion: number;
 
+    // Two-step verification (TOTP): the authenticator's secret, set while setting up, kept while it's on
+    @Exclude()
+    @Column({ type: 'varchar', nullable: true, select: false })
+    totpSecret?: string | null;
+
+    @Column({ type: 'boolean', default: false })
+    totpEnabled: boolean;
+
+    // The time step of the last code used: each code works once
+    @Exclude()
+    @Column({ type: 'integer', nullable: true, select: false })
+    totpLastStep?: number | null;
+
     // The soundfont last picked in the player, by name
     @Column({ type: 'varchar', nullable: true })
     soundfont?: string | null;

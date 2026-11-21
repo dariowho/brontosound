@@ -15,12 +15,12 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
     providers: [
         Google,
         Credentials({
-            credentials: { email: {}, password: {} },
-            async authorize({ email, password }) {
+            credentials: { email: {}, password: {}, code: {} }, // code: two-step verification, when the user has it
+            async authorize({ email, password, code }) {
                 if (typeof email !== 'string' || typeof password !== 'string') {
                     return null;
                 }
-                const user = await authenticateWithPassword(email, password);
+                const user = await authenticateWithPassword(email, password, typeof code === 'string' ? code : '');
                 return user ? { id: String(user.id), email: user.email, name: user.name } : null;
             },
         }),

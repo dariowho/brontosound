@@ -43,6 +43,12 @@
         }
     }
 
+    async function resetTwoStep(user: typeof users[number]) {
+        if (confirm(`Turn off two-step verification for ${user.name}? They can sign in with their password alone, then set it up again.`)) {
+            await request(`/api/user/${user.id}/two-step`, { method: 'DELETE' });
+        }
+    }
+
     async function removeUser(user: typeof users[number]) {
         if (confirm(`Remove ${user.name} (${user.login})? They will no longer be able to sign in.`)) {
             await request(`/api/user/${user.id}`, { method: 'DELETE' });
@@ -72,6 +78,9 @@
                     {#each user.signInMethods as method}
                         <Badge class="mr-1">{method}</Badge>
                     {/each}
+                    {#if user.signInMethods.includes('two-step')}
+                        <Button size="xs" color="light" disabled={busy} on:click={() => resetTwoStep(user)}>Reset two-step</Button>
+                    {/if}
                 </TableBodyCell>
                 <TableBodyCell>
                     {#if user.id === currentUserId}

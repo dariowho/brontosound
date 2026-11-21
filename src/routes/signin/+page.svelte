@@ -10,11 +10,19 @@
   const authErrors = {
     AccessDenied: "This Google account is not registered. Ask a band admin to add your email.",
   };
-  let infoMessage = $derived(page.url.searchParams.has('passwordChanged') ? "Password changed. Sign in with your new password." : null);
+  // The password was right; two-step verification asks for the code too (the form keeps email and password)
+  let asksCode = $derived(['two_step_required', 'two_step_invalid'].includes(page.form?.credentialsError));
+  let infoMessage = $derived(
+    page.form?.credentialsError === 'two_step_required' ? "Enter the 6-digit code from your authenticator app."
+    : page.url.searchParams.has('twoStepOn') ? "Two-step verification is on. Sign in with your password and a code."
+    : page.url.searchParams.has('passwordChanged') ? "Password changed. Sign in with your new password."
+    : null
+  );
   let errorMessage = $derived(
     page.form?.credentialsError === 'too_many_attempts' ? "Too many attempts. Try again in 15 minutes."
     : page.form?.credentialsError === 'slow_down' ? "Too many failed attempts for this account. Wait a minute and try again."
-    : page.form?.credentialsError ? "Invalid credentials."
+    : page.form?.credentialsError === 'two_step_invalid' ? "Wrong code. Enter the one your app shows now."
+    : page.form?.credentialsError && !asksCode ? "Invalid credentials."
     : page.url.searchParams.has('error') ? (authErrors[page.url.searchParams.get('error') ?? ''] ?? "Sign-in failed.")
     : null
   );
@@ -58,6 +66,12 @@
             <Label for="signInPassword" class="mb-2">Password</Label>
             <Input id="signInPassword" name="password" type="password" autocomplete="current-password" required />
           </div>
+          {#if asksCode}
+            <div>
+              <Label for="signInCode" class="mb-2">Code</Label>
+              <Input id="signInCode" name="code" inputmode="numeric" autocomplete="one-time-code" pattern={"[0-9]{6}"} maxlength={6} required autofocus />
+            </div>
+          {/if}
         </svelte:fragment>
         <span slot="submitButton">Sign in</span>
       </SignIn>

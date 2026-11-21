@@ -10,6 +10,7 @@ import { localDataRoot, settingsFilename } from '$lib/server/config';
 import { removeLinksOf } from '$lib/server/backline/links';
 import { addressBlocked, loginWait, recordFailure, recordSuccess } from '$lib/server/loginThrottle';
 import { breachCount } from '$lib/server/breachedPasswords';
+import { useTwoStepCode } from '$lib/server/twoStep';
 
 // Built-in admin, whose password hash lives in band settings (`adminPasswordHash`)
 export const DEFAULT_ADMIN_USERNAME = 'admin';
@@ -21,6 +22,15 @@ export class TooManyLoginAttempts extends CredentialsSignin {
 // This login failed repeatedly: it may try again in a minute at most (see loginThrottle.ts)
 export class LoginCoolingDown extends CredentialsSignin {
     code = 'slow_down';
+}
+
+// The password was right, and the user has two-step verification: the code from their app is needed too
+export class TwoStepRequired extends CredentialsSignin {
+    code = 'two_step_required';
+}
+
+export class TwoStepInvalid extends CredentialsSignin {
+    code = 'two_step_invalid';
 }
 
 export function normalizeEmail(email: string): string {
@@ -90,7 +100,8 @@ export function countLoginAttempt(key: string): number {
     return ++entry.count;
 }
 
-export async function authenticateWithPassword(login: string, password: string): Promise<User | null> {
+/** The user, if the password (and with two-step, the code) is right. Throttled; throws to ask for a code. */
+export async function authenticateWithPassword(login: string, password: string, code = ''): Promise<User | null> {
     if (!login || !password || password.length > MAX_PASSWORD_LENGTH) {
         return null;
     }
@@ -110,9 +121,18 @@ export async function authenticateWithPassword(login: string, password: string):
     } else {
         await verifyPassword(password, await (dummyHash ??= hashPassword('dummy'))); // takes as long as a real check
     }
-    if (!valid) {
+    if (!valid || !user) {
         recordFailure(login, address);
         return null;
+    }
+    if (user.totpEnabled) {
+        if (!code) {
+            throw new TwoStepRequired();
+        }
+        if (!await useTwoStepCode(user.id, code)) {
+            recordFailure(login, address);
+            throw new TwoStepInvalid();
+        }
     }
     loginAttempts.delete(attemptKey);
     recordSuccess(login);
@@ -203,7 +223,8 @@ export async function ensureDefaultAdmin(): Promise<void> {
         return;
     }
     if (admin.id && admin.passwordHash !== passwordHash) {
-        admin.sessionVersion++; // password changed in settings: sign out everywhere
+        admin.sessionVersion++; // password changed in settings: sign out everywhere, and reset two-step (lost device)
+        Object.assign(admin, { totpEnabled: false, totpSecret: null, totpLastStep: null });
     }
     Object.assign(admin, { passwordHash, role: UserRole.ADMIN, removedDate: null });
     await users.save(admin);
@@ -232,6 +253,7 @@ export async function listUsers(): Promise<UserListItem[]> {
         role: user.role,
         signInMethods: [
             ...(user.passwordHash ? ['password'] : []),
+            ...(user.totpEnabled ? ['two-step'] : []),
             ...new Set(user.accounts?.map(account => account.provider)),
         ],
         managedBySettings: isManagedBySettings(user),
@@ -311,6 +333,7 @@ export async function getProfile(id: number) {
         login: user.email ?? user.username,
         role: user.role,
         hasPassword: !!user.passwordHash,
+        twoStepEnabled: user.totpEnabled,
         isDefaultAdmin: user.username === DEFAULT_ADMIN_USERNAME,
     };
 }
