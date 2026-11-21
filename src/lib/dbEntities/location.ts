@@ -55,11 +55,11 @@ export class LocationLink extends UserCreatedEntity{
     type: LocationLinkType
 
     @Column({ type: 'varchar', nullable: true})
-    customLabel?: string = null
+    customLabel?: string | null = null
 
     @Column({ type: 'varchar'})
     value: string
 
     @Column({ type: 'varchar', nullable: true})
-    note?: string = null
+    note?: string | null = null
 }

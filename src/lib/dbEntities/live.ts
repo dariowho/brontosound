@@ -106,13 +106,13 @@ export class LiveGig extends UserCreatedEntity {
     interactions: LiveGigInteraction[] = null
 
     @Column({ type: 'json', nullable: true})
-    proposedCachet?: MoneyAmount
+    proposedCachet?: MoneyAmount | null
 
     @Column({ type: 'json', nullable: true})
-    agreedCachet?: MoneyAmount
+    agreedCachet?: MoneyAmount | null
 
     @Column({ type: 'json', nullable: true})
-    ReceivedCachet?: MoneyAmount
+    ReceivedCachet?: MoneyAmount | null
 }
 
 export enum InteractionSender {

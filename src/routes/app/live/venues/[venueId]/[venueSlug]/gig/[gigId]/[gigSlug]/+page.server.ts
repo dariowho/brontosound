@@ -30,13 +30,15 @@ export async function load({ params }: ServerLoadEvent) {
 import type { Actions } from './$types';
 import { error } from "console";
 import { requirePermission } from '$lib/server/session';
+import { interactionInput } from '$lib/server/liveInput';
+import { parseJson } from '$lib/server/input';
 
 export const actions = {
     saveNewInteraction: async ({request, locals}) => {
-        requirePermission(locals, 'live.write');
+        const { user } = requirePermission(locals, 'live.write');
         const data = await request.formData();
-
-        const savedInteraction = await TypeOrm.saveEntity(LiveGigInteraction, data.get("newInteractionJson"), {"createdBy": locals['brontoSession'].user});
+        const newInteraction = await interactionInput(parseJson(data.get("newInteractionJson"), "newInteractionJson"), user);
+        const savedInteraction = await (await TypeOrm.getRepository(LiveGigInteraction)).save(newInteraction);
         return {
             success: true,
             savedInteraction: JSON.stringify(instanceToPlain(savedInteraction)),

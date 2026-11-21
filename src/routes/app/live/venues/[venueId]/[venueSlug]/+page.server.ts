@@ -20,12 +20,15 @@ export async function load({ params }: ServerLoadEvent) {
 
 import type { Actions } from './$types';
 import { requirePermission } from '$lib/server/session';
+import { gigInput } from '$lib/server/liveInput';
+import { parseJson } from '$lib/server/input';
 
 export const actions = {
     saveNewGig: async ({request, locals}) => {
-        requirePermission(locals, 'live.write');
+        const { user } = requirePermission(locals, 'live.write');
         const data = await request.formData();
-        const savedGig = await TypeOrm.saveEntity(LiveGig, data.get("newGigJson"), {"createdBy": locals['brontoSession'].user});
+        const newGig = await gigInput(parseJson(data.get("newGigJson"), "newGigJson"), user, { create: true });
+        const savedGig = await (await TypeOrm.getRepository(LiveGig)).save(newGig);
         return {
             success: true,
             savedGig: JSON.stringify(instanceToPlain(savedGig)),

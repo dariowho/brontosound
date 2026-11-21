@@ -56,22 +56,6 @@ class TypeOrm {
       const db = await TypeOrm.getDb();
       return db.getRepository(target);
   }
-
-  public static async saveEntity<Type>(entityCls: ClassConstructor<Type>, entity: Promise<object> | object | string, overrideProperties: Record<string, any>=null): Promise<Type> {
-      if (typeof entity === 'string') {
-          entity = JSON.parse(entity);
-      }
-      const [entityObject, entityRepository] = await Promise.all([
-          await entity,
-          await TypeOrm.getRepository(entityCls),
-      ]);
-      if (overrideProperties) {
-        Object.entries(overrideProperties).forEach(([key, value]) => {
-          entityObject[key] = value;
-        });
-      }
-      return entityRepository.save(entityObject as DeepPartial<Type>);
-  }
 }
 export default TypeOrm;
 

@@ -40,10 +40,10 @@ Conventional Commits (`feat:`, `fix:`, `refactor:`, …) — `standard-version` 
 
 ## Architecture
 
-- `src/routes/app/**` — authenticated UI. `src/routes/api/**` — JSON endpoints (POST entity, save via TypeORM, return `instanceToPlain`).
+- `src/routes/app/**` — authenticated UI. `src/routes/api/**` — JSON endpoints (POST entity, save via TypeORM, return `instanceToPlain`). Never save client JSON as is: build what you save field by field with [input.ts](src/lib/server/input.ts) (see [liveInput.ts](src/lib/server/liveInput.ts)); ids, authorship and relations are the server's.
 - `src/lib/dbEntities/*.ts` — TypeORM entities. Registered in the `entities` array in [src/lib/db.ts](src/lib/db.ts) — new entities must be added there. `synchronize: true`, no migrations. DB at `data/database/database.sqlite`.
 - Most entities extend `UserCreatedEntity` (id, createdBy, lastModifiedBy, creationDate).
-- [src/lib/db.ts](src/lib/db.ts) — `TypeOrm.getDb()/getRepository()/saveEntity()` singleton; `saveEntityViaApi()` is the client-side helper that POSTs to an `/api` endpoint.
+- [src/lib/db.ts](src/lib/db.ts) — `TypeOrm.getDb()/getRepository()` singleton; `saveEntityViaApi()` is the client-side helper that POSTs to an `/api` endpoint.
 - Entities cross the server/client boundary as plain objects: `instanceToPlain` in `+page.server.ts` load, `plainToClass` on the way back in.
 - Auth: email/password or Google SSO, see [docs/authentication.md](docs/authentication.md). [src/hooks.server.ts](src/hooks.server.ts) loads the `User` from the JWT's `userId` and guards `/app` and `/api`. Session is `event.locals.brontoSession` (`user`, `auth`, `permissions`). Roles/permissions in [src/lib/dbEntities/user.ts](src/lib/dbEntities/user.ts); enforce with `requirePermission()` ([src/lib/server/session.ts](src/lib/server/session.ts)) in every endpoint and action that changes data, and hide the UI controls with `can()` ([src/lib/permissions.ts](src/lib/permissions.ts)).
 - `data/files/` holds the band's files (filesystem backend), which the band may mount from elsewhere. The rest of `data/` is Brontosound's own: never expose it.
