@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { checkAuthSecret } from './authSecret';
+import { authSecretWarning, checkAuthSecret } from './authSecret';
 
 describe('checkAuthSecret', () => {
     it('refuses a missing or placeholder secret', () => {
@@ -14,5 +14,12 @@ describe('checkAuthSecret', () => {
         expect(warn).toHaveBeenCalledOnce();
         checkAuthSecret('x'.repeat(44));
         expect(warn).toHaveBeenCalledOnce();
+    });
+});
+
+describe('authSecretWarning', () => {
+    it('tells admins about a short secret', () => {
+        expect(authSecretWarning('short-but-random')).toContain('shorter than 32');
+        expect(authSecretWarning('x'.repeat(44))).toBeNull();
     });
 });

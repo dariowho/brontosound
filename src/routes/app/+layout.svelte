@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Breadcrumb, BreadcrumbItem } from 'flowbite-svelte'
+    import { Alert, Breadcrumb, BreadcrumbItem } from 'flowbite-svelte'
     import { page } from '$app/stores';
     import ResponsiveSidebar from './ResponsiveSidebar.svelte';
     import BrontoHeader from '../BrontoHeader.svelte';
@@ -16,6 +16,7 @@
 <section id="content">
     <ResponsiveSidebar bind:isMobile bind:this={sidebarComponent} />
 
+
     {#if $page.data.breadcrumb && $page.data.breadcrumb.length > 0 }
         <div id="breadcrumb">
             <Breadcrumb aria-label="Breadcrumb">
@@ -29,6 +30,9 @@
     {/if}
 
     <div class="pageContent">
+        {#each $page.data.configWarnings ?? [] as warning}
+            <Alert color="red" class="mb-4">{warning}</Alert>
+        {/each}
         <!-- Pages that need actions next to the title render their own PageTitle and omit `pageTitle` -->
         {#if $page.data.pageTitle}
             <PageTitle title={$page.data.pageTitle} />
