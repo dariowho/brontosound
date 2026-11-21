@@ -19,6 +19,7 @@
     }
 
     let pinForm: HTMLFormElement | undefined;
+    let full = false; // all guest seats are taken: waiting for one
     let pin = '';
 
     // The remote runs in a sandboxed frame: it is Backline's code, kept away from this site's session. This page
@@ -28,6 +29,7 @@
         let seated = false;
         const mailbox = openMailbox('/backline/client', {
             opened() {
+                full = false;
                 toFrame('{"t":"open"}');
                 // Seated again: Backline may have been replaced by another one, with another page
                 if (seated) {
@@ -37,6 +39,9 @@
             },
             message: toFrame,
             refused: invalidateAll,
+            full() {
+                full = true;
+            },
         });
         const fromFrame = (event: MessageEvent) => {
             if (event.source === frame.contentWindow && typeof event.data === 'string') {
@@ -70,6 +75,9 @@
 
 {#if page}
     <iframe use:relay srcdoc={page} sandbox="allow-scripts" allow="local-network-access" title="Backline"></iframe>
+    {#if full}
+        <p role="status" class="fixed inset-x-0 top-0 bg-gray-900 px-4 py-3 text-center text-sm text-white">The live session is full. Waiting for a free seat…</p>
+    {/if}
 {:else}
     <main class="mx-auto max-w-xs space-y-6 p-8 pt-24 text-center">
         <img src={data.bandLogo} alt="" class="mx-auto h-20" />

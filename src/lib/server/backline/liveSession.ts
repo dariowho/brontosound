@@ -24,6 +24,7 @@ interface Host {
 
 interface Client {
     name: string;
+    guest: boolean; // not a band member: let in by PIN, and counted against `backlineMaxGuests`
     inbox: Mailbox<string>;
 }
 
@@ -138,10 +139,14 @@ function isPin(pin: string | undefined): boolean {
     return expected.length > 0 && given.length === expected.length && timingSafeEqual(given, expected);
 }
 
-/** Seats a browser and tells Backline. Returns its id */
-export function join(name: string): string {
+/** Seats a browser and tells Backline. Returns its id, or null when all guest seats are taken (members always get in) */
+export function join(name: string, guest: boolean): string | null {
+    sweep();
+    if (guest && [...clients.values()].filter(client => client.guest).length >= readSettings().backlineMaxGuests) {
+        return null;
+    }
     const id = randomBytes(8).toString('hex');
-    clients.set(id, { name, inbox: new Mailbox() });
+    clients.set(id, { name, guest, inbox: new Mailbox() });
     host?.inbox.push({ c: id, join: name });
     return id;
 }

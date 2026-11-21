@@ -11,7 +11,11 @@ export const GET: RequestHandler = async ({ url, locals, cookies }) => {
     }
     const id = url.searchParams.get('id');
     if (!id) {
-        return json({ id: join(locals.brontoSession?.user.name ?? 'Guest'), next: 0, items: [] });
+        const seat = join(locals.brontoSession?.user.name ?? 'Guest', !locals.brontoSession);
+        if (!seat) {
+            error(503, 'The live session is full');
+        }
+        return json({ id: seat, next: 0, items: [] });
     }
     return json(await clientFor(id).inbox.pull(Number(url.searchParams.get('after')) || 0));
 };

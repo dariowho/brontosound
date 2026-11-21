@@ -6,6 +6,8 @@ export interface MailboxEvents {
     message(text: string): void;
     /** Not allowed in (any more), or nothing is live. The mailbox keeps asking */
     refused(): void;
+    /** All seats are taken. The mailbox keeps asking */
+    full(): void;
 }
 
 export function openMailbox(url: string, on: MailboxEvents): { send(text: string): void, close(): void } {
@@ -27,6 +29,9 @@ export function openMailbox(url: string, on: MailboxEvents): { send(text: string
                 if (res.status === 403) {
                     id = null;
                     on.refused();
+                }
+                if (res.status === 503) {
+                    on.full();
                 }
                 if (!res.ok) {
                     throw new Error(res.statusText);

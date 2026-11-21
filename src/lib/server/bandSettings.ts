@@ -30,6 +30,7 @@ export interface SettingsData {
     soundfonts: Soundfont[]; // MIDI.js soundfonts by URL, besides those in data/soundfonts (docs/songPage.md)
     defaultSoundfont?: string; // by name
     backlineStunServers: string[]; // tell Backline and the browsers on /backline their public addresses (docs/backline.md)
+    backlineMaxGuests: number; // browsers let in by PIN at once; band members don't count
     breachedPasswordCheck: boolean; // refuse new passwords found in data breaches (Have I Been Pwned; docs/authentication.md)
 }
 
@@ -49,6 +50,7 @@ export const defaultSettings: SettingsData = {
     osmTileServer: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     soundfonts: [],
     backlineStunServers: ["stun:stun.l.google.com:19302"],
+    backlineMaxGuests: 50,
     breachedPasswordCheck: true,
     adminPasswordSignIn: true,
 }

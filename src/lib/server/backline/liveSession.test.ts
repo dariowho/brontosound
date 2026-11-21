@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../bandSettings', () => ({ readSettings: () => ({ backlineStunServers: ['stun:stun.example:3478'] }) }));
+vi.mock('../bandSettings', () => ({ readSettings: () => ({ backlineStunServers: ['stun:stun.example:3478'], backlineMaxGuests: 2 }) }));
 
 import { admitGuest, announce, clientFor, dropHost, hostFor, join, liveBackline, mayEnter, toClients, toHost } from './liveSession';
 import { Mailbox } from './mailbox';
@@ -65,7 +65,7 @@ describe('live session', () => {
     it('passes messages both ways', async () => {
         announce(backline);
         const host = hostFor('a', 'hash');
-        const id = join('Anna');
+        const id = join('Anna', false)!;
         toHost(id, ['{"t":"hello"}']);
         expect((await host.inbox.pull(0)).items).toEqual([{ c: id, join: 'Anna' }, { c: id, m: '{"t":"hello"}' }]);
         toClients([{ c: id, m: '{"t":"hi"}' }, { c: 'nobody', m: 'lost' }]);
@@ -74,10 +74,18 @@ describe('live session', () => {
 
     it('kicks out the previous Backline and its browsers when another announces', () => {
         announce(backline);
-        const id = join('Anna');
+        const id = join('Anna', false)!;
         announce({ ...backline, instance: 'b' });
         expect(() => hostFor('a', 'hash')).toThrow();
         expect(() => clientFor(id)).toThrow();
         expect(hostFor('b', 'hash').instance).toBe('b');
+    });
+
+    it('seats as many guests as band settings allow, and members always', () => {
+        announce(backline);
+        expect(join('Guest', true)).not.toBeNull();
+        expect(join('Guest', true)).not.toBeNull();
+        expect(join('Guest', true)).toBeNull();
+        expect(join('Anna', false)).not.toBeNull();
     });
 });

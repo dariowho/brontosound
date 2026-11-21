@@ -41,7 +41,7 @@ export const load = (async ({ locals }) => {
             text("Default", "defaultSoundfont"),
             ...s.soundfonts.map(({ name, url }): SettingEntry => ({ kind: 'text', label: name, key: 'soundfonts', value: url ?? '' })),
         ] },
-        { title: "Backline", entries: [list("STUN servers", "backlineStunServers")] },
+        { title: "Backline", entries: [list("STUN servers", "backlineStunServers"), text("Guests at once", "backlineMaxGuests")] },
         { title: "YouTube", entries: [toggle("Use Invidious", "ytInvidiousEnabled"), text("Invidious server", "ytInvidiousServer")] },
         { title: "Security", entries: [
             toggle("Refuse passwords found in data breaches", "breachedPasswordCheck"),
